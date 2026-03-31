@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Megaphone } from "lucide-react";
+import { formatDate } from "@/lib/format";
+import { CardSkeleton } from "@/components/ui/CardSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function AdminAnnouncements() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ message: "", target_role: "all" });
 
   const fetchData = async () => {
     const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
     setAnnouncements(data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -33,17 +38,21 @@ export default function AdminAnnouncements() {
           </button>
         </div>
 
-        <div className="space-y-3">
-          {announcements.map((a) => (
-            <div key={a.id} className="rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary capitalize">{a.target_role}</span>
-                <span className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString("en-GB")}</span>
+        {loading ? <CardSkeleton count={3} /> : announcements.length === 0 ? (
+          <EmptyState title="No announcements" description="Create your first announcement to notify parents or teachers." icon={Megaphone} />
+        ) : (
+          <div className="space-y-3">
+            {announcements.map((a) => (
+              <div key={a.id} className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary capitalize">{a.target_role}</span>
+                  <span className="text-xs text-muted-foreground">{formatDate(a.created_at)}</span>
+                </div>
+                <p className="text-sm text-foreground">{a.message}</p>
               </div>
-              <p className="text-sm text-foreground">{a.message}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showModal && (

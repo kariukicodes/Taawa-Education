@@ -1,32 +1,32 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UserCheck } from "lucide-react";
+import { formatKES } from "@/lib/format";
+import { CardSkeleton } from "@/components/ui/CardSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function AdminTutors() {
   const [tutors, setTutors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", subjects: "", rate_kes: "", status: "active" });
 
   const fetchTutors = async () => {
     const { data } = await supabase.from("tutors").select("*, tutor_assignments(student_id)");
     setTutors(data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchTutors(); }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For MVP, we create tutor record without auth user creation
-    // In production, this would send an invite
     const subjects = form.subjects.split(",").map((s) => s.trim()).filter(Boolean);
     await supabase.from("tutors").insert({
-      full_name: form.full_name,
-      phone: form.phone,
-      subjects,
-      rate_kes: parseInt(form.rate_kes) || 0,
-      status: form.status,
-      user_id: "00000000-0000-0000-0000-000000000000", // placeholder
+      full_name: form.full_name, phone: form.phone, subjects,
+      rate_kes: parseInt(form.rate_kes) || 0, status: form.status,
+      user_id: "00000000-0000-0000-0000-000000000000",
     } as any);
     setShowModal(false);
     fetchTutors();
@@ -42,38 +42,34 @@ export default function AdminTutors() {
           </button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tutors.map((t) => (
-            <div key={t.id} className="card-hover-glow rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
-                  {t.full_name?.split(" ").map((n: string) => n[0]).join("")}
+        {loading ? <CardSkeleton count={6} /> : tutors.length === 0 ? (
+          <EmptyState title="No tutors yet" description="Add your first tutor to get started." icon={UserCheck} />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {tutors.map((t) => (
+              <div key={t.id} className="card-hover-glow rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+                    {t.full_name?.split(" ").map((n: string) => n[0]).join("")}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">{t.full_name}</p>
+                    <span className={`text-xs font-medium ${t.status === "active" ? "text-secondary" : "text-muted-foreground"}`}>
+                      {t.status === "active" ? "Active" : "Inactive"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-foreground">{t.full_name}</p>
-                  <span className={`text-xs font-medium ${t.status === "active" ? "text-secondary" : "text-muted-foreground"}`}>
-                    {t.status === "active" ? "Active" : "Inactive"}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Students</span>
-                  <span className="text-foreground">{t.tutor_assignments?.length ?? 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Rate</span>
-                  <span className="text-foreground">KES {t.rate_kes?.toLocaleString()}</span>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {t.subjects?.map((sub: string) => (
-                    <span key={sub} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{sub}</span>
-                  ))}
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Students</span><span className="text-foreground">{t.tutor_assignments?.length ?? 0}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Rate</span><span className="text-foreground">{formatKES(t.rate_kes)}</span></div>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {t.subjects?.map((sub: string) => (<span key={sub} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{sub}</span>))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showModal && (

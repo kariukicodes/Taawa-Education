@@ -118,3 +118,16 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out forwards;
 }
+
+/* Consistent gold focus ring for all interactive elements */
+input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible {
+  outline: none;
+  ring: 2px;
+  --tw-ring-color: hsl(43, 50%, 54%);
+  box-shadow: 0 0 0 2px hsl(43, 50%, 54% / 0.4);
+}
+
+/* Gold link hover */
+a.text-primary:hover {
+  text-decoration-color: hsl(43, 50%, 54%);
+}

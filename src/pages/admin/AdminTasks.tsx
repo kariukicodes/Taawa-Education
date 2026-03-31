@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ListTodo } from "lucide-react";
+import { formatDate } from "@/lib/format";
+import { CardSkeleton } from "@/components/ui/CardSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function AdminTasks() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ tutor_id: "", title: "", description: "", due_date: "" });
 
@@ -16,18 +20,14 @@ export default function AdminTasks() {
     ]);
     setTasks(t.data ?? []);
     setTutors(tu.data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    await supabase.from("tasks").insert({
-      tutor_id: form.tutor_id,
-      title: form.title,
-      description: form.description,
-      due_date: form.due_date || null,
-    });
+    await supabase.from("tasks").insert({ tutor_id: form.tutor_id, title: form.title, description: form.description, due_date: form.due_date || null });
     setShowModal(false);
     setForm({ tutor_id: "", title: "", description: "", due_date: "" });
     fetchData();
@@ -43,22 +43,26 @@ export default function AdminTasks() {
           </button>
         </div>
 
-        <div className="space-y-3">
-          {tasks.map((t) => (
-            <div key={t.id} className={`rounded-xl border border-border bg-card p-4 ${t.status === "done" ? "opacity-60" : ""}`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`font-medium text-foreground ${t.status === "done" ? "line-through" : ""}`}>{t.title}</p>
-                  <p className="text-xs text-muted-foreground">{t.tutors?.full_name} • Due: {t.due_date ? new Date(t.due_date).toLocaleDateString("en-GB") : "No date"}</p>
+        {loading ? <CardSkeleton count={4} /> : tasks.length === 0 ? (
+          <EmptyState title="No tasks assigned" description="Create a task to assign to a tutor." icon={ListTodo} />
+        ) : (
+          <div className="space-y-3">
+            {tasks.map((t) => (
+              <div key={t.id} className={`rounded-xl border border-border bg-card p-4 ${t.status === "done" ? "opacity-60" : ""}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`font-medium text-foreground ${t.status === "done" ? "line-through" : ""}`}>{t.title}</p>
+                    <p className="text-xs text-muted-foreground">{t.tutors?.full_name} • Due: {t.due_date ? formatDate(t.due_date) : "No date"}</p>
+                  </div>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${t.status === "done" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-primary"}`}>
+                    {t.status}
+                  </span>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${t.status === "done" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-primary"}`}>
-                  {t.status}
-                </span>
+                {t.description && <p className="mt-2 text-sm text-muted-foreground">{t.description}</p>}
               </div>
-              {t.description && <p className="mt-2 text-sm text-muted-foreground">{t.description}</p>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showModal && (

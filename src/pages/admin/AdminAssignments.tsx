@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { X } from "lucide-react";
+import { X, GitBranch } from "lucide-react";
+import { formatDate } from "@/lib/format";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function AdminAssignments() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showReassign, setShowReassign] = useState<any>(null);
   const [newTutorId, setNewTutorId] = useState("");
 
@@ -16,6 +20,7 @@ export default function AdminAssignments() {
     ]);
     setAssignments(a.data ?? []);
     setTutors(t.data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -32,35 +37,38 @@ export default function AdminAssignments() {
     <AdminLayout>
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-foreground">Tutor Assignments</h2>
-        <div className="rounded-xl border border-border bg-card overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-border">
-              {["Student", "Grade", "Assigned Tutor", "Subjects", "Start Date", ""].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {assignments.map((a) => (
-                <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                  <td className="px-4 py-3 text-foreground">{a.students?.full_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.students?.grade}</td>
-                  <td className="px-4 py-3 text-foreground">{a.tutors?.full_name}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {a.students?.subjects?.map((s: string) => (
-                        <span key={s} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{s}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.start_date ? new Date(a.start_date).toLocaleDateString("en-GB") : "—"}</td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => { setShowReassign(a); setNewTutorId(a.tutor_id); }} className="text-xs text-primary hover:underline">Reassign</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+
+        {loading ? <TableSkeleton columns={6} /> : assignments.length === 0 ? (
+          <EmptyState title="No assignments yet" description="Assign tutors to students from the Students section." icon={GitBranch} />
+        ) : (
+          <div className="rounded-xl border border-border bg-card overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-border">
+                {["Student", "Grade", "Assigned Tutor", "Subjects", "Start Date", ""].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {assignments.map((a) => (
+                  <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                    <td className="px-4 py-3 text-foreground">{a.students?.full_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{a.students?.grade}</td>
+                    <td className="px-4 py-3 text-foreground">{a.tutors?.full_name}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {a.students?.subjects?.map((s: string) => (<span key={s} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{s}</span>))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDate(a.start_date)}</td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => { setShowReassign(a); setNewTutorId(a.tutor_id); }} className="text-xs text-primary hover:underline">Reassign</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {showReassign && (
