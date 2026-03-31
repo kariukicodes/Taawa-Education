@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+// Admin
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminLeads from "./pages/admin/AdminLeads";
 import AdminStudents from "./pages/admin/AdminStudents";
@@ -19,8 +20,23 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminTasks from "./pages/admin/AdminTasks";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
+// Parent
 import ParentOverview from "./pages/parent/ParentOverview";
-import TeacherOverview from "./pages/teacher/TeacherOverview";
+import ParentChildren from "./pages/parent/ParentChildren";
+import ParentSchedule from "./pages/parent/ParentSchedule";
+import ParentReports from "./pages/parent/ParentReports";
+import ParentAttendance from "./pages/parent/ParentAttendance";
+import ParentDocuments from "./pages/parent/ParentDocuments";
+import ParentBilling from "./pages/parent/ParentBilling";
+import ParentNotifications from "./pages/parent/ParentNotifications";
+// Teacher
+import TeacherStudents from "./pages/teacher/TeacherStudents";
+import TeacherSchedule from "./pages/teacher/TeacherSchedule";
+import TeacherLessons from "./pages/teacher/TeacherLessons";
+import TeacherAttendance from "./pages/teacher/TeacherAttendance";
+import TeacherTasks from "./pages/teacher/TeacherTasks";
+import TeacherEarnings from "./pages/teacher/TeacherEarnings";
+import TeacherNotifications from "./pages/teacher/TeacherNotifications";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +52,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Admin routes */}
+            {/* Admin */}
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminOverview /></ProtectedRoute>} />
             <Route path="/admin/leads" element={<ProtectedRoute requiredRole="admin"><AdminLeads /></ProtectedRoute>} />
             <Route path="/admin/students" element={<ProtectedRoute requiredRole="admin"><AdminStudents /></ProtectedRoute>} />
@@ -48,13 +64,24 @@ const App = () => (
             <Route path="/admin/tasks" element={<ProtectedRoute requiredRole="admin"><AdminTasks /></ProtectedRoute>} />
             <Route path="/admin/announcements" element={<ProtectedRoute requiredRole="admin"><AdminAnnouncements /></ProtectedRoute>} />
 
-            {/* Parent routes */}
+            {/* Parent */}
             <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><ParentOverview /></ProtectedRoute>} />
-            <Route path="/parent/*" element={<ProtectedRoute requiredRole="parent"><ParentOverview /></ProtectedRoute>} />
+            <Route path="/parent/children" element={<ProtectedRoute requiredRole="parent"><ParentChildren /></ProtectedRoute>} />
+            <Route path="/parent/schedule" element={<ProtectedRoute requiredRole="parent"><ParentSchedule /></ProtectedRoute>} />
+            <Route path="/parent/reports" element={<ProtectedRoute requiredRole="parent"><ParentReports /></ProtectedRoute>} />
+            <Route path="/parent/attendance" element={<ProtectedRoute requiredRole="parent"><ParentAttendance /></ProtectedRoute>} />
+            <Route path="/parent/documents" element={<ProtectedRoute requiredRole="parent"><ParentDocuments /></ProtectedRoute>} />
+            <Route path="/parent/billing" element={<ProtectedRoute requiredRole="parent"><ParentBilling /></ProtectedRoute>} />
+            <Route path="/parent/notifications" element={<ProtectedRoute requiredRole="parent"><ParentNotifications /></ProtectedRoute>} />
 
-            {/* Teacher routes */}
-            <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherOverview /></ProtectedRoute>} />
-            <Route path="/teacher/*" element={<ProtectedRoute requiredRole="teacher"><TeacherOverview /></ProtectedRoute>} />
+            {/* Teacher */}
+            <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherStudents /></ProtectedRoute>} />
+            <Route path="/teacher/schedule" element={<ProtectedRoute requiredRole="teacher"><TeacherSchedule /></ProtectedRoute>} />
+            <Route path="/teacher/lessons" element={<ProtectedRoute requiredRole="teacher"><TeacherLessons /></ProtectedRoute>} />
+            <Route path="/teacher/attendance" element={<ProtectedRoute requiredRole="teacher"><TeacherAttendance /></ProtectedRoute>} />
+            <Route path="/teacher/tasks" element={<ProtectedRoute requiredRole="teacher"><TeacherTasks /></ProtectedRoute>} />
+            <Route path="/teacher/earnings" element={<ProtectedRoute requiredRole="teacher"><TeacherEarnings /></ProtectedRoute>} />
+            <Route path="/teacher/notifications" element={<ProtectedRoute requiredRole="teacher"><TeacherNotifications /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
