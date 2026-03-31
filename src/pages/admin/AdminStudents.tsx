@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { Plus, X } from "lucide-react";
+import { Plus, X, GraduationCap } from "lucide-react";
+import { formatDate } from "@/lib/format";
+import { CardSkeleton } from "@/components/ui/CardSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function AdminStudents() {
   const [students, setStudents] = useState<any[]>([]);
   const [parents, setParents] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ full_name: "", age: "", grade: "", curriculum: "CBC", parent_id: "", tutor_id: "", subjects: "", start_date: "" });
 
@@ -19,6 +23,7 @@ export default function AdminStudents() {
     setStudents(s.data ?? []);
     setParents(p.data ?? []);
     setTutors(t.data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -27,15 +32,9 @@ export default function AdminStudents() {
     e.preventDefault();
     const subjects = form.subjects.split(",").map((s) => s.trim()).filter(Boolean);
     const { data: student } = await supabase.from("students").insert({
-      full_name: form.full_name,
-      age: parseInt(form.age),
-      grade: form.grade,
-      curriculum: form.curriculum as any,
-      parent_id: form.parent_id,
-      subjects,
-      start_date: form.start_date || undefined,
+      full_name: form.full_name, age: parseInt(form.age), grade: form.grade,
+      curriculum: form.curriculum as any, parent_id: form.parent_id, subjects, start_date: form.start_date || undefined,
     }).select().single();
-
     if (student && form.tutor_id) {
       await supabase.from("tutor_assignments").insert({ tutor_id: form.tutor_id, student_id: student.id });
     }
@@ -54,39 +53,36 @@ export default function AdminStudents() {
           </button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {students.map((s) => {
-            const tutorName = s.tutor_assignments?.[0]?.tutors?.full_name;
-            return (
-              <div key={s.id} className="card-hover-glow rounded-xl border border-border bg-card p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
-                    {s.full_name?.split(" ").map((n: string) => n[0]).join("")}
+        {loading ? <CardSkeleton count={6} /> : students.length === 0 ? (
+          <EmptyState title="No students enrolled" description="Add your first student to get started." icon={GraduationCap} />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {students.map((s) => {
+              const tutorName = s.tutor_assignments?.[0]?.tutors?.full_name;
+              return (
+                <div key={s.id} className="card-hover-glow rounded-xl border border-border bg-card p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+                      {s.full_name?.split(" ").map((n: string) => n[0]).join("")}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{s.full_name}</p>
+                      <p className="text-xs text-muted-foreground">Grade {s.grade}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{s.full_name}</p>
-                    <p className="text-xs text-muted-foreground">Grade {s.grade}</p>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Curriculum</span>
-                    <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">{s.curriculum}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tutor</span>
-                    <span className="text-foreground">{tutorName ?? "Unassigned"}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {s.subjects?.map((sub: string) => (
-                      <span key={sub} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{sub}</span>
-                    ))}
+                  <div className="mt-4 space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="text-muted-foreground">Curriculum</span><span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">{s.curriculum}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Tutor</span><span className="text-foreground">{tutorName ?? "Unassigned"}</span></div>
+                    {s.start_date && <div className="flex justify-between"><span className="text-muted-foreground">Started</span><span className="text-foreground">{formatDate(s.start_date)}</span></div>}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {s.subjects?.map((sub: string) => (<span key={sub} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{sub}</span>))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {showModal && (

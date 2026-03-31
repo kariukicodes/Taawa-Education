@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { Search, X } from "lucide-react";
+import { Search, X, Users } from "lucide-react";
+import { formatDate } from "@/lib/format";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const statusColors: Record<string, string> = {
   New: "bg-primary/20 text-primary",
@@ -13,6 +16,7 @@ const statusColors: Record<string, string> = {
 
 export default function AdminLeads() {
   const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedLead, setSelectedLead] = useState<any>(null);
@@ -26,6 +30,7 @@ export default function AdminLeads() {
     if (statusFilter) query = query.eq("status", statusFilter);
     const { data } = await query;
     setLeads(data ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchLeads(); }, [statusFilter]);
@@ -45,11 +50,7 @@ export default function AdminLeads() {
   const saveChanges = async () => {
     if (!selectedLead) return;
     setSaving(true);
-    await supabase.from("leads").update({
-      status: panelStatus,
-      notes: panelNotes,
-      follow_up_date: panelFollowUp || null,
-    }).eq("id", selectedLead.id);
+    await supabase.from("leads").update({ status: panelStatus, notes: panelNotes, follow_up_date: panelFollowUp || null }).eq("id", selectedLead.id);
     setSaving(false);
     setSelectedLead(null);
     fetchLeads();
@@ -63,60 +64,47 @@ export default function AdminLeads() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name or email..."
-              className="w-full rounded-lg border border-border bg-muted py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-            />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..."
+              className="w-full rounded-lg border border-border bg-muted py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-border bg-muted px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-          >
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-lg border border-border bg-muted px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none">
             <option value="">All Statuses</option>
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Consultation Booked">Consultation Booked</option>
-            <option value="Enrolled">Enrolled</option>
-            <option value="Inactive">Inactive</option>
+            {["New", "Contacted", "Consultation Booked", "Enrolled", "Inactive"].map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
 
-        <div className="rounded-xl border border-border bg-card overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
+        {loading ? <TableSkeleton columns={8} rows={5} /> : filtered.length === 0 ? (
+          <EmptyState title="No leads found" description="Try adjusting your search or filter criteria." icon={Users} />
+        ) : (
+          <div className="rounded-xl border border-border bg-card overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-border">
                 {["Parent Name", "Email", "Phone", "Child", "Grade", "Curriculum", "Status", "Date"].map((h) => (
                   <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">{h}</th>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((lead) => (
-                <tr key={lead.id} onClick={() => openPanel(lead)} className="cursor-pointer border-b border-border last:border-0 hover:bg-muted/50">
-                  <td className="px-4 py-3 text-foreground">{lead.parent_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{lead.email}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{lead.phone}</td>
-                  <td className="px-4 py-3 text-foreground">{lead.child_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{lead.grade}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{lead.curriculum_interest}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[lead.status] ?? ""}`}>{lead.status}</span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{new Date(lead.created_at).toLocaleDateString("en-GB")}</td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No leads found</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </tr></thead>
+              <tbody>
+                {filtered.map((lead) => (
+                  <tr key={lead.id} onClick={() => openPanel(lead)} className="cursor-pointer border-b border-border last:border-0 hover:bg-muted/50">
+                    <td className="px-4 py-3 text-foreground">{lead.parent_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{lead.email}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{lead.phone}</td>
+                    <td className="px-4 py-3 text-foreground">{lead.child_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{lead.grade}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{lead.curriculum_interest}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[lead.status] ?? ""}`}>{lead.status}</span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDate(lead.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Slide-out panel */}
       {selectedLead && (
         <>
           <div className="fixed inset-0 z-40 bg-background/60" onClick={() => setSelectedLead(null)} />
@@ -125,7 +113,6 @@ export default function AdminLeads() {
               <h3 className="text-lg font-semibold text-foreground">Lead Details</h3>
               <button onClick={() => setSelectedLead(null)}><X className="h-5 w-5 text-muted-foreground" /></button>
             </div>
-
             <div className="space-y-4 text-sm">
               <div><p className="text-muted-foreground">Parent Name</p><p className="text-foreground">{selectedLead.parent_name}</p></div>
               <div><p className="text-muted-foreground">Email</p><p className="text-foreground">{selectedLead.email}</p></div>
@@ -140,24 +127,19 @@ export default function AdminLeads() {
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Status</label>
                 <select value={panelStatus} onChange={(e) => setPanelStatus(e.target.value)}
                   className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none">
-                  {["New", "Contacted", "Consultation Booked", "Enrolled", "Inactive"].map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                  {["New", "Contacted", "Consultation Booked", "Enrolled", "Inactive"].map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Internal Notes</label>
                 <textarea rows={4} value={panelNotes} onChange={(e) => setPanelNotes(e.target.value)}
                   className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none" />
               </div>
-
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Follow-up Date</label>
                 <input type="date" value={panelFollowUp} onChange={(e) => setPanelFollowUp(e.target.value)}
                   className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none" />
               </div>
-
               <button onClick={saveChanges} disabled={saving}
                 className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
                 {saving ? "Saving..." : "Save Changes"}
