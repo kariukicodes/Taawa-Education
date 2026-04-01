@@ -37,6 +37,9 @@ import TeacherAttendance from "./pages/teacher/TeacherAttendance";
 import TeacherTasks from "./pages/teacher/TeacherTasks";
 import TeacherEarnings from "./pages/teacher/TeacherEarnings";
 import TeacherNotifications from "./pages/teacher/TeacherNotifications";
+import TutorsPage from "@/pages/tutors";
+import AboutPage from "@/pages/AboutPage";
+import ProgramsPage from "@/pages/ProgramsPage";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +85,9 @@ const App = () => (
             <Route path="/teacher/tasks" element={<ProtectedRoute requiredRole="teacher"><TeacherTasks /></ProtectedRoute>} />
             <Route path="/teacher/earnings" element={<ProtectedRoute requiredRole="teacher"><TeacherEarnings /></ProtectedRoute>} />
             <Route path="/teacher/notifications" element={<ProtectedRoute requiredRole="teacher"><TeacherNotifications /></ProtectedRoute>} />
+            <Route path="/tutors" element={<TutorsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/programs" element={<ProgramsPage />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
