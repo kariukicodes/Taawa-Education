@@ -66,7 +66,7 @@ export function TutorsSection() {
 
   return (
     <section className="relative overflow-hidden bg-[#0A0A08] py-28">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
 
@@ -79,30 +79,34 @@ export function TutorsSection() {
                 Our Tutors
               </span>
             </div>
+
             <h2
               className="text-[38px] font-bold leading-[1.1] tracking-[-0.02em] text-[#F5F5F0] md:text-[48px]"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              Meet the people
+              Learn from tutors
               <br />
-              <span className="text-[#C9A84C]">behind the results.</span>
+              <span className="text-[#C9A84C]">who truly understand your child.</span>
             </h2>
           </div>
 
           <div className="flex flex-col gap-5 lg:items-end">
-            <p className="max-w-[340px] text-[14px] leading-[1.95] text-[#F5F5F0]/38 lg:text-right">
-              Every tutor is degree-qualified, hand-picked, and vetted for
-              their ability to connect with children — not just teach them.
+            <p className="max-w-[360px] text-[14px] leading-[1.9] text-[#F5F5F0]/45 lg:text-right">
+              Our tutors are carefully selected not just for academic excellence,
+              but for their ability to connect, guide, and support each learner’s growth.
               <span className="mt-3 block font-medium text-[#F5F5F0]/55">
                 CBC · IGCSE · A-Level · KCSE
               </span>
             </p>
+
             <a
               href="/tutors"
               className="group inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/25 px-5 py-2 text-[12px] font-semibold text-[#C9A84C] transition-all duration-300 hover:bg-[#C9A84C]/10"
             >
               View all tutors
-              <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+                →
+              </span>
             </a>
           </div>
         </div>
@@ -160,7 +164,7 @@ export function TutorsSection() {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
     </section>
   );
 }

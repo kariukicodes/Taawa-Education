@@ -23,18 +23,26 @@ const programs = [
   {
     title: "Custom Learning Plan",
     badge: "Bespoke",
-    who: "Families with specific goals, dual-curriculum needs, or unique learner profiles",
+    who: "Families with specific goals, dual-curriculum needs, or learners with special educational needs",
     ages: "All ages",
-    structure: "Fully personalised curriculum designed around your child's strengths and aspirations.",
+    structure: "Fully personalised learning plans designed to support each child’s strengths, pace, and unique needs — including specialised support for learners with additional needs.",
   },
 ];
 
 export function ProgramsSection() {
   return (
-    <section id="programs" className="py-24 px-3 lg:px-3 bg-card/50">
+    <section
+      id="programs"
+      className="relative py-24 px-3 lg:px-3 bg-[#0A0A08]"
+    >
+      {/* Top divider */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Programs</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
+            Programs
+          </p>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
             Curriculum Options
           </h2>
@@ -52,7 +60,9 @@ export function ProgramsSection() {
               <span className="mb-4 inline-block w-fit rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 {p.badge}
               </span>
-              <h3 className="text-lg font-semibold text-foreground">{p.title}</h3>
+              <h3 className="text-lg font-semibold text-foreground">
+                {p.title}
+              </h3>
               <p className="mt-2 text-sm text-muted-foreground">{p.who}</p>
               <p className="mt-1 text-xs text-primary">{p.ages}</p>
               <p className="mt-3 flex-1 text-sm text-muted-foreground leading-relaxed">

@@ -89,19 +89,16 @@ export function HeroSection() {
             className={`mb-5 text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-[#F5F5F0] md:text-[52px] lg:text-[58px] ${fadeUp("delay-100")}`}
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Your child deserves
-            <br />
-            <span className="text-[#C9A84C]">the right tutor.</span>
+            Unlock Your Child’s Full Academic Potential
           </h1>
 
           {/* Sub */}
           <p className={`mb-9 max-w-[420px] text-[15px] font-light leading-[1.9] text-[#F5F5F0]/50 ${fadeUp("delay-200")}`}>
-            Expert one-on-one tutoring, structured CBC & IGCSE programs, and
-            real-time progress tracking — all in one place for Kenyan students.
+            Personalized homeschooling programs, expert tutors, and real-time progress tracking — built for parents who want more than just tutoring.
           </p>
 
           {/* CTAs */}
-          <div className={`mb-11 flex flex-wrap gap-3 ${fadeUp("delay-300")}`}>
+          <div className={`mb-3 flex flex-wrap gap-3 ${fadeUp("delay-300")}`}>
             <a
               href="#contact"
               className="group inline-flex items-center gap-2 rounded-xl bg-[#C9A84C] px-7 py-3.5 text-[13px] font-bold text-[#0A0A08] transition-all duration-300 hover:scale-[1.02] hover:bg-[#d4b054] hover:shadow-lg hover:shadow-[#C9A84C]/20 active:scale-[0.98]"
@@ -116,11 +113,13 @@ export function HeroSection() {
               Browse Tutors
             </a>
           </div>
+          <p className="mb-8 text-[11px] text-[#F5F5F0]/30">
+            Limited slots available — personalized plans for each student
+          </p>
 
           {/* Trust strip */}
           <div className={`border-t border-white/[0.06] pt-7 ${fadeUp("delay-[450ms]")}`}>
             <div className="flex flex-wrap items-center gap-6">
-
               {/* Avatar stack */}
               <div className="flex items-center gap-3">
                 <div className="flex">
@@ -156,6 +155,12 @@ export function HeroSection() {
                 <p className="text-[11px] text-[#F5F5F0]/35">KCSE &amp; IGCSE 2024</p>
               </div>
 
+              <div className="h-7 w-px bg-white/[0.08]" />
+
+              {/* New: Trusted by parents globally */}
+              <div>
+                <p className="text-[12px] font-semibold text-[#F5F5F0]/80">Trusted by parents globally</p>
+              </div>
             </div>
           </div>
         </div>

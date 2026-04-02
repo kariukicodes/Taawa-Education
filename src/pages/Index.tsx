@@ -2,9 +2,10 @@ import { LandingNav } from "@/components/landing/LandingNav";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { AboutSection } from "@/components/landing/AboutSection";
 import { ProgramsSection } from "@/components/landing/ProgramsSection";
-import { TutorsSection } from "@/components/landing/tutors.Section";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { TutorsSection } from "@/components/landing/Tutors.Section";
+import { ProgressPreviewSection } from "@/components/landing/ProgressPreviewSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { WhyChooseSection } from "@/components/landing/WhyChooseSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { ContactSection } from "@/components/landing/ContactSection";
@@ -15,11 +16,12 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <LandingNav />
       <HeroSection />
+      <HowItWorksSection />
+      <WhyChooseSection />
       <AboutSection />
-      <FeaturesSection />
+      <ProgressPreviewSection />
       <ProgramsSection />
       <TutorsSection />
-      <HowItWorksSection />
       <TestimonialsSection />
       <FAQSection />
       <ContactSection />

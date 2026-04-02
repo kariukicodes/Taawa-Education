@@ -49,11 +49,11 @@ export function AboutSection() {
   const { ref, visible } = useVisible();
 
   return (
-    <section ref={ref} className="relative overflow-hidden bg-[#0F0F0F] py-28">
+    <section ref={ref} className="relative overflow-hidden bg-[#0A0A08] py-28">
 
       {/* Top + bottom rules */}
-      <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-      <div className="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+      <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+      <div className="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
 
       {/* Faint dot grid */}
       <div
