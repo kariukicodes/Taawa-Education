@@ -60,7 +60,7 @@ function AboutHero() {
         </span>
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-7xl flex-col items-center justify-center px-8 py-32 text-center md:px-16">
+      <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-7xl flex-col items-center justify-center px-3 py-32 text-center lg:px-3">
         <div
           className={`mb-6 flex items-center gap-3 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
         >
@@ -131,7 +131,7 @@ function StorySection() {
     <section ref={ref} className="relative bg-[#0A0A0A] py-28">
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
-      <div className="mx-auto grid max-w-7xl items-center gap-16 px-8 md:px-16 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-7xl items-center gap-16 px-3 lg:px-3 lg:grid-cols-2">
 
         {/* Left — text */}
         <div
@@ -270,7 +270,7 @@ function ValuesSection() {
     <section ref={ref} className="relative bg-[#0F0F0F] py-28">
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-8 md:px-16">
+      <div className="mx-auto max-w-7xl px-3 lg:px-3">
         <div
           className="mb-14 text-center transition-all duration-700"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)" }}
@@ -352,7 +352,7 @@ function StatsSection() {
         style={{ backgroundImage: "repeating-linear-gradient(45deg, #C9A84C 0px, #C9A84C 1px, transparent 1px, transparent 60px)" }}
       />
 
-      <div className="relative mx-auto max-w-7xl px-8 md:px-16">
+      <div className="relative mx-auto max-w-7xl px-3 lg:px-3">
         <div className="grid grid-cols-2 gap-px bg-white/[0.06] sm:grid-cols-3 lg:grid-cols-6">
           {stats.map((s, i) => (
             <div
@@ -426,7 +426,7 @@ function TeamSection() {
     <section ref={ref} className="relative bg-[#0F0F0F] py-28">
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-8 md:px-16">
+      <div className="mx-auto max-w-7xl px-3 lg:px-3">
         <div
           className="mb-14 transition-all duration-700"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)" }}
@@ -519,7 +519,7 @@ function AboutCTA() {
       />
 
       <div
-        className="relative mx-auto max-w-3xl px-8 text-center transition-all duration-1000 md:px-16"
+        className="relative mx-auto max-w-3xl px-3 text-center transition-all duration-1000 lg:px-3"
         style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(28px)" }}
       >
         <SectionLabel text="READY TO START" />

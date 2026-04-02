@@ -20,8 +20,8 @@ function FloatCard({
   return (
     <div
       style={style}
-      className={`absolute z-20 rounded-2xl border border-white/10 bg-[#1A1A18]/95 p-4 shadow-2xl shadow-black/60 backdrop-blur-xl transition-all duration-700 ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+      className={`absolute z-20 rounded-2xl border border-white/[0.08] bg-[#131310]/90 p-3.5 shadow-2xl shadow-black/70 backdrop-blur-xl transition-all duration-700 ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
       } ${className}`}
     >
       {children}
@@ -29,306 +29,343 @@ function FloatCard({
   );
 }
 
+const AVATARS = [
+  { i: "FK", bg: "#C9A84C", fg: "#0F0F0F" },
+  { i: "MW", bg: "#7A9E7E", fg: "#0F0F0F" },
+  { i: "AO", bg: "#6B5B45", fg: "#F5F5F0" },
+  { i: "NK", bg: "#3A3A3A", fg: "#C9A84C" },
+  { i: "ZM", bg: "#2C3A2C", fg: "#7A9E7E" },
+];
+
 export function HeroSection() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => { setMounted(true); }, []);
+
+  const fadeUp = (delay: string) =>
+    `transition-all duration-700 ${delay} ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`;
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#0F0F0F]">
+    <section className="relative min-h-screen overflow-hidden bg-[#0A0A08]">
 
-      {/* Grain texture */}
+      {/* Gold hairline top rule */}
+      <div className="absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/60 to-transparent" />
+
+      {/* Subtle radial ambient — left side only */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.035]"
+        className="pointer-events-none absolute inset-0 z-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundSize: "256px 256px",
+          background:
+            "radial-gradient(ellipse 70% 60% at 20% 50%, rgba(201,168,76,0.06) 0%, transparent 70%)",
         }}
       />
 
-      {/* Gold top rule */}
-      <div className="absolute left-0 top-0 z-10 h-[2px] w-full bg-gradient-to-r from-transparent via-[#C9A84C]/50 to-transparent" />
+      {/* Grain */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "200px 200px",
+        }}
+      />
 
-      {/* SPLIT GRID */}
-      <div className="relative z-10 grid min-h-screen items-center lg:grid-cols-2">
+      {/* ─── MAIN GRID ─── */}
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1280px] items-center px-3 lg:grid-cols-[1fr_480px] lg:gap-16 lg:px-3">
 
-        {/* LEFT — Copy */}
-        <div className="flex flex-col justify-center px-8 py-24 md:px-16 lg:py-0">
+        {/* ─── LEFT: COPY ─── */}
+        <div className="flex flex-col justify-center py-28 lg:py-0">
 
-          {/* Badge */}
-          <div
-            className={`mb-8 flex w-fit items-center gap-2.5 rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.07] px-4 py-2 transition-all duration-700 ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-            }`}
-          >
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]" />
-            <span className="text-[11px] font-medium tracking-[0.14em] text-[#C9A84C]">
-              Smart Learning
+          {/* Eyebrow pill */}
+          <div className={`mb-7 w-fit ${fadeUp("delay-0")}`}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/25 bg-[#C9A84C]/[0.08] px-4 py-1.5">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]" />
+              <span className="text-[11px] font-semibold tracking-[0.15em] text-[#C9A84C] uppercase">
+                CBC · IGCSE · A-Level
+              </span>
             </span>
           </div>
 
-          {/* Headline */}
+          {/* Headline — serif display */}
           <h1
-            className={`mb-6 text-[36px] font-black leading-[1.0] tracking-[-2.5px] text-[#F5F5F0] transition-all duration-700 delay-100 md:text-[44px] lg:text-[52px] ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
+            className={`mb-5 text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-[#F5F5F0] md:text-[52px] lg:text-[58px] ${fadeUp("delay-100")}`}
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Unlock Your Child’s Full Academic Potential
+            Your child deserves
+            <br />
+            <span className="text-[#C9A84C]">the right tutor.</span>
           </h1>
 
-          {/* Subheadline */}
-          <p
-            className={`mb-10 max-w-[400px] text-[15px] font-light leading-[1.85] text-[#F5F5F0]/45 transition-all duration-700 delay-200 ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            Through personalized one-on-one learning, expert tutors,
-             and structured progress tracking, we help your child learn with confidence, 
-             progress, clarity, and measurable results.
+          {/* Sub */}
+          <p className={`mb-9 max-w-[420px] text-[15px] font-light leading-[1.9] text-[#F5F5F0]/50 ${fadeUp("delay-200")}`}>
+            Expert one-on-one tutoring, structured CBC & IGCSE programs, and
+            real-time progress tracking — all in one place for Kenyan students.
           </p>
 
           {/* CTAs */}
-          <div
-            className={`mb-12 flex flex-wrap gap-4 transition-all duration-700 delay-300 ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
+          <div className={`mb-11 flex flex-wrap gap-3 ${fadeUp("delay-300")}`}>
             <a
               href="#contact"
-              className="rounded-lg bg-[#C9A84C] px-8 py-3.5 text-[13px] font-semibold text-[#0F0F0F] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#C9A84C]/25 active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 rounded-xl bg-[#C9A84C] px-7 py-3.5 text-[13px] font-bold text-[#0A0A08] transition-all duration-300 hover:scale-[1.02] hover:bg-[#d4b054] hover:shadow-lg hover:shadow-[#C9A84C]/20 active:scale-[0.98]"
             >
               Book a Free Consultation
+              <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
             </a>
             <a
-              href="#programs"
-              className="flex items-center gap-2 rounded-lg border border-white/10 px-8 py-3.5 text-[13px] font-medium text-[#F5F5F0]/60 transition-all duration-300 hover:border-[#C9A84C]/35 hover:text-[#F5F5F0]"
+              href="/tutors"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] px-7 py-3.5 text-[13px] font-medium text-[#F5F5F0]/55 transition-all duration-300 hover:border-[#C9A84C]/40 hover:text-[#F5F5F0]/90"
             >
-              Explore Programs
-              <span className="text-[#C9A84C]">→</span>
+              Browse Tutors
             </a>
           </div>
 
           {/* Trust strip */}
-          <div
-            className={`flex flex-wrap items-center gap-5 border-t border-white/[0.07] pt-7 transition-all duration-700 delay-[500ms] ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            <div className="flex">
-              {[
-                { i: "GK", bg: "#C9A84C", fg: "#0F0F0F" },
-                { i: "DO", bg: "#7A9E7E", fg: "#0F0F0F" },
-                { i: "AM", bg: "#6B5B45", fg: "#F5F5F0" },
-                { i: "NW", bg: "#3A3A3A", fg: "#C9A84C" },
-              ].map((a, idx) => (
-                <div
-                  key={a.i}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0F0F0F] text-[10px] font-bold"
-                  style={{ background: a.bg, color: a.fg, marginLeft: idx > 0 ? "-9px" : "0" }}
-                >
-                  {a.i}
+          <div className={`border-t border-white/[0.06] pt-7 ${fadeUp("delay-[450ms]")}`}>
+            <div className="flex flex-wrap items-center gap-6">
+
+              {/* Avatar stack */}
+              <div className="flex items-center gap-3">
+                <div className="flex">
+                  {AVATARS.map((a, i) => (
+                    <div
+                      key={a.i}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0A0A08] text-[9px] font-bold"
+                      style={{ background: a.bg, color: a.fg, marginLeft: i > 0 ? "-10px" : "0" }}
+                    >
+                      {a.i}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="text-[12px] leading-[1.6] text-[#F5F5F0]/40">
-              <span className="block font-semibold text-[#F5F5F0]/80">48 families enrolled</span>
-              across Nairobi &amp; diaspora
-            </div>
-            <div className="h-6 w-px bg-white/10" />
-            <div>
-              <div className="text-[11px] tracking-[2px] text-[#C9A84C]">★★★★★</div>
-              <div className="mt-0.5 text-[11px] text-[#F5F5F0]/30">4.9 · 48 reviews</div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#F5F5F0]/80">500+ students</p>
+                  <p className="text-[11px] text-[#F5F5F0]/35">across Kenya &amp; diaspora</p>
+                </div>
+              </div>
+
+              <div className="h-7 w-px bg-white/[0.08]" />
+
+              {/* Stars */}
+              <div>
+                <p className="text-[12px] tracking-[3px] text-[#C9A84C]">★★★★★</p>
+                <p className="mt-0.5 text-[11px] text-[#F5F5F0]/30">4.9 avg · 200+ reviews</p>
+              </div>
+
+              <div className="h-7 w-px bg-white/[0.08]" />
+
+              {/* Quick stat */}
+              <div>
+                <p className="text-[12px] font-semibold text-[#F5F5F0]/80">98% pass rate</p>
+                <p className="text-[11px] text-[#F5F5F0]/35">KCSE &amp; IGCSE 2024</p>
+              </div>
+
             </div>
           </div>
         </div>
 
-        {/* RIGHT — Image frame + floating cards */}
-        <div className="relative hidden lg:flex lg:items-center lg:justify-center lg:py-16 lg:pr-8">
+        {/* ─── RIGHT: VISUAL FRAME ─── */}
+        <div className="relative hidden lg:flex lg:items-center lg:justify-center lg:py-20">
+          <div className="relative" style={{ width: "440px", height: "580px" }}>
 
-          {/* Outer wrapper — cards overflow from here */}
-          <div className="relative" style={{ width: "420px", height: "560px" }}>
-
-            {/* ── MAIN IMAGE FRAME ──
-                Tall rounded portrait card, centred.
-                Gold warm ambient behind the image (like the orange panel in inspo).
-            ── */}
+            {/* Portrait card */}
             <div
-              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[36px]"
+              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[32px]"
               style={{
-                width: "300px",
-                height: "500px",
+                width: "290px",
+                height: "490px",
                 transform: "translate(-50%, -50%)",
-                background: "#1C1609",
+                background: "#14120C",
                 boxShadow:
-                  "0 48px 96px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.12), inset 0 0 60px rgba(201,168,76,0.06)",
+                  "0 60px 120px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.10), inset 0 0 80px rgba(201,168,76,0.04)",
               }}
             >
-              {/* Warm gold ambient wash — the "orange panel" equivalent from inspo */}
+              {/* Warm ambient */}
               <div
-                className="absolute inset-0 z-10"
+                className="absolute inset-0 z-10 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 55% 25%, rgba(201,168,76,0.30) 0%, transparent 60%)",
+                    "radial-gradient(ellipse at 60% 20%, rgba(201,168,76,0.22) 0%, transparent 55%)",
                 }}
               />
 
-              {/* ── REPLACE THIS with your actual <img> ── */}
+              {/* Hero image — swap src for your actual photo */}
               <img
-                src="heroimage.png"
-                alt="EduNest student learning"
+                src="/heroimage.png"
+                alt="Student learning with EduNest tutor"
                 className="absolute inset-0 h-full w-full object-cover object-top"
-                style={{ opacity: 0.9 }}
+                style={{ opacity: 0.88 }}
               />
 
-              {/* Bottom fade out */}
+              {/* Bottom scrim */}
               <div
-                className="absolute bottom-0 left-0 right-0 z-10"
+                className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
                 style={{
-                  height: "120px",
-                  background: "linear-gradient(to top, #0F0F0F, transparent)",
+                  height: "160px",
+                  background: "linear-gradient(to top, #0A0A08 10%, transparent)",
                 }}
               />
 
-              {/* Inner bottom session card */}
-              <div className="absolute bottom-4 left-3 right-3 z-20 rounded-xl border border-white/10 bg-[#0D0D0B]/85 p-3 backdrop-blur-md">
+              {/* Live session pill — inside image at bottom */}
+              <div className="absolute bottom-4 left-3 right-3 z-20 rounded-[14px] border border-white/[0.09] bg-[#0D0D0B]/80 p-3 backdrop-blur-md">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[9px] font-medium tracking-[0.1em] text-[#F5F5F0]/30">
-                      CURRENT SESSION
+                    <p className="text-[9px] font-semibold tracking-[0.12em] text-[#F5F5F0]/28 uppercase">
+                      Live session
                     </p>
                     <p className="mt-0.5 text-[12px] font-semibold text-[#F5F5F0]">
-                      Mathematics · Grade 5
+                      Mathematics · Grade 8
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#F5F5F0]/35">
-                      Ms. Amina · CBC
-                    </p>
+                    <p className="text-[10px] text-[#F5F5F0]/35">Mr. Odhiambo · CBC</p>
                   </div>
                   <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C9A84C]/15">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C9A84C]/15 ring-1 ring-[#C9A84C]/20">
                       <div className="h-2 w-2 animate-pulse rounded-full bg-[#C9A84C]" />
                     </div>
-                    <span className="text-[8px] tracking-wider text-[#C9A84C]/60">LIVE</span>
+                    <span className="text-[7px] font-bold tracking-wider text-[#C9A84C]/60 uppercase">Live</span>
                   </div>
                 </div>
-                <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-white/8">
-                  <div className="h-full w-[65%] rounded-full bg-[#C9A84C]" />
+                {/* Progress bar */}
+                <div className="mt-2.5 h-[2px] w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-[#C9A84C]/80 to-[#C9A84C]" />
                 </div>
+                <p className="mt-1 text-[9px] text-[#F5F5F0]/20">62% complete</p>
               </div>
             </div>
 
-            {/* ════════════════════════════
-                FLOATING CARDS — escape the frame
-                Mirroring inspo: cards outside and overlapping the portrait
-            ════════════════════════════ */}
+            {/* ── FLOATING CARDS ── */}
 
-            {/* Card A — top left: big % score (like inspo "60%" card) */}
-            <FloatCard delay={700} style={{ top: "20px", left: "0px" }} className="min-w-[138px]">
-              <p className="mb-1 text-[10px] font-medium tracking-[0.08em] text-[#F5F5F0]/30">
-                — UP TO
-              </p>
+            {/* Card A — Score callout (top-left) */}
+            <FloatCard delay={600} style={{ top: "16px", left: "0px" }}>
+              <p className="mb-0.5 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">Top score</p>
               <div
-                className="text-[38px] font-black leading-none text-[#F5F5F0]"
+                className="text-[40px] font-black leading-none text-[#F5F5F0]"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                92
-                <span className="text-[20px] font-normal text-[#C9A84C]">%</span>
+                96<span className="text-[18px] font-light text-[#C9A84C]">%</span>
               </div>
-              <p className="mt-1.5 text-[11px] leading-[1.5] text-[#F5F5F0]/35">
-                avg score
-                <br />
-                this term
+              <p className="mt-1.5 text-[10px] leading-[1.5] text-[#F5F5F0]/32">
+                Wanjiru K. — KCSE<br />Maths, 2024
               </p>
             </FloatCard>
 
-            {/* Card B — top right: checklist (like inspo checkbox cards) */}
-            <FloatCard delay={900} style={{ top: "32px", right: "0px" }} className="min-w-[170px]">
-              <p className="mb-2.5 text-[10px] font-medium tracking-[0.08em] text-[#F5F5F0]/30">
-                THIS WEEK
-              </p>
+            {/* Card B — Weekly sessions (top-right) */}
+            <FloatCard delay={800} style={{ top: "28px", right: "0px" }} className="min-w-[172px]">
+              <p className="mb-2 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">This week</p>
               <div className="flex flex-col gap-2">
                 {[
-                  { label: "Math — Grade 5 CBC", done: true, accent: "#C9A84C" },
-                  { label: "English Composition", done: true, accent: "#7A9E7E" },
-                  { label: "Science revision", done: false, accent: "" },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2">
+                  { label: "Maths — Grade 8 CBC", done: true, color: "#C9A84C" },
+                  { label: "English composition", done: true, color: "#7A9E7E" },
+                  { label: "Physics revision", done: true, color: "#7A9E7E" },
+                  { label: "Chemistry — IGCSE", done: false, color: "" },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center gap-2">
                     <div
-                      className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-[4px] text-[8px] font-bold"
+                      className="flex h-[15px] w-[15px] flex-shrink-0 items-center justify-center rounded-[3px] text-[8px] font-black"
                       style={
-                        item.done
-                          ? { background: item.accent + "28", color: item.accent }
-                          : { border: "1px solid rgba(255,255,255,0.12)" }
+                        s.done
+                          ? { background: s.color + "22", color: s.color }
+                          : { border: "1px solid rgba(255,255,255,0.1)" }
                       }
                     >
-                      {item.done ? "✓" : ""}
+                      {s.done ? "✓" : ""}
                     </div>
-                    <span
-                      className={`text-[11px] ${
-                        item.done ? "text-[#F5F5F0]/70" : "text-[#F5F5F0]/28"
-                      }`}
-                    >
-                      {item.label}
+                    <span className={`text-[10px] ${s.done ? "text-[#F5F5F0]/65" : "text-[#F5F5F0]/22"}`}>
+                      {s.label}
                     </span>
                   </div>
                 ))}
               </div>
             </FloatCard>
 
-            {/* Card C — mid right: student profile (like inspo product card bottom-right) */}
+            {/* Card C — Student profile (mid-right) */}
             <FloatCard
-              delay={1100}
+              delay={1000}
               style={{ top: "50%", right: "0px", transform: "translateY(-50%)" }}
-              className="min-w-[160px]"
+              className="min-w-[165px]"
             >
-              <p className="mb-2 text-[10px] font-medium tracking-[0.08em] text-[#F5F5F0]/30">
-                STUDENT
-              </p>
-              <p className="mb-1.5 text-[13px] font-semibold text-[#F5F5F0]">Zara Kamau</p>
-              <div className="mb-2 flex gap-1">
-                {["CBC", "Grade 5"].map((t) => (
+              <p className="mb-2 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">Student</p>
+              <div className="mb-2 flex items-center gap-2">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold"
+                  style={{ background: "#C9A84C22", color: "#C9A84C" }}
+                >
+                  ZK
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#F5F5F0]">Zara Kamau</p>
+                  <p className="text-[10px] text-[#F5F5F0]/30">Grade 8 · CBC</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1 mb-2.5">
+                {["Maths", "Science", "English"].map((t) => (
                   <span
                     key={t}
-                    className="rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/10 px-2 py-[2px] text-[10px] font-medium text-[#C9A84C]"
+                    className="rounded-full border border-[#C9A84C]/18 bg-[#C9A84C]/[0.08] px-2 py-[2px] text-[9px] font-medium text-[#C9A84C]"
                   >
                     {t}
                   </span>
                 ))}
               </div>
-              <p className="mb-2.5 text-[11px] text-[#F5F5F0]/30">Tutor: Ms. Amina</p>
-              <div className="h-[3px] w-full overflow-hidden rounded-full bg-white/8">
-                <div className="h-full w-[78%] rounded-full bg-[#7A9E7E]" />
+              <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="h-full w-[81%] rounded-full bg-[#7A9E7E]" />
               </div>
-              <p className="mt-1.5 text-[10px] text-[#F5F5F0]/22">78% of term complete</p>
+              <p className="mt-1 text-[9px] text-[#F5F5F0]/22">81% of term complete</p>
             </FloatCard>
 
-            {/* Card D — bottom left: enrollment stat */}
-            <FloatCard delay={1300} style={{ bottom: "28px", left: "0px" }} className="min-w-[162px]">
-              <p className="mb-1.5 text-[10px] font-medium tracking-[0.08em] text-[#F5F5F0]/30">
-                — NEW THIS MONTH
-              </p>
+            {/* Card D — New students (bottom-left) */}
+            <FloatCard delay={1200} style={{ bottom: "24px", left: "0px" }} className="min-w-[155px]">
+              <p className="mb-1 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">New this month</p>
               <div
-                className="text-[30px] font-black leading-none text-[#F5F5F0]"
+                className="text-[32px] font-black leading-none text-[#F5F5F0]"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                6{" "}
-                <span className="text-[16px] font-light text-[#C9A84C]">families</span>
+                12{" "}
+                <span className="text-[15px] font-light text-[#C9A84C]">students</span>
               </div>
-              <p className="mt-1 text-[11px] text-[#F5F5F0]/30">joined EduNest in March</p>
+              <p className="mt-1 text-[10px] text-[#F5F5F0]/30">joined EduNest in April</p>
+              <div className="mt-2 flex gap-1">
+                {[40, 65, 50, 80, 55, 90, 70].map((h, i) => (
+                  <div
+                    key={i}
+                    className="w-[5px] rounded-sm"
+                    style={{
+                      height: `${h * 0.28}px`,
+                      background: i === 6 ? "#C9A84C" : "rgba(201,168,76,0.2)",
+                    }}
+                  />
+                ))}
+              </div>
             </FloatCard>
 
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-12 z-20 hidden flex-col items-center gap-2 lg:flex">
+      {/* ─── SCROLL INDICATOR ─── */}
+      <div className="absolute bottom-8 left-10 z-20 hidden flex-col items-center gap-2 lg:flex">
+        <div className="h-10 w-px animate-pulse bg-gradient-to-b from-[#C9A84C]/50 to-transparent" />
         <span
-          className="text-[10px] font-light tracking-[0.2em] text-[#F5F5F0]/20"
+          className="text-[9px] font-medium tracking-[0.25em] text-[#F5F5F0]/18 uppercase"
           style={{ writingMode: "vertical-rl" }}
         >
-          SCROLL
+          Scroll
         </span>
-        <div className="h-10 w-px animate-pulse bg-gradient-to-b from-[#C9A84C]/40 to-transparent" />
+      </div>
+
+      {/* ─── MOBILE FLOATING STATS ─── */}
+      <div className="relative z-10 mx-auto grid grid-cols-3 gap-3 px-3 pb-10 lg:px-3 lg:hidden">
+        {[
+          { val: "500+", label: "Students" },
+          { val: "4.9★", label: "Rating" },
+          { val: "98%", label: "Pass rate" },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="rounded-2xl border border-white/[0.07] bg-[#131310]/80 p-3 text-center backdrop-blur-sm"
+          >
+            <p className="text-[18px] font-black text-[#C9A84C]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {s.val}
+            </p>
+            <p className="mt-0.5 text-[10px] text-[#F5F5F0]/35">{s.label}</p>
+          </div>
+        ))}
       </div>
 
     </section>

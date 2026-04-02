@@ -64,7 +64,7 @@ export function AboutSection() {
         }}
       />
 
-      <div className="relative mx-auto max-w-7xl px-8 md:px-16">
+      <div className="relative mx-auto max-w-7xl px-3 lg:px-3">
 
         {/* ── Section label + heading (centred above) ── */}
         <div
@@ -82,8 +82,7 @@ export function AboutSection() {
             <span className="h-px w-10 bg-[#C9A84C]/40" />
           </div>
           <h2
-            className="mx-auto max-w-2xl text-[44px] font-black leading-[1.02] tracking-[-2px] text-[#F5F5F0] md:text-[54px]"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="mx-auto max-w-2xl text-3xl font-bold text-foreground md:text-4xl"
           >
             A New Standard
             <br />
@@ -131,24 +130,14 @@ export function AboutSection() {
 
               {/* ── YOUR IMAGE — replace src ── */}
               <img
-                src="/about-photo.jpg"
-                alt="EduNest tutor and student"
+                src="/heroimage.png"
+                alt="EduNest hero section image"
                 className="absolute inset-0 h-full w-full object-cover object-center"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
               />
 
-              {/* Fallback initials */}
-              <div className="absolute inset-0 z-0 flex flex-col items-center justify-center gap-3 opacity-20">
-                <div
-                  className="flex h-20 w-20 items-center justify-center rounded-full border border-[#C9A84C]/30 text-[26px]"
-                  style={{ color: "#C9A84C", fontFamily: "'Playfair Display', serif" }}
-                >
-                  EN
-                </div>
-                <p className="text-[11px] tracking-widest text-[#F5F5F0]/30">YOUR PHOTO HERE</p>
-              </div>
 
               {/* Bottom fade */}
               <div

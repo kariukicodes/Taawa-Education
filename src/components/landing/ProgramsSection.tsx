@@ -31,7 +31,7 @@ const programs = [
 
 export function ProgramsSection() {
   return (
-    <section id="programs" className="py-24 px-6 bg-card/50">
+    <section id="programs" className="py-24 px-3 lg:px-3 bg-card/50">
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Programs</p>

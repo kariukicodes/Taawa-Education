@@ -28,7 +28,7 @@ export function LandingNav() {
         scrolled ? "border-b border-border bg-background/95 backdrop-blur-md" : "bg-transparent"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 lg:px-3 py-4">
         <Link to="/" className="text-xl font-bold text-foreground">
           Edu<span className="text-primary">Nest</span>
         </Link>

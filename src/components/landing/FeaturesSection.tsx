@@ -370,7 +370,7 @@ export function FeaturesSection() {
       {/* Top rule */}
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/8 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-8 md:px-16">
+      <div className="mx-auto max-w-7xl px-3 lg:px-3">
 
         {/* ── Section header ── */}
         <div

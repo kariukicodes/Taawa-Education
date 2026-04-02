@@ -38,8 +38,8 @@ const programs = [
       "The CBC curriculum redesigned for homeschooling — structured around the official KICD framework but delivered at your child's pace, with one-on-one attention no classroom can match.",
     ageRange: "Ages 4 – 17",
     grades: "PP1 to Grade 9",
-    price: "From KES 12,000",
-    period: "per month",
+    price: "KES 40,000",
+    period: "per month · KES 2,000 per 2hrs",
     accent: "#C9A84C",
     darkAccent: "#1C1609",
     subjects: ["Mathematics", "English", "Kiswahili", "Science & Technology", "Social Studies", "CRE / IRE", "Creative Arts"],
@@ -52,7 +52,7 @@ const programs = [
       "Flexible scheduling",
     ],
     ideal: "Families who want official curriculum coverage with a personalised delivery and the flexibility homeschooling provides.",
-    image: "/programs/cbc.jpg",
+      image: "/competency.jpg",
     popular: true,
   },
   {
@@ -64,8 +64,8 @@ const programs = [
       "Cambridge and Edexcel-aligned homeschooling for families preparing their children for international universities or relocating abroad. Rigorous, globally recognised, and fully personalised.",
     ageRange: "Ages 5 – 18",
     grades: "Year 1 to A-Level",
-    price: "From KES 15,000",
-    period: "per month",
+    price: "KES 50,000",
+    period: "per month · KES 2,500 per 2hrs",
     accent: "#7A9E7E",
     darkAccent: "#0D150E",
     subjects: ["Mathematics", "Sciences (Bio/Chem/Phys)", "English Language & Literature", "History", "Geography", "Business Studies", "ICT"],
@@ -78,7 +78,7 @@ const programs = [
       "Parent progress meetings",
     ],
     ideal: "Families with international ambitions, expat families, or those targeting UK, US, or global university admissions.",
-    image: "/programs/british.jpg",
+      image: "/igcse.jpg",
     popular: false,
   },
   {
@@ -90,8 +90,8 @@ const programs = [
       "The authentic Montessori method adapted for home delivery — hands-on learning, self-directed exploration, and intrinsic motivation. For parents who believe education should ignite rather than extinguish curiosity.",
     ageRange: "Ages 2 – 12",
     grades: "Early Years to Upper Primary",
-    price: "From KES 13,500",
-    period: "per month",
+    price: "KES 30,000",
+    period: "per month · KES 1,500 per 2hrs",
     accent: "#8B7355",
     darkAccent: "#171009",
     subjects: ["Practical Life Skills", "Sensorial Development", "Language Arts", "Mathematics", "Cultural Studies", "Science & Nature", "Creative Expression"],
@@ -104,7 +104,7 @@ const programs = [
       "Flexible pacing",
     ],
     ideal: "Parents of younger children who want to nurture independence, creativity, and a genuine love of learning from an early age.",
-    image: "/programs/montessori.jpg",
+      image: "/montessori.png",
     popular: false,
   },
   {
@@ -116,8 +116,8 @@ const programs = [
       "No template. No constraints. We design a learning plan from scratch based on your child's strengths, gaps, interests, and goals — drawing from multiple frameworks to create something that fits perfectly.",
     ageRange: "All ages",
     grades: "Any level",
-    price: "From KES 10,000",
-    period: "per month",
+    price: "KES 45,000",
+    period: "per month · KES 2,000 per 2hrs",
     accent: "#6B8FA3",
     darkAccent: "#090D11",
     subjects: ["Fully customised subject selection", "Learning style assessment", "Multi-curriculum blend", "Interest-led projects", "Gap-filling modules", "Enrichment electives"],
@@ -130,7 +130,7 @@ const programs = [
       "Direct founder involvement",
     ],
     ideal: "Children with unique learning needs, twice-exceptional students, or families who want something that goes beyond any standard curriculum.",
-    image: "/programs/custom.jpg",
+      image: "/special.png",
     popular: false,
   },
 ];
@@ -165,7 +165,7 @@ function ProgramsHero() {
         </span>
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-[65vh] max-w-7xl flex-col items-center justify-center px-8 py-28 text-center md:px-16">
+      <div className="relative z-10 mx-auto flex min-h-[65vh] max-w-7xl flex-col items-center justify-center px-3 py-28 text-center lg:px-3">
         <div
           className={`mb-6 flex items-center gap-3 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
         >
@@ -239,7 +239,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
     >
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-8 md:px-16">
+      <div className="mx-auto max-w-7xl px-3 lg:px-3">
         <div className={`grid items-start gap-14 lg:grid-cols-2 ${!isEven ? "lg:direction-rtl" : ""}`}>
 
           {/* ── LEFT (or right on odd): Info ── */}
@@ -445,7 +445,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
 const compRows = [
   { label: "Age range",          cbc: "4 – 17",        british: "5 – 18",         montessori: "2 – 12",      custom: "All ages"    },
   { label: "Curriculum body",    cbc: "KICD Kenya",     british: "Cambridge/Edexcel", montessori: "AMI/AMS",  custom: "Bespoke"     },
-  { label: "Starting price",     cbc: "KES 12,000",    british: "KES 15,000",     montessori: "KES 13,500",  custom: "KES 10,000"  },
+  { label: "Starting price",     cbc: "KES 40,000",    british: "KES 50,000",     montessori: "KES 30,000",  custom: "KES 45,000"  },
   { label: "Exam prep",          cbc: "KCPE / KCSE",   british: "IGCSE / A-Level", montessori: "None",       custom: "As required" },
   { label: "Session format",     cbc: "1-on-1",        british: "1-on-1",         montessori: "1-on-1",      custom: "1-on-1"      },
   { label: "Progress reports",   cbc: "Weekly",        british: "Weekly",         montessori: "Observational", custom: "Weekly"   },
@@ -460,7 +460,7 @@ function ComparisonTable() {
     <section ref={ref} className="bg-[#0F0F0F] py-24">
       <div className="absolute left-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-8 md:px-16">
+      <div className="mx-auto max-w-7xl px-3 lg:px-3">
         <div
           className="mb-12 text-center transition-all duration-700"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)" }}
@@ -559,7 +559,7 @@ function HowItWorks() {
         style={{ backgroundImage: "repeating-linear-gradient(45deg, #C9A84C 0px, #C9A84C 1px, transparent 1px, transparent 60px)" }}
       />
 
-      <div className="relative mx-auto max-w-7xl px-8 md:px-16">
+      <div className="relative mx-auto max-w-7xl px-3 lg:px-3">
         <div
           className="mb-14 text-center transition-all duration-700"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)" }}
@@ -641,7 +641,7 @@ function ProgramsCTA() {
       />
 
       <div
-        className="relative mx-auto max-w-3xl px-8 text-center transition-all duration-1000 md:px-16"
+        className="relative mx-auto max-w-3xl px-3 text-center transition-all duration-1000 lg:px-3"
         style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(28px)" }}
       >
         <Label text="GET STARTED" center />
@@ -677,9 +677,6 @@ function ProgramsCTA() {
           </a>
         </div>
 
-        <p className="mt-8 text-[12px] text-[#F5F5F0]/22">
-          No commitment · Response within 24 hours · All curricula available nationwide
-        </p>
       </div>
     </section>
   );

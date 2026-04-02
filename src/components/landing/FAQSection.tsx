@@ -28,7 +28,7 @@ export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="py-24 px-6">
+    <section id="faq" className="py-24 px-3 lg:px-3">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">FAQ</p>

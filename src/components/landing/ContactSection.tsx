@@ -89,7 +89,7 @@ export function ContactSection() {
 
   if (submitted) {
     return (
-      <section id="contact" className="py-24 px-6">
+      <section id="contact" className="py-24 px-3 lg:px-3">
         <div className="mx-auto max-w-lg text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-primary" />
           <h2 className="mt-6 text-2xl font-bold text-foreground">Thank You for Reaching Out</h2>
