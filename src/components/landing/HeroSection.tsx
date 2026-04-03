@@ -118,7 +118,7 @@ export function HeroSection() {
           </p>
 
           {/* Trust strip */}
-          <div className={`border-t border-white/[0.06] pt-7 ${fadeUp("delay-[450ms]")}`}>
+          <div className={`border-t border-white/[0.06] pt-7 ${fadeUp("delay-500")}`}>
             <div className="flex flex-wrap items-center gap-6">
               {/* Avatar stack */}
               <div className="flex items-center gap-3">

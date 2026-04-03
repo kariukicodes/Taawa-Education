@@ -312,7 +312,7 @@ function TutorsHero() {
           </div>
 
           {/* Stats */}
-          <div className={`flex flex-wrap items-center gap-8 border-t border-white/[0.06] pt-8 ${fadeUp("delay-[450ms]")}`}>
+          <div className={`flex flex-wrap items-center gap-8 border-t border-white/[0.06] pt-8 ${fadeUp("delay-500")}`}>
             {[
               { value: "12+", label: "Expert tutors" },
               { value: "48+", label: "Families served" },

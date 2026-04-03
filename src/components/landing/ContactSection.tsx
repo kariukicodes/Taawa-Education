@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface FormErrors {
   parent_name?: string;
@@ -92,6 +93,11 @@ export function ContactSection() {
       <section id="contact" className="py-24 px-3 lg:px-3">
         <div className="mx-auto max-w-lg text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-primary" />
+          <div className="mt-8 flex justify-center">
+            <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
+              Contact
+            </Badge>
+          </div>
           <h2 className="mt-6 text-2xl font-bold text-foreground">Thank You for Reaching Out</h2>
           <p className="mt-3 text-muted-foreground">
             Our team will be in touch within 24 hours.
@@ -105,7 +111,9 @@ export function ContactSection() {
     <section id="contact" className="py-24 px-6">
       <div className="mx-auto max-w-2xl">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Contact</p>
+          <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
+            Contact
+          </Badge>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
             Start Your Child's Journey
           </h2>

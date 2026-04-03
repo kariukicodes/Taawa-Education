@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+
 const testimonials = [
   {
     quote: "EduNest transformed our homeschooling journey. Zara is thriving in ways we never expected — she's two grades ahead in maths and actually enjoys learning.",
@@ -24,7 +26,9 @@ export function TestimonialsSection() {
     <section id="testimonials" className="py-24 px-3 lg:px-3 bg-card/50">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Testimonials</p>
+          <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
+            Testimonials
+          </Badge>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
             What Our Families Say
           </h2>

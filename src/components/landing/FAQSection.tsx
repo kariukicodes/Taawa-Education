@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const faqs = [
   {
@@ -31,7 +32,9 @@ export function FAQSection() {
     <section id="faq" className="py-24 px-3 lg:px-3">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">FAQ</p>
+          <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
+            FAQ
+          </Badge>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
             Frequently Asked Questions
           </h2>

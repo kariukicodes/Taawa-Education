@@ -74,12 +74,13 @@ export function AboutSection() {
             transform: visible ? "translateY(0)" : "translateY(20px)",
           }}
         >
-          <div className="mb-5 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-[#C9A84C]/40" />
-            <span className="text-[11px] font-medium tracking-[0.18em] text-[#C9A84C]">
-              ABOUT US
-            </span>
-            <span className="h-px w-10 bg-[#C9A84C]/40" />
+          <div className="mb-6 flex justify-center">
+            <div className="flex w-fit items-center gap-2 rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.07] px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
+              <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#C9A84C]">
+                About Us
+              </span>
+            </div>
           </div>
           <h2
             className="mx-auto max-w-2xl text-3xl font-bold text-foreground md:text-4xl"

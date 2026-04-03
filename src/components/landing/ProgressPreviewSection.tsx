@@ -23,9 +23,14 @@ export function ProgressPreviewSection() {
 
       <div className="mx-auto max-w-7xl px-3 lg:px-3">
         <div className="mx-auto mb-12 max-w-3xl text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#C9A84C]">
-            Parent Dashboard
-          </p>
+          <div className="mb-6 flex justify-center">
+            <div className="flex w-fit items-center gap-2 rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.07] px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
+              <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#C9A84C]">
+                Parent Dashboard
+              </span>
+            </div>
+          </div>
 
           <h2
             className="text-3xl font-bold tracking-[-0.03em] text-[#F5F5F0] md:text-5xl"
