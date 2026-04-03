@@ -2,7 +2,7 @@ import { LandingNav } from "@/components/landing/LandingNav";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { AboutSection } from "@/components/landing/AboutSection";
 import { ProgramsSection } from "@/components/landing/ProgramsSection";
-import { TutorsSection } from "@/components/landing/Tutors.Section";
+import { TutorsSection } from "@/components/landing/TutorsSection";
 import { ProgressPreviewSection } from "@/components/landing/ProgressPreviewSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { WhyChooseSection } from "@/components/landing/WhyChooseSection";
