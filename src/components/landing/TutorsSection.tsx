@@ -66,42 +66,41 @@ export function TutorsSection() {
 
   return (
     <section className="relative overflow-hidden bg-[#0A0A08] py-28">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
 
         {/* ── HEADER ── */}
         <div className="mb-16 grid gap-10 lg:grid-cols-2 lg:items-end">
           <div>
-            <div className="mb-6 flex w-fit items-center gap-2 rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.07] px-4 py-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#C9A84C]">
+            <div className="mb-6 flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-primary">
                 Our Tutors
               </span>
             </div>
 
             <h2
-              className="text-[38px] font-bold leading-[1.1] tracking-[-0.02em] text-[#F5F5F0] md:text-[48px]"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-display text-[38px] font-bold leading-[1.1] tracking-[-0.02em] text-foreground md:text-[48px]"
             >
               Learn from tutors
               <br />
-              <span className="text-[#C9A84C]">who truly understand your child.</span>
+              <span className="text-primary">who truly understand your child.</span>
             </h2>
           </div>
 
           <div className="flex flex-col gap-5 lg:items-end">
-            <p className="max-w-[360px] text-[14px] leading-[1.9] text-[#F5F5F0]/45 lg:text-right">
+            <p className="max-w-[360px] text-[14px] leading-[1.9] text-muted-foreground lg:text-right">
               Our tutors are carefully selected not just for academic excellence,
               but for their ability to connect, guide, and support each learner’s growth.
-              <span className="mt-3 block font-medium text-[#F5F5F0]/55">
+              <span className="mt-3 block font-medium text-foreground/80">
                 CBC · IGCSE · A-Level · KCSE
               </span>
             </p>
 
             <a
               href="/tutors"
-              className="group inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/25 px-5 py-2 text-[12px] font-semibold text-[#C9A84C] transition-all duration-300 hover:bg-[#C9A84C]/10"
+              className="group inline-flex items-center gap-2 rounded-full border border-primary/25 px-5 py-2 text-[12px] font-semibold text-primary transition-all duration-300 hover:bg-primary/10"
             >
               View all tutors
               <span className="transition-transform duration-300 group-hover:translate-x-0.5">
@@ -135,7 +134,10 @@ export function TutorsSection() {
                 className="h-[3px] rounded-full transition-all duration-300"
                 style={{
                   width: i === activeIndex ? "24px" : "6px",
-                  background: i === activeIndex ? "#C9A84C" : "rgba(255,255,255,0.15)",
+                  background:
+                    i === activeIndex
+                      ? "hsl(var(--primary))"
+                      : "hsl(var(--foreground) / 0.15)",
                 }}
               />
             ))}
@@ -145,7 +147,7 @@ export function TutorsSection() {
             <button
               onClick={() => scroll("left")}
               disabled={activeIndex === 0}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] text-[#F5F5F0]/40 transition-all duration-200 hover:border-[#C9A84C]/40 hover:text-[#C9A84C] disabled:cursor-not-allowed disabled:opacity-20"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-20"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M9 2L4 7L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -154,7 +156,7 @@ export function TutorsSection() {
             <button
               onClick={() => scroll("right")}
               disabled={activeIndex === tutors.length - 1}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] text-[#F5F5F0]/40 transition-all duration-200 hover:border-[#C9A84C]/40 hover:text-[#C9A84C] disabled:cursor-not-allowed disabled:opacity-20"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-20"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M5 2L10 7L5 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -164,7 +166,7 @@ export function TutorsSection() {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
     </section>
   );
 }
@@ -254,12 +256,11 @@ function TutorCard({ tutor }: { tutor: (typeof tutors)[0]; index: number }) {
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h3
-              className="text-[15px] font-semibold leading-tight text-[#F5F5F0]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="font-display text-[15px] font-semibold leading-tight text-foreground"
             >
               {tutor.name}
             </h3>
-            <p className="mt-1 text-[11px] text-[#F5F5F0]/35">{tutor.role}</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{tutor.role}</p>
           </div>
 
           <a
@@ -279,11 +280,10 @@ function TutorCard({ tutor }: { tutor: (typeof tutors)[0]; index: number }) {
           {tutor.subjects.map((s) => (
             <span
               key={s}
-              className="rounded-full px-2.5 py-[4px] text-[10px] font-medium"
+              className="rounded-full px-2.5 py-[4px] text-[10px] font-medium text-muted-foreground/80"
               style={{
                 background: "rgba(255,255,255,0.04)",
                 border: "1px solid rgba(255,255,255,0.07)",
-                color: "rgba(245,245,240,0.45)",
               }}
             >
               {s}

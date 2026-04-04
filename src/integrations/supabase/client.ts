@@ -8,10 +8,38 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+type SupabaseClientType = ReturnType<typeof createClient<Database>>;
+
+function createMockSupabaseClient(): SupabaseClientType {
+  const subscription = { unsubscribe: () => {} };
+
+  return {
+    auth: {
+      onAuthStateChange: () => ({ data: { subscription } } as any),
+      getSession: async () => ({ data: { session: null }, error: null } as any),
+      signOut: async () => ({ error: null } as any),
+    },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          single: async () => ({ data: null, error: null }),
+        }),
+      }),
+      insert: async () => ({ data: null, error: null }),
+    }),
+  } as any;
+}
+
+export const supabase: SupabaseClientType =
+  SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
+    ? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: {
+          storage: localStorage,
+          persistSession: true,
+          autoRefreshToken: true,
+        },
+      })
+    : (console.warn(
+        "Supabase env vars are missing (VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY). Auth features are disabled until they are configured.",
+      ),
+      createMockSupabaseClient());

@@ -98,7 +98,7 @@ export function ContactSection() {
               Contact
             </Badge>
           </div>
-          <h2 className="mt-6 text-2xl font-bold text-foreground">Thank You for Reaching Out</h2>
+          <h2 className="font-display mt-6 text-2xl font-bold text-foreground">Thank You for Reaching Out</h2>
           <p className="mt-3 text-muted-foreground">
             Our team will be in touch within 24 hours.
           </p>
@@ -114,7 +114,7 @@ export function ContactSection() {
           <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
             Contact
           </Badge>
-          <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
+          <h2 className="font-display mt-3 text-3xl font-bold text-foreground md:text-4xl">
             Start Your Child's Journey
           </h2>
           <p className="mt-4 text-muted-foreground">

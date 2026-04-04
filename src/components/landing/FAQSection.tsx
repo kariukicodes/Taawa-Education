@@ -26,40 +26,62 @@ const faqs = [
 ];
 
 export function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-24 px-3 lg:px-3">
+    <section
+      id="faq"
+      className="relative bg-[#0A0A08] px-3 py-24 lg:px-3"
+    >
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
-          <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
+          <Badge
+            variant="secondary"
+            className="border border-[#C9A84C]/20 bg-[#C9A84C]/10 px-4 py-1 text-[11px] tracking-[0.2em] text-[#C9A84C] uppercase hover:bg-[#C9A84C]/10"
+          >
             FAQ
           </Badge>
-          <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
-            Frequently Asked Questions
+
+          <h2
+            className="mt-4 text-3xl font-bold tracking-[-0.02em] text-[#F5F5F0] md:text-4xl"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Frequently asked questions
           </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-8 text-[#F5F5F0]/55">
+            Everything parents usually want to know before getting started with EduNest.
+          </p>
         </div>
 
         <div className="mt-14 space-y-3">
           {faqs.map((faq, i) => (
             <div
               key={i}
-              className="rounded-xl border border-border bg-card overflow-hidden"
+              className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#131310]"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="flex w-full items-center justify-between px-6 py-4 text-left"
+                className="flex w-full items-center justify-between px-6 py-5 text-left"
               >
-                <span className="text-sm font-medium text-foreground">{faq.q}</span>
+                <span className="pr-4 text-sm font-medium text-[#F5F5F0]">
+                  {faq.q}
+                </span>
+
                 <ChevronDown
-                  className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
-                    openIndex === i ? "rotate-180" : ""
+                  className={`h-4 w-4 shrink-0 text-[#F5F5F0]/40 transition-transform duration-300 ${
+                    openIndex === i ? "rotate-180 text-[#C9A84C]" : ""
                   }`}
                 />
               </button>
+
               {openIndex === i && (
-                <div className="border-t border-border px-6 py-4">
-                  <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                <div className="border-t border-white/[0.08] px-6 py-4">
+                  <p className="text-sm leading-7 text-[#F5F5F0]/52">
+                    {faq.a}
+                  </p>
                 </div>
               )}
             </div>

@@ -16,6 +16,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { useContactModal } from "./ContactModalContext";
 
 const features = [
   {
@@ -45,6 +46,8 @@ const features = [
 ];
 
 export function WhyChooseSection() {
+  const { openModal } = useContactModal();
+
   return (
     <section className="relative overflow-hidden bg-[#0A0A08] px-4 py-24 lg:px-6">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
@@ -59,19 +62,18 @@ export function WhyChooseSection() {
 
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto mb-14 max-w-3xl text-center">
-          <Badge className="border border-[#C9A84C]/20 bg-[#C9A84C]/10 px-4 py-1 text-[11px] tracking-[0.18em] text-[#C9A84C] uppercase hover:bg-[#C9A84C]/10">
+          <Badge className="border border-primary/20 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.18em] text-primary uppercase hover:bg-primary/10">
             Why Choose EduNest
           </Badge>
 
           <h2
-            className="mt-6 text-3xl font-bold tracking-[-0.03em] text-[#F5F5F0] md:text-5xl"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display mt-6 text-3xl font-bold tracking-[-0.03em] text-foreground md:text-5xl"
           >
             Built for parents who want
-            <span className="text-[#C9A84C]"> structure, trust, and results</span>
+            <span className="text-primary"> structure, trust, and results</span>
           </h2>
 
-          <p className="mt-5 text-[15px] leading-8 text-[#F5F5F0]/55 md:text-base">
+          <p className="mt-5 text-[15px] leading-8 text-muted-foreground md:text-base">
             EduNest combines personalised academic support, carefully vetted tutors,
             and clear progress systems to give families a more confident
             homeschooling experience.
@@ -83,18 +85,17 @@ export function WhyChooseSection() {
           <Card className="group relative overflow-hidden border-white/10 bg-[#131310]/90 shadow-2xl shadow-black/30 backdrop-blur-xl lg:col-span-5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,168,76,0.16),transparent_35%)] opacity-80" />
             <CardHeader className="relative pb-4">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#C9A84C]/20 bg-[#C9A84C]/10 text-[#C9A84C]">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
                 <ShieldCheck className="h-7 w-7" />
               </div>
 
               <CardTitle
-                className="text-2xl text-[#F5F5F0] md:text-3xl"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="font-display text-2xl text-foreground md:text-3xl"
               >
                 A more premium way to support your child’s education
               </CardTitle>
 
-              <CardDescription className="max-w-md text-sm leading-7 text-[#F5F5F0]/55">
+              <CardDescription className="max-w-md text-sm leading-7 text-muted-foreground">
                 We go beyond tutoring by creating a structured support system that
                 helps students grow academically while giving parents clarity,
                 confidence, and peace of mind.
@@ -111,7 +112,7 @@ export function WhyChooseSection() {
                 ].map((item) => (
                   <div
                     key={item}
-                    className="rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-[#F5F5F0]/75"
+                    className="rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-sm text-foreground/80"
                   >
                     {item}
                   </div>
@@ -121,9 +122,15 @@ export function WhyChooseSection() {
               <div className="flex flex-wrap items-center gap-3 pt-3">
                 <Button
                   asChild
-                  className="bg-[#C9A84C] text-[#0A0A08] hover:bg-[#d4b054]"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  <a href="#contact">
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openModal();
+                    }}
+                  >
                     Book Consultation
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
@@ -132,7 +139,7 @@ export function WhyChooseSection() {
                 <Button
                   asChild
                   variant="outline"
-                  className="border-white/10 bg-transparent text-[#F5F5F0] hover:bg-white/5 hover:text-[#F5F5F0]"
+                  className="border-border bg-transparent text-foreground hover:bg-muted/50 hover:text-foreground"
                 >
                   <a href="/programs">Explore Programs</a>
                 </Button>
@@ -148,24 +155,24 @@ export function WhyChooseSection() {
               return (
                 <Card
                   key={feature.title}
-                  className="group border-white/10 bg-[#131310]/85 shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A84C]/25 hover:bg-[#151512]"
+                  className="group border-white/10 bg-[#131310]/85 shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:bg-[#151512]"
                 >
                   <CardHeader>
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C9A84C]/15 bg-[#C9A84C]/10 text-[#C9A84C] transition-transform duration-300 group-hover:scale-105">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105">
                       <Icon className="h-5 w-5" />
                     </div>
 
-                    <CardTitle className="text-lg text-[#F5F5F0]">
+                    <CardTitle className="text-lg text-foreground">
                       {feature.title}
                     </CardTitle>
                   </CardHeader>
 
                   <CardContent>
-                    <p className="text-sm leading-7 text-[#F5F5F0]/50">
+                    <p className="text-sm leading-7 text-muted-foreground">
                       {feature.description}
                     </p>
 
-                    <div className="mt-6 h-px w-full bg-gradient-to-r from-[#C9A84C]/25 to-transparent" />
+                    <div className="mt-6 h-px w-full bg-gradient-to-r from-primary/25 to-transparent" />
                   </CardContent>
                 </Card>
               );

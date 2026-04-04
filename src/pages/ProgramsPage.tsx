@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LandingNav } from "@/components/landing/LandingNav";
+import { useContactModal } from "@/components/landing/ContactModalContext";
 
 // ── Scroll visibility hook ─────────────────────────────────────
 function useVisible(threshold = 0.1) {
@@ -21,7 +22,7 @@ function Label({ text, center = false }: { text: string; center?: boolean }) {
   return (
     <div className={`mb-5 flex items-center gap-3 ${center ? "justify-center" : ""}`}>
       <span className="h-px w-8 bg-[#C9A84C]/40" />
-      <span className="text-[11px] font-medium tracking-[0.18em] text-[#C9A84C]">{text}</span>
+      <span className="text-[11px] font-medium tracking-[0.18em] text-primary">{text}</span>
       <span className="h-px w-8 bg-[#C9A84C]/40" />
     </div>
   );
@@ -158,8 +159,7 @@ function ProgramsHero() {
       {/* Faint watermark */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
         <span
-          className="select-none text-[18vw] font-black leading-none text-white/[0.018]"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          className="font-display select-none text-[18vw] font-black leading-none text-foreground/[0.018]"
         >
           PROGRAMS
         </span>
@@ -169,24 +169,23 @@ function ProgramsHero() {
         <div
           className={`mb-6 flex items-center gap-3 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
         >
-          <span className="h-px w-8 bg-[#C9A84C]/40" />
-          <span className="text-[11px] font-medium tracking-[0.18em] text-[#C9A84C]">
+          <span className="h-px w-8 bg-primary/40" />
+          <span className="text-[11px] font-medium tracking-[0.18em] text-primary">
             OUR PROGRAMS
           </span>
-          <span className="h-px w-8 bg-[#C9A84C]/40" />
+          <span className="h-px w-8 bg-primary/40" />
         </div>
 
         <h1
-          className={`mb-6 max-w-3xl text-[52px] font-black leading-[1.0] tracking-[-2.5px] text-[#F5F5F0] transition-all duration-700 delay-100 md:text-[66px] lg:text-[76px] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className={`font-display mb-6 max-w-3xl text-[52px] font-black leading-[1.0] tracking-[-2.5px] text-foreground transition-all duration-700 delay-100 md:text-[66px] lg:text-[76px] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           Four paths.
           <br />
-          <span className="text-[#C9A84C]">One perfect fit.</span>
+          <span className="text-primary">One perfect fit.</span>
         </h1>
 
         <p
-          className={`mb-12 max-w-lg text-[15px] font-light leading-[1.85] text-[#F5F5F0]/45 transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          className={`mb-12 max-w-lg text-[15px] font-light leading-[1.85] text-muted-foreground transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           From Kenya's national CBC to Cambridge IGCSE, from Montessori early
           years to fully custom plans — every EduNest program is delivered
@@ -201,16 +200,16 @@ function ProgramsHero() {
             <a
               key={p.id}
               href={`#${p.id}`}
-              className="flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-[12px] font-medium text-[#F5F5F0]/55 transition-all duration-300 hover:border-[#C9A84C]/35 hover:text-[#F5F5F0]"
+              className="flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-[12px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/35 hover:text-foreground"
             >
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.accent }} />
               {p.tag}
               {p.popular && (
                 <span
                   className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
-                  style={{ background: "rgba(201,168,76,0.15)", color: "#C9A84C" }}
+                  style={{ background: "rgba(201,168,76,0.15)" }}
                 >
-                  Popular
+                  <span className="text-primary">Popular</span>
                 </span>
               )}
             </a>
@@ -261,23 +260,22 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
               {program.popular && (
                 <span
                   className="rounded-full px-3 py-1.5 text-[10px] font-semibold"
-                  style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.2)", color: "#C9A84C" }}
+                  style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.2)" }}
                 >
-                  ✦ Most Popular
+                  <span className="text-primary">✦ Most Popular</span>
                 </span>
               )}
             </div>
 
             <h2
-              className="mb-2 text-[36px] font-black leading-[1.05] tracking-[-1.5px] text-[#F5F5F0] md:text-[42px]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="font-display mb-2 text-[36px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[42px]"
             >
               {program.name}
             </h2>
             <p className="mb-5 text-[14px] font-light" style={{ color: program.accent }}>
               {program.tagline}
             </p>
-            <p className="mb-8 text-[14px] font-light leading-[1.85] text-[#F5F5F0]/45">
+            <p className="mb-8 text-[14px] font-light leading-[1.85] text-muted-foreground">
               {program.description}
             </p>
 
@@ -291,28 +289,27 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
                   key={item.label}
                   className="flex-1 rounded-xl border border-white/7 bg-[#141412] px-4 py-3"
                 >
-                  <p className="mb-0.5 text-[10px] font-medium tracking-[0.08em] text-[#F5F5F0]/30">
+                  <p className="mb-0.5 text-[10px] font-medium tracking-[0.08em] text-muted-foreground/70">
                     {item.label.toUpperCase()}
                   </p>
-                  <p className="text-[13px] font-semibold text-[#F5F5F0]/80">{item.val}</p>
+                  <p className="text-[13px] font-semibold text-foreground/80">{item.val}</p>
                 </div>
               ))}
             </div>
 
             {/* Subjects */}
             <div className="mb-8">
-              <p className="mb-3 text-[11px] font-medium tracking-[0.1em] text-[#F5F5F0]/30">
+              <p className="mb-3 text-[11px] font-medium tracking-[0.1em] text-muted-foreground/70">
                 SUBJECTS COVERED
               </p>
               <div className="flex flex-wrap gap-2">
                 {program.subjects.map((s) => (
                   <span
                     key={s}
-                    className="rounded-full px-3 py-1.5 text-[11px] font-medium"
+                    className="rounded-full px-3 py-1.5 text-[11px] font-medium text-muted-foreground"
                     style={{
                       background: "rgba(255,255,255,0.04)",
                       border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(245,245,240,0.55)",
                     }}
                   >
                     {s}
@@ -324,26 +321,25 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
             {/* Pricing + CTA */}
             <div className="flex items-center gap-5 rounded-2xl border border-white/8 bg-[#141412] p-5">
               <div>
-                <p className="text-[10px] font-medium tracking-[0.1em] text-[#F5F5F0]/30">
+                <p className="text-[10px] font-medium tracking-[0.1em] text-muted-foreground/70">
                   STARTING FROM
                 </p>
                 <p
-                  className="text-[28px] font-black leading-none text-[#F5F5F0]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="font-display text-[28px] font-black leading-none text-foreground"
                 >
                   {program.price}
                 </p>
-                <p className="mt-0.5 text-[11px] text-[#F5F5F0]/30">{program.period}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground/70">{program.period}</p>
               </div>
               <div className="ml-auto flex flex-col gap-2">
                 <a
                   href="#contact"
-                  className="rounded-lg px-6 py-3 text-[13px] font-semibold text-[#0F0F0F] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+                  className="rounded-lg px-6 py-3 text-[13px] font-semibold text-background transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
                   style={{ background: program.accent, boxShadow: `0 0 0 0 ${program.accent}` }}
                 >
                   Enquire Now
                 </a>
-                <p className="text-center text-[10px] text-[#F5F5F0]/25">Free consultation</p>
+                <p className="text-center text-[10px] text-muted-foreground/60">Free consultation</p>
               </div>
             </div>
           </div>
@@ -387,8 +383,8 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
               {/* Placeholder */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-25">
                 <div
-                  className="flex h-20 w-20 items-center justify-center rounded-full border text-[20px] font-black"
-                  style={{ borderColor: `${program.accent}40`, color: program.accent, fontFamily: "'Playfair Display', serif" }}
+                  className="font-display flex h-20 w-20 items-center justify-center rounded-full border text-[20px] font-black"
+                  style={{ borderColor: `${program.accent}40`, color: program.accent }}
                 >
                   {program.tag[0]}
                 </div>
@@ -405,7 +401,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
 
               {/* What's included overlay card */}
               <div className="absolute bottom-5 left-5 right-5 z-20 rounded-2xl border border-white/10 bg-[#0D0D0B]/88 p-4 backdrop-blur-md">
-                <p className="mb-3 text-[10px] font-medium tracking-[0.1em] text-[#F5F5F0]/30">
+                <p className="mb-3 text-[10px] font-medium tracking-[0.1em] text-muted-foreground/70">
                   WHAT'S INCLUDED
                 </p>
                 <div className="grid grid-cols-2 gap-y-1.5 gap-x-3">
@@ -415,7 +411,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
                         className="h-1 w-1 flex-shrink-0 rounded-full"
                         style={{ background: program.accent }}
                       />
-                      <span className="text-[11px] text-[#F5F5F0]/60">{item}</span>
+                      <span className="text-[11px] text-foreground/80">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -425,10 +421,10 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
               <div
                 className="absolute left-5 top-5 z-20 max-w-[200px] rounded-xl border border-white/10 bg-[#0D0D0B]/85 p-3 backdrop-blur-md"
               >
-                <p className="mb-1 text-[9px] font-medium tracking-[0.1em] text-[#F5F5F0]/30">
+                <p className="mb-1 text-[9px] font-medium tracking-[0.1em] text-muted-foreground/70">
                   IDEAL FOR
                 </p>
-                <p className="text-[11px] leading-[1.5] text-[#F5F5F0]/65">{program.ideal}</p>
+                <p className="text-[11px] leading-[1.5] text-foreground/80">{program.ideal}</p>
               </div>
             </div>
           </div>
@@ -467,12 +463,11 @@ function ComparisonTable() {
         >
           <Label text="COMPARE PROGRAMS" center />
           <h2
-            className="mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-[#F5F5F0] md:text-[46px]"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="font-display mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]"
           >
             Not sure which to choose?
             <br />
-            <span className="text-[#C9A84C]">Compare side by side.</span>
+            <span className="text-primary">Compare side by side.</span>
           </h2>
         </div>
 
@@ -503,11 +498,11 @@ function ComparisonTable() {
               style={{ background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}
             >
               <div className="px-5 py-3.5">
-                <span className="text-[12px] font-medium text-[#F5F5F0]/45">{row.label}</span>
+                <span className="text-[12px] font-medium text-muted-foreground">{row.label}</span>
               </div>
               {[row.cbc, row.british, row.montessori, row.custom].map((val, j) => (
                 <div key={j} className="flex items-center justify-center px-5 py-3.5">
-                  <span className="text-center text-[12px] text-[#F5F5F0]/70">{val}</span>
+                  <span className="text-center text-[12px] text-foreground/80">{val}</span>
                 </div>
               ))}
             </div>
@@ -516,7 +511,7 @@ function ComparisonTable() {
           {/* CTA row */}
           <div className="grid grid-cols-5 bg-[#141412]">
             <div className="px-5 py-4">
-              <span className="text-[11px] text-[#F5F5F0]/25">Enquire</span>
+              <span className="text-[11px] text-muted-foreground/60">Enquire</span>
             </div>
             {programs.map((p) => (
               <div key={p.id} className="flex items-center justify-center px-5 py-4">
@@ -566,12 +561,11 @@ function HowItWorks() {
         >
           <Label text="THE PROCESS" center />
           <h2
-            className="mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-[#F5F5F0] md:text-[46px]"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="font-display mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]"
           >
             From enquiry to first lesson
             <br />
-            <span className="text-[#C9A84C]">in four simple steps.</span>
+            <span className="text-primary">in four simple steps.</span>
           </h2>
         </div>
 
@@ -593,23 +587,22 @@ function HowItWorks() {
 
               {/* Big faint number */}
               <div
-                className="mb-4 text-[52px] font-black leading-none"
-                style={{ color: `${step.accent}20`, fontFamily: "'Playfair Display', serif" }}
+                className="font-display mb-4 text-[52px] font-black leading-none"
+                style={{ color: `${step.accent}20` }}
               >
                 {step.num}
               </div>
 
               <h3
-                className="mb-2.5 text-[15px] font-semibold text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="font-display mb-2.5 text-[15px] font-semibold text-foreground"
               >
                 {step.title}
               </h3>
-              <p className="text-[12.5px] font-light leading-[1.8] text-[#F5F5F0]/42">{step.body}</p>
+              <p className="text-[12.5px] font-light leading-[1.8] text-muted-foreground">{step.body}</p>
 
               {/* Connector arrow — all but last */}
               {i < steps.length - 1 && (
-                <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 text-[#F5F5F0]/15 lg:block">
+                <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 text-foreground/10 lg:block">
                   →
                 </div>
               )}
@@ -631,6 +624,7 @@ function HowItWorks() {
 // ══════════════════════════════════════════════════════════════
 function ProgramsCTA() {
   const { ref, visible } = useVisible();
+  const { openModal } = useContactModal();
 
   return (
     <section ref={ref} className="relative overflow-hidden bg-[#0F0F0F] py-28">
@@ -647,15 +641,14 @@ function ProgramsCTA() {
         <Label text="GET STARTED" center />
 
         <h2
-          className="mb-6 text-[42px] font-black leading-[1.02] tracking-[-1.5px] text-[#F5F5F0] md:text-[52px]"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          className="font-display mb-6 text-[42px] font-black leading-[1.02] tracking-[-1.5px] text-foreground md:text-[52px]"
         >
           Not sure which program
           <br />
-          <span className="text-[#C9A84C]">is right for your child?</span>
+          <span className="text-primary">is right for your child?</span>
         </h2>
 
-        <p className="mb-10 text-[15px] font-light leading-[1.85] text-[#F5F5F0]/42">
+        <p className="mb-10 text-[15px] font-light leading-[1.85] text-muted-foreground">
           Book a free consultation and we'll recommend the best fit based on
           your child's age, learning style, academic goals, and your family's
           lifestyle. No obligation required.
@@ -664,16 +657,20 @@ function ProgramsCTA() {
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <a
             href="#contact"
-            className="rounded-lg bg-[#C9A84C] px-9 py-4 text-[14px] font-semibold text-[#0F0F0F] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#C9A84C]/25 active:scale-[0.98]"
+            onClick={(e) => {
+              e.preventDefault();
+              openModal();
+            }}
+            className="rounded-lg bg-primary px-9 py-4 text-[14px] font-semibold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-[#C9A84C]/25 active:scale-[0.98]"
           >
             Book a Free Consultation
           </a>
           <a
             href="/tutors"
-            className="flex items-center gap-2 rounded-lg border border-white/10 px-9 py-4 text-[14px] font-medium text-[#F5F5F0]/60 transition-all duration-300 hover:border-[#C9A84C]/35 hover:text-[#F5F5F0]"
+            className="flex items-center gap-2 rounded-lg border border-white/10 px-9 py-4 text-[14px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/35 hover:text-foreground"
           >
             Meet Our Tutors
-            <span className="text-[#C9A84C]">→</span>
+            <span className="text-primary">→</span>
           </a>
         </div>
 

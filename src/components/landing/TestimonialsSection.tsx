@@ -23,14 +23,27 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section id="testimonials" className="py-24 px-3 lg:px-3 bg-card/50">
+    <section
+      id="testimonials"
+      className="relative py-24 px-3 lg:px-3 bg-[#0A0A08]"
+    >
+      {/* Divider */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
+          <Badge
+            variant="secondary"
+            className="border border-[#C9A84C]/20 bg-[#C9A84C]/10 px-4 py-1 text-[11px] tracking-[0.2em] text-[#C9A84C] uppercase hover:bg-[#C9A84C]/10"
+          >
             Testimonials
           </Badge>
-          <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
-            What Our Families Say
+
+          <h2
+            className="mt-4 text-3xl font-bold text-[#F5F5F0] md:text-4xl tracking-[-0.02em]"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            What families are experiencing
           </h2>
         </div>
 
@@ -38,16 +51,26 @@ export function TestimonialsSection() {
           {testimonials.map((t) => (
             <div
               key={t.parent}
-              className="card-hover-glow rounded-xl border border-border bg-card p-6"
+              className="rounded-xl border border-white/[0.08] bg-[#131310] p-6"
             >
-              <div className="mb-4 text-2xl text-primary">"</div>
-              <p className="text-sm text-muted-foreground leading-relaxed italic">
+              <div className="mb-4 text-xl text-[#C9A84C]">“</div>
+
+              <p className="text-sm leading-relaxed text-[#F5F5F0]/55 italic">
                 {t.quote}
               </p>
-              <div className="mt-6 border-t border-border pt-4">
-                <p className="font-semibold text-foreground">{t.parent}</p>
-                <p className="text-xs text-muted-foreground">{t.child}</p>
-                <p className="mt-1 text-xs font-medium text-primary">{t.outcome}</p>
+
+              <div className="mt-6 border-t border-white/[0.08] pt-4">
+                <p className="font-semibold text-[#F5F5F0]">
+                  {t.parent}
+                </p>
+
+                <p className="text-xs text-[#F5F5F0]/40">
+                  {t.child}
+                </p>
+
+                <p className="mt-1 text-xs font-medium text-[#C9A84C]">
+                  {t.outcome}
+                </p>
               </div>
             </div>
           ))}

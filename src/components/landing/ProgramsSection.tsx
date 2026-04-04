@@ -38,14 +38,14 @@ export function ProgramsSection() {
       className="relative py-24 px-3 lg:px-3 bg-[#0A0A08]"
     >
       {/* Top divider */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <Badge variant="secondary" className="border border-primary/30 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.2em] text-primary uppercase hover:bg-primary/10">
             Programs
           </Badge>
-          <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
+          <h2 className="font-display mt-3 text-3xl font-bold text-foreground md:text-4xl">
             Curriculum Options
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-muted-foreground">

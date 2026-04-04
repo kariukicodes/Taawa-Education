@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useContactModal } from "./ContactModalContext";
 
 function FloatCard({
   children,
@@ -41,6 +42,8 @@ export function HeroSection() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  const { openModal } = useContactModal();
+
   const fadeUp = (delay: string) =>
     `transition-all duration-700 ${delay} ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`;
 
@@ -78,22 +81,19 @@ export function HeroSection() {
           <div className={`mb-7 w-fit ${fadeUp("delay-0")}`}>
             <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/25 bg-[#C9A84C]/[0.08] px-4 py-1.5">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]" />
-              <span className="text-[11px] font-semibold tracking-[0.15em] text-[#C9A84C] uppercase">
+              <span className="text-[11px] font-semibold tracking-[0.15em] text-primary uppercase">
                 CBC · IGCSE · A-Level
               </span>
             </span>
           </div>
 
           {/* Headline — serif display */}
-          <h1
-            className={`mb-5 text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-[#F5F5F0] md:text-[52px] lg:text-[58px] ${fadeUp("delay-100")}`}
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
+          <h1 className={`font-display mb-5 text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-foreground md:text-[52px] lg:text-[58px] ${fadeUp("delay-100")}`}>
             Unlock Your Child’s Full Academic Potential
           </h1>
 
           {/* Sub */}
-          <p className={`mb-9 max-w-[420px] text-[15px] font-light leading-[1.9] text-[#F5F5F0]/50 ${fadeUp("delay-200")}`}>
+          <p className={`mb-9 max-w-[420px] text-[15px] font-light leading-[1.9] text-muted-foreground ${fadeUp("delay-200")}`}>
             Personalized homeschooling programs, expert tutors, and real-time progress tracking — built for parents who want more than just tutoring.
           </p>
 
@@ -101,19 +101,23 @@ export function HeroSection() {
           <div className={`mb-3 flex flex-wrap gap-3 ${fadeUp("delay-300")}`}>
             <a
               href="#contact"
-              className="group inline-flex items-center gap-2 rounded-xl bg-[#C9A84C] px-7 py-3.5 text-[13px] font-bold text-[#0A0A08] transition-all duration-300 hover:scale-[1.02] hover:bg-[#d4b054] hover:shadow-lg hover:shadow-[#C9A84C]/20 active:scale-[0.98]"
+              onClick={(e) => {
+                e.preventDefault();
+                openModal();
+              }}
+              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-[13px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]"
             >
               Book a Free Consultation
               <span className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
             </a>
             <a
               href="/tutors"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] px-7 py-3.5 text-[13px] font-medium text-[#F5F5F0]/55 transition-all duration-300 hover:border-[#C9A84C]/40 hover:text-[#F5F5F0]/90"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] px-7 py-3.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/40 hover:text-foreground"
             >
               Browse Tutors
             </a>
           </div>
-          <p className="mb-8 text-[11px] text-[#F5F5F0]/30">
+          <p className="mb-8 text-[11px] text-muted-foreground">
             Limited slots available — personalized plans for each student
           </p>
 
@@ -134,8 +138,8 @@ export function HeroSection() {
                   ))}
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#F5F5F0]/80">500+ students</p>
-                  <p className="text-[11px] text-[#F5F5F0]/35">across Kenya &amp; diaspora</p>
+                  <p className="text-[12px] font-semibold text-foreground/80">500+ students</p>
+                  <p className="text-[11px] text-muted-foreground">across Kenya &amp; diaspora</p>
                 </div>
               </div>
 
@@ -143,23 +147,23 @@ export function HeroSection() {
 
               {/* Stars */}
               <div>
-                <p className="text-[12px] tracking-[3px] text-[#C9A84C]">★★★★★</p>
-                <p className="mt-0.5 text-[11px] text-[#F5F5F0]/30">4.9 avg · 200+ reviews</p>
+                <p className="text-[12px] tracking-[3px] text-primary">★★★★★</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">4.9 avg · 200+ reviews</p>
               </div>
 
               <div className="h-7 w-px bg-white/[0.08]" />
 
               {/* Quick stat */}
               <div>
-                <p className="text-[12px] font-semibold text-[#F5F5F0]/80">98% pass rate</p>
-                <p className="text-[11px] text-[#F5F5F0]/35">KCSE &amp; IGCSE 2024</p>
+                <p className="text-[12px] font-semibold text-foreground/80">98% pass rate</p>
+                <p className="text-[11px] text-muted-foreground">KCSE &amp; IGCSE 2024</p>
               </div>
 
               <div className="h-7 w-px bg-white/[0.08]" />
 
               {/* New: Trusted by parents globally */}
               <div>
-                <p className="text-[12px] font-semibold text-[#F5F5F0]/80">Trusted by parents globally</p>
+                <p className="text-[12px] font-semibold text-foreground/80">Trusted by parents globally</p>
               </div>
             </div>
           </div>
@@ -211,26 +215,26 @@ export function HeroSection() {
               <div className="absolute bottom-4 left-3 right-3 z-20 rounded-[14px] border border-white/[0.09] bg-[#0D0D0B]/80 p-3 backdrop-blur-md">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[9px] font-semibold tracking-[0.12em] text-[#F5F5F0]/28 uppercase">
+                    <p className="text-[9px] font-semibold tracking-[0.12em] text-muted-foreground/70 uppercase">
                       Live session
                     </p>
-                    <p className="mt-0.5 text-[12px] font-semibold text-[#F5F5F0]">
+                    <p className="mt-0.5 text-[12px] font-semibold text-foreground">
                       Mathematics · Grade 8
                     </p>
-                    <p className="text-[10px] text-[#F5F5F0]/35">Mr. Odhiambo · CBC</p>
+                    <p className="text-[10px] text-muted-foreground">Mr. Odhiambo · CBC</p>
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C9A84C]/15 ring-1 ring-[#C9A84C]/20">
                       <div className="h-2 w-2 animate-pulse rounded-full bg-[#C9A84C]" />
                     </div>
-                    <span className="text-[7px] font-bold tracking-wider text-[#C9A84C]/60 uppercase">Live</span>
+                    <span className="text-[7px] font-bold tracking-wider text-primary/60 uppercase">Live</span>
                   </div>
                 </div>
                 {/* Progress bar */}
                 <div className="mt-2.5 h-[2px] w-full overflow-hidden rounded-full bg-white/[0.06]">
                   <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-[#C9A84C]/80 to-[#C9A84C]" />
                 </div>
-                <p className="mt-1 text-[9px] text-[#F5F5F0]/20">62% complete</p>
+                <p className="mt-1 text-[9px] text-muted-foreground/60">62% complete</p>
               </div>
             </div>
 
@@ -238,21 +242,18 @@ export function HeroSection() {
 
             {/* Card A — Score callout (top-left) */}
             <FloatCard delay={600} style={{ top: "16px", left: "0px" }}>
-              <p className="mb-0.5 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">Top score</p>
-              <div
-                className="text-[40px] font-black leading-none text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                96<span className="text-[18px] font-light text-[#C9A84C]">%</span>
+              <p className="mb-0.5 text-[9px] font-semibold tracking-[0.1em] text-muted-foreground/70 uppercase">Top score</p>
+              <div className="font-display text-[40px] font-black leading-none text-foreground">
+                96<span className="text-[18px] font-light text-primary">%</span>
               </div>
-              <p className="mt-1.5 text-[10px] leading-[1.5] text-[#F5F5F0]/32">
+              <p className="mt-1.5 text-[10px] leading-[1.5] text-muted-foreground">
                 Wanjiru K. — KCSE<br />Maths, 2024
               </p>
             </FloatCard>
 
             {/* Card B — Weekly sessions (top-right) */}
             <FloatCard delay={800} style={{ top: "28px", right: "0px" }} className="min-w-[172px]">
-              <p className="mb-2 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">This week</p>
+              <p className="mb-2 text-[9px] font-semibold tracking-[0.1em] text-muted-foreground/70 uppercase">This week</p>
               <div className="flex flex-col gap-2">
                 {[
                   { label: "Maths — Grade 8 CBC", done: true, color: "#C9A84C" },
@@ -271,7 +272,7 @@ export function HeroSection() {
                     >
                       {s.done ? "✓" : ""}
                     </div>
-                    <span className={`text-[10px] ${s.done ? "text-[#F5F5F0]/65" : "text-[#F5F5F0]/22"}`}>
+                    <span className={`text-[10px] ${s.done ? "text-foreground/70" : "text-muted-foreground/50"}`}>
                       {s.label}
                     </span>
                   </div>
@@ -285,7 +286,7 @@ export function HeroSection() {
               style={{ top: "50%", right: "0px", transform: "translateY(-50%)" }}
               className="min-w-[165px]"
             >
-              <p className="mb-2 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">Student</p>
+              <p className="mb-2 text-[9px] font-semibold tracking-[0.1em] text-muted-foreground/70 uppercase">Student</p>
               <div className="mb-2 flex items-center gap-2">
                 <div
                   className="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold"
@@ -294,15 +295,15 @@ export function HeroSection() {
                   ZK
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#F5F5F0]">Zara Kamau</p>
-                  <p className="text-[10px] text-[#F5F5F0]/30">Grade 8 · CBC</p>
+                  <p className="text-[12px] font-semibold text-foreground">Zara Kamau</p>
+                  <p className="text-[10px] text-muted-foreground/70">Grade 8 · CBC</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-1 mb-2.5">
                 {["Maths", "Science", "English"].map((t) => (
                   <span
                     key={t}
-                    className="rounded-full border border-[#C9A84C]/18 bg-[#C9A84C]/[0.08] px-2 py-[2px] text-[9px] font-medium text-[#C9A84C]"
+                    className="rounded-full border border-[#C9A84C]/18 bg-[#C9A84C]/[0.08] px-2 py-[2px] text-[9px] font-medium text-primary"
                   >
                     {t}
                   </span>
@@ -311,20 +312,17 @@ export function HeroSection() {
               <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/[0.06]">
                 <div className="h-full w-[81%] rounded-full bg-[#7A9E7E]" />
               </div>
-              <p className="mt-1 text-[9px] text-[#F5F5F0]/22">81% of term complete</p>
+              <p className="mt-1 text-[9px] text-muted-foreground/60">81% of term complete</p>
             </FloatCard>
 
             {/* Card D — New students (bottom-left) */}
             <FloatCard delay={1200} style={{ bottom: "24px", left: "0px" }} className="min-w-[155px]">
-              <p className="mb-1 text-[9px] font-semibold tracking-[0.1em] text-[#F5F5F0]/28 uppercase">New this month</p>
-              <div
-                className="text-[32px] font-black leading-none text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
+              <p className="mb-1 text-[9px] font-semibold tracking-[0.1em] text-muted-foreground/70 uppercase">New this month</p>
+              <div className="font-display text-[32px] font-black leading-none text-foreground">
                 12{" "}
-                <span className="text-[15px] font-light text-[#C9A84C]">students</span>
+                <span className="text-[15px] font-light text-primary">students</span>
               </div>
-              <p className="mt-1 text-[10px] text-[#F5F5F0]/30">joined EduNest in April</p>
+              <p className="mt-1 text-[10px] text-muted-foreground/70">joined EduNest in April</p>
               <div className="mt-2 flex gap-1">
                 {[40, 65, 50, 80, 55, 90, 70].map((h, i) => (
                   <div
@@ -347,7 +345,7 @@ export function HeroSection() {
       <div className="absolute bottom-8 left-10 z-20 hidden flex-col items-center gap-2 lg:flex">
         <div className="h-10 w-px animate-pulse bg-gradient-to-b from-[#C9A84C]/50 to-transparent" />
         <span
-          className="text-[9px] font-medium tracking-[0.25em] text-[#F5F5F0]/18 uppercase"
+          className="text-[9px] font-medium tracking-[0.25em] text-muted-foreground/60 uppercase"
           style={{ writingMode: "vertical-rl" }}
         >
           Scroll
@@ -365,10 +363,10 @@ export function HeroSection() {
             key={s.label}
             className="rounded-2xl border border-white/[0.07] bg-[#131310]/80 p-3 text-center backdrop-blur-sm"
           >
-            <p className="text-[18px] font-black text-[#C9A84C]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <p className="font-display text-[18px] font-black text-primary">
               {s.val}
             </p>
-            <p className="mt-0.5 text-[10px] text-[#F5F5F0]/35">{s.label}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">{s.label}</p>
           </div>
         ))}
       </div>

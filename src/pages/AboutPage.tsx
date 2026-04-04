@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useContactModal } from "@/components/landing/ContactModalContext";
 
 // ── Scroll visibility hook ─────────────────────────────────────
 function useVisible(threshold = 0.12) {
@@ -19,9 +20,9 @@ function useVisible(threshold = 0.12) {
 function SectionLabel({ text }: { text: string }) {
   return (
     <div className="mb-5 flex items-center gap-3">
-      <span className="h-px w-10 bg-[#C9A84C]/40" />
-      <span className="text-[11px] font-medium tracking-[0.18em] text-[#C9A84C]">{text}</span>
-      <span className="h-px w-10 bg-[#C9A84C]/40" />
+      <span className="h-px w-10 bg-primary/40" />
+      <span className="text-[11px] font-medium tracking-[0.18em] text-primary">{text}</span>
+      <span className="h-px w-10 bg-primary/40" />
     </div>
   );
 }
@@ -53,8 +54,7 @@ function AboutHero() {
         style={{ zIndex: 0 }}
       >
         <span
-          className="select-none text-[20vw] font-black leading-none tracking-tighter text-white/[0.02]"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          className="font-display select-none text-[20vw] font-black leading-none tracking-tighter text-foreground/[0.02]"
         >
           ABOUT
         </span>
@@ -64,24 +64,23 @@ function AboutHero() {
         <div
           className={`mb-6 flex items-center gap-3 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
         >
-          <span className="h-px w-10 bg-[#C9A84C]/40" />
-          <span className="text-[11px] font-medium tracking-[0.18em] text-[#C9A84C]">OUR STORY</span>
-          <span className="h-px w-10 bg-[#C9A84C]/40" />
+          <span className="h-px w-10 bg-primary/40" />
+          <span className="text-[11px] font-medium tracking-[0.18em] text-primary">OUR STORY</span>
+          <span className="h-px w-10 bg-primary/40" />
         </div>
 
         <h1
-          className={`mb-6 max-w-4xl text-[52px] font-black leading-[1.0] tracking-[-2.5px] text-[#F5F5F0] transition-all duration-700 delay-100 md:text-[68px] lg:text-[80px] ${
+          className={`font-display mb-6 max-w-4xl text-[52px] font-black leading-[1.0] tracking-[-2.5px] text-foreground transition-all duration-700 delay-100 md:text-[68px] lg:text-[80px] ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           Built by parents.
           <br />
-          <span className="text-[#C9A84C]">For parents.</span>
+          <span className="text-primary">For parents.</span>
         </h1>
 
         <p
-          className={`mb-10 max-w-xl text-[16px] font-light leading-[1.85] text-[#F5F5F0]/45 transition-all duration-700 delay-200 ${
+          className={`mb-10 max-w-xl text-[16px] font-light leading-[1.85] text-muted-foreground transition-all duration-700 delay-200 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
@@ -104,12 +103,11 @@ function AboutHero() {
           ].map((s) => (
             <div key={s.label} className="flex flex-col items-center gap-1">
               <span
-                className="text-[32px] font-black leading-none text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="font-display text-[32px] font-black leading-none text-foreground"
               >
                 {s.val}
               </span>
-              <span className="text-[11px] text-[#F5F5F0]/35">{s.label}</span>
+              <span className="text-[11px] text-muted-foreground/70">{s.label}</span>
             </div>
           ))}
         </div>
@@ -140,12 +138,11 @@ function StorySection() {
         >
           <SectionLabel text="HOW WE STARTED" />
           <h2
-            className="mb-8 text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-[#F5F5F0] md:text-[46px]"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="font-display mb-8 text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]"
           >
             We saw the gap.
             <br />
-            <span className="text-[#C9A84C]">So we filled it.</span>
+            <span className="text-primary">So we filled it.</span>
           </h2>
 
           <div className="flex flex-col gap-5">
@@ -176,13 +173,13 @@ function StorySection() {
                 <div className="flex flex-col items-center pt-1">
                   <div
                     className="flex h-8 w-14 flex-shrink-0 items-center justify-center rounded-lg text-[11px] font-bold"
-                    style={{ background: "rgba(201,168,76,0.12)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.2)" }}
+                    style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.2)" }}
                   >
-                    {item.year}
+                    <span className="text-primary">{item.year}</span>
                   </div>
                   {i < 2 && <div className="mt-2 h-full w-px bg-white/8" />}
                 </div>
-                <p className="pt-1 text-[14px] font-light leading-[1.85] text-[#F5F5F0]/50">{item.text}</p>
+                <p className="pt-1 text-[14px] font-light leading-[1.85] text-muted-foreground">{item.text}</p>
               </div>
             ))}
           </div>
@@ -210,8 +207,8 @@ function StorySection() {
             />
             {/* Placeholder */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-20">
-              <div className="h-16 w-16 rounded-full border border-[#C9A84C]/30 flex items-center justify-center text-[20px]" style={{ color: "#C9A84C", fontFamily: "'Playfair Display', serif" }}>EN</div>
-              <p className="text-[11px] tracking-widest text-[#F5F5F0]/30">FOUNDERS PHOTO</p>
+              <div className="font-display flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 text-[20px] text-primary">EN</div>
+              <p className="text-[11px] tracking-widest text-muted-foreground/70">FOUNDERS PHOTO</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(to top, #0A0A0A, transparent)" }} />
           </div>
@@ -277,12 +274,11 @@ function ValuesSection() {
         >
           <SectionLabel text="WHAT WE BELIEVE" />
           <h2
-            className="mx-auto max-w-xl text-[40px] font-black leading-[1.05] tracking-[-1.5px] text-[#F5F5F0] md:text-[48px]"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="font-display mx-auto max-w-xl text-[40px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[48px]"
           >
             Six values that drive
             <br />
-            <span className="text-[#C9A84C]">every decision we make.</span>
+            <span className="text-primary">every decision we make.</span>
           </h2>
         </div>
 
@@ -308,12 +304,11 @@ function ValuesSection() {
                 {v.icon}
               </div>
               <h3
-                className="mb-2.5 text-[15px] font-semibold text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="font-display mb-2.5 text-[15px] font-semibold text-foreground"
               >
                 {v.title}
               </h3>
-              <p className="text-[12.5px] font-light leading-[1.8] text-[#F5F5F0]/42">{v.body}</p>
+              <p className="text-[12.5px] font-light leading-[1.8] text-muted-foreground">{v.body}</p>
               <div
                 className="absolute bottom-0 left-5 right-5 h-[1.5px] origin-left scale-x-0 rounded-full transition-transform duration-500 group-hover:scale-x-100"
                 style={{ background: `linear-gradient(to right, ${v.accent}70, transparent)` }}
@@ -365,14 +360,13 @@ function StatsSection() {
               }}
             >
               <span
-                className="mb-2 text-[36px] font-black leading-none text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="font-display mb-2 text-[36px] font-black leading-none text-foreground"
               >
                 {s.val}
-                <span className="text-[#C9A84C]">+</span>
+                <span className="text-primary">+</span>
               </span>
-              <span className="mb-1 text-[12px] font-semibold text-[#F5F5F0]/70">{s.label}</span>
-              <span className="text-[10px] text-[#F5F5F0]/28">{s.sub}</span>
+              <span className="mb-1 text-[12px] font-semibold text-foreground/80">{s.label}</span>
+              <span className="text-[10px] text-muted-foreground/70">{s.sub}</span>
             </div>
           ))}
         </div>
@@ -433,12 +427,11 @@ function TeamSection() {
         >
           <SectionLabel text="THE TEAM" />
           <h2
-            className="text-[40px] font-black leading-[1.05] tracking-[-1.5px] text-[#F5F5F0] md:text-[48px]"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="font-display text-[40px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[48px]"
           >
             The people behind
             <br />
-            <span className="text-[#C9A84C]">EduNest.</span>
+            <span className="text-primary">EduNest.</span>
           </h2>
         </div>
 
@@ -468,8 +461,8 @@ function TeamSection() {
                 {/* Initials fallback */}
                 <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 0 }}>
                   <div
-                    className="flex h-20 w-20 items-center justify-center rounded-full text-[22px] font-black"
-                    style={{ background: `${member.accent}18`, border: `1px solid ${member.accent}30`, color: member.accent, fontFamily: "'Playfair Display', serif" }}
+                    className="font-display flex h-20 w-20 items-center justify-center rounded-full text-[22px] font-black"
+                    style={{ background: `${member.accent}18`, border: `1px solid ${member.accent}30`, color: member.accent }}
                   >
                     {member.initials}
                   </div>
@@ -480,13 +473,12 @@ function TeamSection() {
               {/* Info */}
               <div className="p-5">
                 <h3
-                  className="mb-0.5 text-[15px] font-semibold text-[#F5F5F0]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="font-display mb-0.5 text-[15px] font-semibold text-foreground"
                 >
                   {member.name}
                 </h3>
                 <p className="mb-3 text-[11px] font-medium" style={{ color: member.accent }}>{member.role}</p>
-                <p className="text-[12px] font-light leading-[1.75] text-[#F5F5F0]/40">{member.bio}</p>
+                <p className="text-[12px] font-light leading-[1.75] text-muted-foreground">{member.bio}</p>
               </div>
 
               {/* Bottom accent */}
@@ -507,6 +499,7 @@ function TeamSection() {
 // ══════════════════════════════════════════════════════════════
 function AboutCTA() {
   const { ref, visible } = useVisible();
+  const { openModal } = useContactModal();
 
   return (
     <section ref={ref} className="relative overflow-hidden bg-[#0A0A0A] py-28">
@@ -525,15 +518,14 @@ function AboutCTA() {
         <SectionLabel text="READY TO START" />
 
         <h2
-          className="mb-6 text-[42px] font-black leading-[1.02] tracking-[-1.5px] text-[#F5F5F0] md:text-[52px]"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          className="font-display mb-6 text-[42px] font-black leading-[1.02] tracking-[-1.5px] text-foreground md:text-[52px]"
         >
           Give your child the
           <br />
           education they deserve.
         </h2>
 
-        <p className="mb-10 text-[15px] font-light leading-[1.85] text-[#F5F5F0]/42">
+        <p className="mb-10 text-[15px] font-light leading-[1.85] text-muted-foreground">
           Book a free 30-minute consultation. We'll understand your child's
           needs, recommend a curriculum, and match you with the right tutor —
           no commitment required.
@@ -542,21 +534,25 @@ function AboutCTA() {
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <a
             href="#contact"
-            className="rounded-lg bg-[#C9A84C] px-9 py-4 text-[14px] font-semibold text-[#0F0F0F] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#C9A84C]/25 active:scale-[0.98]"
+            onClick={(e) => {
+              e.preventDefault();
+              openModal();
+            }}
+            className="rounded-lg bg-primary px-9 py-4 text-[14px] font-semibold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-[#C9A84C]/25 active:scale-[0.98]"
           >
             Book a Free Consultation
           </a>
           <a
             href="/tutors"
-            className="flex items-center gap-2 rounded-lg border border-white/10 px-9 py-4 text-[14px] font-medium text-[#F5F5F0]/60 transition-all duration-300 hover:border-[#C9A84C]/35 hover:text-[#F5F5F0]"
+            className="flex items-center gap-2 rounded-lg border border-white/10 px-9 py-4 text-[14px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/35 hover:text-foreground"
           >
             Meet Our Tutors
-            <span className="text-[#C9A84C]">→</span>
+            <span className="text-primary">→</span>
           </a>
         </div>
 
         {/* Trust note */}
-        <p className="mt-8 text-[12px] text-[#F5F5F0]/25">
+        <p className="mt-8 text-[12px] text-muted-foreground/60">
           No obligation · No payment required · Response within 24 hours
         </p>
       </div>

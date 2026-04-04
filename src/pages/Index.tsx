@@ -8,7 +8,7 @@ import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { WhyChooseSection } from "@/components/landing/WhyChooseSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { FAQSection } from "@/components/landing/FAQSection";
-import { ContactSection } from "@/components/landing/ContactSection";
+import { FinalCTASection } from "@/components/landing/FinalCTASection";
 import { Footer } from "@/components/landing/Footer";
 
 export default function Index() {
@@ -24,7 +24,7 @@ export default function Index() {
       <TutorsSection />
       <TestimonialsSection />
       <FAQSection />
-      <ContactSection />
+      <FinalCTASection />
       <Footer />
     </div>
   );

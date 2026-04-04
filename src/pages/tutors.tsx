@@ -141,12 +141,11 @@ function TutorStack({ tutors: stackTutors }: { tutors: typeof tutors }) {
             {/* Initials fallback */}
             <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
               <div
-                className="flex h-20 w-20 items-center justify-center rounded-full text-[22px] font-black"
+                className="font-display flex h-20 w-20 items-center justify-center rounded-full text-[22px] font-black"
                 style={{
                   background: `${tutor.accent}18`,
                   border: `1px solid ${tutor.accent}30`,
                   color: tutor.accent,
-                  fontFamily: "'Playfair Display', serif",
                 }}
               >
                 {tutor.initials}
@@ -179,19 +178,18 @@ function TutorStack({ tutors: stackTutors }: { tutors: typeof tutors }) {
             {isFront && (
               <div className="absolute bottom-0 left-0 right-0 z-10 p-5" style={{ zIndex: 4 }}>
                 <p
-                  className="mb-0.5 text-[15px] font-bold text-[#F5F5F0]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="font-display mb-0.5 text-[15px] font-bold text-foreground"
                 >
                   {tutor.name}
                 </p>
-                <p className="mb-2.5 text-[11px] text-[#F5F5F0]/45">{tutor.role}</p>
+                <p className="mb-2.5 text-[11px] text-muted-foreground">{tutor.role}</p>
                 <div className="mb-1.5 flex items-center gap-2">
                   <Stars rating={tutor.rating} />
-                  <span className="text-[10px] text-[#F5F5F0]/40">{tutor.rating}</span>
+                  <span className="text-[10px] text-muted-foreground/80">{tutor.rating}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-[#C9A84C]">✦</span>
-                  <span className="text-[10px] text-[#F5F5F0]/40">{tutor.students}+ students</span>
+                  <span className="text-[10px] text-primary">✦</span>
+                  <span className="text-[10px] text-muted-foreground/80">{tutor.students}+ students</span>
                 </div>
               </div>
             )}
@@ -216,10 +214,10 @@ function TutorStack({ tutors: stackTutors }: { tutors: typeof tutors }) {
 
       {/* Hover hint */}
       <div
-        className="absolute -bottom-8 left-0 right-0 flex items-center justify-center gap-1.5 text-[10px] text-[#F5F5F0]/20"
+        className="absolute -bottom-8 left-0 right-0 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/50"
       >
         <span>hover to browse</span>
-        <span className="text-[#C9A84C]/40">→</span>
+        <span className="text-primary/60">→</span>
       </div>
 
       {/* Dot indicators */}
@@ -276,19 +274,18 @@ function TutorsHero() {
 
           {/* Headline */}
           <h1
-            className={`mb-6 text-[52px] font-black leading-[1.0] tracking-[-0.03em] text-[#F5F5F0] md:text-[62px] lg:text-[70px] ${fadeUp("delay-100")}`}
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className={`font-display mb-6 text-[52px] font-black leading-[1.0] tracking-[-0.03em] text-foreground md:text-[62px] lg:text-[70px] ${fadeUp("delay-100")}`}
           >
             Meet Nairobi's
             <br />
             finest{" "}
-            <span className="text-[#C9A84C]">tutors</span>
+            <span className="text-primary">tutors</span>
             <br />
             for your child.
           </h1>
 
           {/* Sub */}
-          <p className={`mb-10 max-w-[400px] text-[15px] font-light leading-[1.9] text-[#F5F5F0]/45 ${fadeUp("delay-200")}`}>
+          <p className={`mb-10 max-w-[400px] text-[15px] font-light leading-[1.9] text-muted-foreground ${fadeUp("delay-200")}`}>
             Every EduNest tutor is degree-qualified, background-checked, and
             trained in personalised homeschooling — not just teaching, but
             building a genuine relationship with your child.
@@ -298,16 +295,16 @@ function TutorsHero() {
           <div className={`mb-12 flex flex-wrap gap-4 ${fadeUp("delay-300")}`}>
             <a
               href="#tutors-grid"
-              className="group inline-flex items-center gap-2 rounded-xl bg-[#C9A84C] px-8 py-3.5 text-[13px] font-bold text-[#0A0A08] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#C9A84C]/20 active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-[13px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-[#C9A84C]/20 active:scale-[0.98]"
             >
               Explore Our Tutors
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] px-8 py-3.5 text-[13px] font-medium text-[#F5F5F0]/55 transition-all duration-300 hover:border-[#C9A84C]/40 hover:text-[#F5F5F0]"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] px-8 py-3.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/40 hover:text-foreground"
             >
               Request a Tutor
-              <span className="text-[#C9A84C]">→</span>
+              <span className="text-primary">→</span>
             </a>
           </div>
 
@@ -320,12 +317,11 @@ function TutorsHero() {
             ].map((s) => (
               <div key={s.label}>
                 <p
-                  className="text-[28px] font-black leading-none text-[#C9A84C]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="font-display text-[28px] font-black leading-none text-primary"
                 >
                   {s.value}
                 </p>
-                <p className="mt-1 text-[11px] text-[#F5F5F0]/35">{s.label}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground/70">{s.label}</p>
               </div>
             ))}
           </div>
@@ -344,16 +340,15 @@ function TutorsHero() {
                 transitionDelay: "1200ms",
               }}
             >
-              <p className="text-[9px] font-semibold tracking-[0.12em] text-[#F5F5F0]/28 uppercase">
+              <p className="text-[9px] font-semibold tracking-[0.12em] text-muted-foreground/70 uppercase">
                 Subjects Covered
               </p>
               <p
-                className="text-[26px] font-black leading-none text-[#F5F5F0]"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="font-display text-[26px] font-black leading-none text-foreground"
               >
-                15<span className="text-[#C9A84C]">+</span>
+                15<span className="text-primary">+</span>
               </p>
-              <p className="mt-0.5 text-[10px] text-[#F5F5F0]/30">across all curricula</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground/70">across all curricula</p>
             </div>
 
             {/* The stack */}
@@ -370,11 +365,11 @@ function TutorsHero() {
             >
               <div className="flex items-center gap-2.5">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C9A84C]/15 ring-1 ring-[#C9A84C]/20">
-                  <span className="text-[11px] text-[#C9A84C]">✓</span>
+                  <span className="text-[11px] text-primary">✓</span>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-[#F5F5F0]">Vetted &amp; Verified</p>
-                  <p className="text-[10px] text-[#F5F5F0]/35">All tutors background-checked</p>
+                  <p className="text-[11px] font-semibold text-foreground">Vetted &amp; Verified</p>
+                  <p className="text-[10px] text-muted-foreground/70">All tutors background-checked</p>
                 </div>
               </div>
             </div>
@@ -387,7 +382,7 @@ function TutorsHero() {
       <div className="absolute bottom-8 left-10 z-20 hidden flex-col items-center gap-2 lg:flex">
         <div className="h-10 w-px animate-pulse bg-gradient-to-b from-[#C9A84C]/50 to-transparent" />
         <span
-          className="text-[9px] font-medium tracking-[0.25em] text-[#F5F5F0]/18 uppercase"
+          className="text-[9px] font-medium tracking-[0.25em] text-muted-foreground/50 uppercase"
           style={{ writingMode: "vertical-rl" }}
         >
           Scroll
@@ -422,12 +417,11 @@ function TutorsGrid() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="rounded-full px-5 py-2 text-[12px] font-medium transition-all duration-200"
-              style={{
-                background: filter === f ? "#C9A84C" : "rgba(255,255,255,0.04)",
-                color: filter === f ? "#0A0A08" : "rgba(245,245,240,0.45)",
-                border: filter === f ? "none" : "1px solid rgba(255,255,255,0.08)",
-              }}
+              className={`rounded-full px-5 py-2 text-[12px] font-medium transition-all duration-200 ${
+                filter === f
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-white/[0.08] bg-white/[0.04] text-muted-foreground"
+              }`}
             >
               {f}
             </button>
@@ -439,7 +433,7 @@ function TutorsGrid() {
           {filtered.map((tutor) => (
             <div
               key={tutor.name}
-              className="group relative overflow-hidden rounded-[20px] border border-white/[0.06] bg-[#111110] transition-all duration-500 hover:-translate-y-1 hover:border-[#C9A84C]/25"
+              className="group relative overflow-hidden rounded-[20px] border border-white/[0.06] bg-[#111110] transition-all duration-500 hover:-translate-y-1 hover:border-primary/25"
             >
               <div className="relative overflow-hidden" style={{ height: "260px", background: tutor.bgAccent }}>
                 <div
@@ -452,12 +446,11 @@ function TutorsGrid() {
                 {/* Initials */}
                 <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
                   <div
-                    className="flex h-20 w-20 items-center justify-center rounded-full text-[20px] font-black"
+                    className="font-display flex h-20 w-20 items-center justify-center rounded-full text-[20px] font-black"
                     style={{
                       background: `${tutor.accent}18`,
                       border: `1px solid ${tutor.accent}30`,
                       color: tutor.accent,
-                      fontFamily: "'Playfair Display', serif",
                     }}
                   >
                     {tutor.initials}
@@ -496,15 +489,14 @@ function TutorsGrid() {
 
               <div className="p-5">
                 <h3
-                  className="text-[15px] font-semibold text-[#F5F5F0]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="font-display text-[15px] font-semibold text-foreground"
                 >
                   {tutor.name}
                 </h3>
-                <p className="mt-0.5 text-[11px] text-[#F5F5F0]/38">{tutor.role}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{tutor.role}</p>
                 <div className="mb-3 mt-2 flex items-center gap-2">
                   <Stars rating={tutor.rating} />
-                  <span className="text-[10px] text-[#F5F5F0]/32">
+                  <span className="text-[10px] text-muted-foreground/70">
                     {tutor.rating} · {tutor.students}+ students
                   </span>
                 </div>
@@ -512,11 +504,10 @@ function TutorsGrid() {
                   {tutor.subjects.map((s) => (
                     <span
                       key={s}
-                      className="rounded-full px-2.5 py-[4px] text-[10px] font-medium"
+                      className="rounded-full px-2.5 py-[4px] text-[10px] font-medium text-muted-foreground"
                       style={{
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.07)",
-                        color: "rgba(245,245,240,0.42)",
                       }}
                     >
                       {s}
@@ -534,12 +525,12 @@ function TutorsGrid() {
         </div>
 
         <div className="mt-16 flex flex-col items-center gap-4 text-center">
-          <p className="text-[14px] text-[#F5F5F0]/35">
+          <p className="text-[14px] text-muted-foreground/70">
             Don't see the right fit? We'll match you personally.
           </p>
           <a
             href="#contact"
-            className="rounded-xl bg-[#C9A84C] px-8 py-3.5 text-[13px] font-bold text-[#0A0A08] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#C9A84C]/20"
+            className="rounded-xl bg-primary px-8 py-3.5 text-[13px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-[#C9A84C]/20"
           >
             Request a Custom Tutor Match
           </a>

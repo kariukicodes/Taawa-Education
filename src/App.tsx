@@ -40,6 +40,7 @@ import TeacherNotifications from "./pages/teacher/TeacherNotifications";
 import TutorsPage from "@/pages/tutors";
 import AboutPage from "@/pages/AboutPage";
 import ProgramsPage from "@/pages/ProgramsPage";
+import { ContactModalProvider } from "@/components/landing/ContactModalContext";
 
 const queryClient = new QueryClient();
 
@@ -50,47 +51,49 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
+          <ContactModalProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Admin */}
-            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminOverview /></ProtectedRoute>} />
-            <Route path="/admin/leads" element={<ProtectedRoute requiredRole="admin"><AdminLeads /></ProtectedRoute>} />
-            <Route path="/admin/students" element={<ProtectedRoute requiredRole="admin"><AdminStudents /></ProtectedRoute>} />
-            <Route path="/admin/parents" element={<ProtectedRoute requiredRole="admin"><AdminParents /></ProtectedRoute>} />
-            <Route path="/admin/tutors" element={<ProtectedRoute requiredRole="admin"><AdminTutors /></ProtectedRoute>} />
-            <Route path="/admin/assignments" element={<ProtectedRoute requiredRole="admin"><AdminAssignments /></ProtectedRoute>} />
-            <Route path="/admin/reports" element={<ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>} />
-            <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><AdminPayments /></ProtectedRoute>} />
-            <Route path="/admin/tasks" element={<ProtectedRoute requiredRole="admin"><AdminTasks /></ProtectedRoute>} />
-            <Route path="/admin/announcements" element={<ProtectedRoute requiredRole="admin"><AdminAnnouncements /></ProtectedRoute>} />
+              {/* Admin */}
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminOverview /></ProtectedRoute>} />
+              <Route path="/admin/leads" element={<ProtectedRoute requiredRole="admin"><AdminLeads /></ProtectedRoute>} />
+              <Route path="/admin/students" element={<ProtectedRoute requiredRole="admin"><AdminStudents /></ProtectedRoute>} />
+              <Route path="/admin/parents" element={<ProtectedRoute requiredRole="admin"><AdminParents /></ProtectedRoute>} />
+              <Route path="/admin/tutors" element={<ProtectedRoute requiredRole="admin"><AdminTutors /></ProtectedRoute>} />
+              <Route path="/admin/assignments" element={<ProtectedRoute requiredRole="admin"><AdminAssignments /></ProtectedRoute>} />
+              <Route path="/admin/reports" element={<ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>} />
+              <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><AdminPayments /></ProtectedRoute>} />
+              <Route path="/admin/tasks" element={<ProtectedRoute requiredRole="admin"><AdminTasks /></ProtectedRoute>} />
+              <Route path="/admin/announcements" element={<ProtectedRoute requiredRole="admin"><AdminAnnouncements /></ProtectedRoute>} />
 
-            {/* Parent */}
-            <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><ParentOverview /></ProtectedRoute>} />
-            <Route path="/parent/children" element={<ProtectedRoute requiredRole="parent"><ParentChildren /></ProtectedRoute>} />
-            <Route path="/parent/schedule" element={<ProtectedRoute requiredRole="parent"><ParentSchedule /></ProtectedRoute>} />
-            <Route path="/parent/reports" element={<ProtectedRoute requiredRole="parent"><ParentReports /></ProtectedRoute>} />
-            <Route path="/parent/attendance" element={<ProtectedRoute requiredRole="parent"><ParentAttendance /></ProtectedRoute>} />
-            <Route path="/parent/documents" element={<ProtectedRoute requiredRole="parent"><ParentDocuments /></ProtectedRoute>} />
-            <Route path="/parent/billing" element={<ProtectedRoute requiredRole="parent"><ParentBilling /></ProtectedRoute>} />
-            <Route path="/parent/notifications" element={<ProtectedRoute requiredRole="parent"><ParentNotifications /></ProtectedRoute>} />
+              {/* Parent */}
+              <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><ParentOverview /></ProtectedRoute>} />
+              <Route path="/parent/children" element={<ProtectedRoute requiredRole="parent"><ParentChildren /></ProtectedRoute>} />
+              <Route path="/parent/schedule" element={<ProtectedRoute requiredRole="parent"><ParentSchedule /></ProtectedRoute>} />
+              <Route path="/parent/reports" element={<ProtectedRoute requiredRole="parent"><ParentReports /></ProtectedRoute>} />
+              <Route path="/parent/attendance" element={<ProtectedRoute requiredRole="parent"><ParentAttendance /></ProtectedRoute>} />
+              <Route path="/parent/documents" element={<ProtectedRoute requiredRole="parent"><ParentDocuments /></ProtectedRoute>} />
+              <Route path="/parent/billing" element={<ProtectedRoute requiredRole="parent"><ParentBilling /></ProtectedRoute>} />
+              <Route path="/parent/notifications" element={<ProtectedRoute requiredRole="parent"><ParentNotifications /></ProtectedRoute>} />
 
-            {/* Teacher */}
-            <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherStudents /></ProtectedRoute>} />
-            <Route path="/teacher/schedule" element={<ProtectedRoute requiredRole="teacher"><TeacherSchedule /></ProtectedRoute>} />
-            <Route path="/teacher/lessons" element={<ProtectedRoute requiredRole="teacher"><TeacherLessons /></ProtectedRoute>} />
-            <Route path="/teacher/attendance" element={<ProtectedRoute requiredRole="teacher"><TeacherAttendance /></ProtectedRoute>} />
-            <Route path="/teacher/tasks" element={<ProtectedRoute requiredRole="teacher"><TeacherTasks /></ProtectedRoute>} />
-            <Route path="/teacher/earnings" element={<ProtectedRoute requiredRole="teacher"><TeacherEarnings /></ProtectedRoute>} />
-            <Route path="/teacher/notifications" element={<ProtectedRoute requiredRole="teacher"><TeacherNotifications /></ProtectedRoute>} />
-            <Route path="/tutors" element={<TutorsPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/programs" element={<ProgramsPage />} />
+              {/* Teacher */}
+              <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherStudents /></ProtectedRoute>} />
+              <Route path="/teacher/schedule" element={<ProtectedRoute requiredRole="teacher"><TeacherSchedule /></ProtectedRoute>} />
+              <Route path="/teacher/lessons" element={<ProtectedRoute requiredRole="teacher"><TeacherLessons /></ProtectedRoute>} />
+              <Route path="/teacher/attendance" element={<ProtectedRoute requiredRole="teacher"><TeacherAttendance /></ProtectedRoute>} />
+              <Route path="/teacher/tasks" element={<ProtectedRoute requiredRole="teacher"><TeacherTasks /></ProtectedRoute>} />
+              <Route path="/teacher/earnings" element={<ProtectedRoute requiredRole="teacher"><TeacherEarnings /></ProtectedRoute>} />
+              <Route path="/teacher/notifications" element={<ProtectedRoute requiredRole="teacher"><TeacherNotifications /></ProtectedRoute>} />
+              <Route path="/tutors" element={<TutorsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/programs" element={<ProgramsPage />} />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ContactModalProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
