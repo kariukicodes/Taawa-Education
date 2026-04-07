@@ -53,23 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [roleOverride]);
 
   const fetchRole = async (userId: string): Promise<UserRole> => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
+    // Prefer RPC over direct table access.
+    // In some deployments, querying `user_roles` via PostgREST can fail due to RLS/policy recursion
+    // even when the underlying functions work fine.
+    const [{ data: isAdmin, error: adminError }, { data: isParent, error: parentError }, { data: isTeacher, error: teacherError }] =
+      await Promise.all([
+        supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+        supabase.rpc("has_role", { _user_id: userId, _role: "parent" }),
+        supabase.rpc("has_role", { _user_id: userId, _role: "teacher" }),
+      ]);
 
-    if (error) throw error;
+    if (adminError) throw adminError;
+    if (parentError) throw parentError;
+    if (teacherError) throw teacherError;
 
-    const roles = (data ?? []).map((r) => r.role) as Array<Exclude<UserRole, null>>;
-    const resolvedRole: UserRole = roles.includes("admin")
-      ? "admin"
-      : roles.includes("parent")
-        ? "parent"
-        : roles.includes("teacher")
-          ? "teacher"
-          : null;
-
-    return resolvedRole;
+    if (isAdmin) return "admin";
+    if (isParent) return "parent";
+    if (isTeacher) return "teacher";
+    return null;
   };
 
   const fetchRoleWithTimeout = async (userId: string, timeoutMs = 10_000): Promise<UserRole> => {

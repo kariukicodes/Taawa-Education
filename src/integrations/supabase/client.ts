@@ -27,6 +27,7 @@ function createMockSupabaseClient(): SupabaseClientType {
       }),
       insert: async () => ({ data: null, error: null }),
     }),
+    rpc: async () => ({ data: null, error: null } as any),
   } as any;
 }
 
