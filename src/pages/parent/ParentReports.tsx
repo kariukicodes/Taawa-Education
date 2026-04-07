@@ -6,26 +6,77 @@ import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TrendingUp } from "lucide-react";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function ParentReports() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const isDemo = import.meta.env.DEV && roleOverride === "parent";
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
-      const { data: parent } = await supabase.from("parents").select("id").eq("user_id", user.id).single();
-      if (!parent) { setLoading(false); return; }
-      const { data: students } = await supabase.from("students").select("id").eq("parent_id", parent.id);
-      const ids = students?.map((s) => s.id) ?? [];
-      if (ids.length === 0) { setLoading(false); return; }
-      const { data } = await supabase.from("lessons").select("*, students(full_name), tutors(full_name)").in("student_id", ids).order("date", { ascending: false });
-      setLessons(data ?? []);
+
+    if (isDemo) {
+      setLoading(true);
+      setLoadError(null);
+      setLessons(DEMO_DATA.parent.reports.lessons);
       setLoading(false);
+      return;
+    }
+
+    const fetch = async () => {
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const { data: parent, error: parentError } = await supabase
+          .from("parents")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (parentError) throw parentError;
+
+        if (!parent) {
+          setLoadError("No parent record was found for this account. Ask an admin to create a row in parents for your user.");
+          setLessons([]);
+          return;
+        }
+
+        const { data: students, error: studentsError } = await supabase
+          .from("students")
+          .select("id")
+          .eq("parent_id", parent.id);
+
+        if (studentsError) throw studentsError;
+
+        const ids = students?.map((s) => s.id) ?? [];
+        if (ids.length === 0) {
+          setLessons([]);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("lessons")
+          .select("*, students(full_name), tutors(full_name)")
+          .in("student_id", ids)
+          .order("date", { ascending: false });
+
+        if (error) throw error;
+        setLessons(data ?? []);
+      } catch (err) {
+        console.error("ParentReports load failed", err);
+        setLoadError("We couldn't load your progress reports.");
+        setLessons([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   const ratingColors: Record<string, string> = {
     Excellent: "bg-secondary/20 text-secondary",
@@ -37,7 +88,12 @@ export default function ParentReports() {
     <ParentLayout>
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-foreground">Progress & Reports</h2>
-        {loading ? <CardSkeleton count={4} /> : lessons.length === 0 ? (
+
+        {loadError && !loading && (
+          <EmptyState title="Account setup needed" description={loadError} icon={TrendingUp} />
+        )}
+
+        {loading ? <CardSkeleton count={4} /> : loadError ? null : lessons.length === 0 ? (
           <EmptyState title="No reports yet" description="Lesson reports from tutors will appear here." icon={TrendingUp} />
         ) : (
           <div className="space-y-4">

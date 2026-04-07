@@ -6,24 +6,62 @@ import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Users } from "lucide-react";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function ParentChildren() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
   const [selected, setSelected] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const isDemo = import.meta.env.DEV && roleOverride === "parent";
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
-      const { data: parent } = await supabase.from("parents").select("id").eq("user_id", user.id).single();
-      if (!parent) { setLoading(false); return; }
-      const { data } = await supabase.from("students").select("*, tutor_assignments(tutors(full_name))").eq("parent_id", parent.id);
-      setStudents(data ?? []);
+
+    if (isDemo) {
+      setLoading(true);
+      setLoadError(null);
+      setStudents(DEMO_DATA.parent.students);
+      setSelected(0);
       setLoading(false);
+      return;
+    }
+
+    const fetch = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const { data: parent, error: parentError } = await supabase
+          .from("parents")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (parentError) throw parentError;
+
+        if (!parent) {
+          setLoadError("No parent record was found for this account. Ask an admin to create a row in parents for your user.");
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("students")
+          .select("*, tutor_assignments(tutors(full_name))")
+          .eq("parent_id", parent.id);
+
+        if (error) throw error;
+        setStudents(data ?? []);
+      } catch (err) {
+        console.error("ParentChildren load failed", err);
+        setLoadError("We couldn't load your children list.");
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   const s = students[selected];
 
@@ -32,7 +70,11 @@ export default function ParentChildren() {
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-foreground">My Children</h2>
 
-        {loading ? <CardSkeleton count={1} /> : students.length === 0 ? (
+        {loadError && !loading && (
+          <EmptyState title="Account setup needed" description={loadError} icon={Users} />
+        )}
+
+        {loading ? <CardSkeleton count={1} /> : loadError ? null : students.length === 0 ? (
           <EmptyState title="No children linked" description="Your children will appear here once assigned by admin." icon={Users} />
         ) : (
           <>

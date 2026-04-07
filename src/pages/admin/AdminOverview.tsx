@@ -6,13 +6,26 @@ import { formatKES, formatDate } from "@/lib/format";
 import { KpiSkeleton } from "@/components/ui/KpiSkeleton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminOverview() {
+  const { roleOverride } = useAuth();
   const [stats, setStats] = useState({ students: 0, tutors: 0, leads: 0, paymentsThisMonth: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   useEffect(() => {
+    if (isDemo) {
+      setLoading(true);
+      setStats(DEMO_DATA.admin.overview.stats);
+      setRecentLeads(DEMO_DATA.admin.overview.recentLeads);
+      setLoading(false);
+      return;
+    }
+
     const fetchAll = async () => {
       const [students, tutors, leads, payments] = await Promise.all([
         supabase.from("students").select("id", { count: "exact", head: true }),
@@ -27,7 +40,7 @@ export default function AdminOverview() {
       setLoading(false);
     };
     fetchAll();
-  }, []);
+  }, [isDemo]);
 
   const kpis = [
     { label: "Total Students", value: stats.students, icon: GraduationCap },

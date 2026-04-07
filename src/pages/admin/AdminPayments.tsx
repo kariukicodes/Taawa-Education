@@ -5,14 +5,27 @@ import { CreditCard } from "lucide-react";
 import { formatKES, formatDate } from "@/lib/format";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminPayments() {
+  const { roleOverride } = useAuth();
   const [tab, setTab] = useState<"payments" | "earnings">("payments");
   const [payments, setPayments] = useState<any[]>([]);
   const [earnings, setEarnings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   useEffect(() => {
+    if (isDemo) {
+      setLoading(true);
+      setPayments(DEMO_DATA.admin.payments.payments);
+      setEarnings(DEMO_DATA.admin.payments.earnings);
+      setLoading(false);
+      return;
+    }
+
     const fetch = async () => {
       const [p, e] = await Promise.all([
         supabase.from("payments").select("*, students(full_name)").order("date", { ascending: false }),
@@ -23,7 +36,7 @@ export default function AdminPayments() {
       setLoading(false);
     };
     fetch();
-  }, []);
+  }, [isDemo]);
 
   const statusColors: Record<string, string> = {
     Paid: "bg-secondary/20 text-secondary",

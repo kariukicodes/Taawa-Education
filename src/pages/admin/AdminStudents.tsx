@@ -5,8 +5,11 @@ import { Plus, X, GraduationCap } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminStudents() {
+  const { roleOverride } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
   const [parents, setParents] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
@@ -14,7 +17,18 @@ export default function AdminStudents() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ full_name: "", age: "", grade: "", curriculum: "CBC", parent_id: "", tutor_id: "", subjects: "", start_date: "" });
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   const fetchData = async () => {
+    if (isDemo) {
+      setLoading(true);
+      setStudents(DEMO_DATA.admin.students.students);
+      setParents(DEMO_DATA.admin.students.parents);
+      setTutors(DEMO_DATA.admin.students.tutors);
+      setLoading(false);
+      return;
+    }
+
     const [s, p, t] = await Promise.all([
       supabase.from("students").select("*, parents(full_name), tutor_assignments(tutors(full_name))"),
       supabase.from("parents").select("id, full_name"),
@@ -26,11 +40,33 @@ export default function AdminStudents() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [isDemo]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const subjects = form.subjects.split(",").map((s) => s.trim()).filter(Boolean);
+
+    if (isDemo) {
+      const parentName = parents.find((p) => p.id === form.parent_id)?.full_name;
+      const tutorName = tutors.find((t) => t.id === form.tutor_id)?.full_name;
+      const demoStudent = {
+        id: `demo_student_${Date.now()}`,
+        full_name: form.full_name,
+        age: parseInt(form.age) || 0,
+        grade: form.grade,
+        curriculum: form.curriculum,
+        parent_id: form.parent_id,
+        parents: parentName ? { full_name: parentName } : null,
+        subjects,
+        start_date: form.start_date || null,
+        tutor_assignments: tutorName ? [{ tutors: { full_name: tutorName } }] : [],
+      };
+      setStudents((prev) => [demoStudent, ...prev]);
+      setShowModal(false);
+      setForm({ full_name: "", age: "", grade: "", curriculum: "CBC", parent_id: "", tutor_id: "", subjects: "", start_date: "" });
+      return;
+    }
+
     const { data: student } = await supabase.from("students").insert({
       full_name: form.full_name, age: parseInt(form.age), grade: form.grade,
       curriculum: form.curriculum as any, parent_id: form.parent_id, subjects, start_date: form.start_date || undefined,

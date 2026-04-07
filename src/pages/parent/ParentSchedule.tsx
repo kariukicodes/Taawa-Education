@@ -2,16 +2,25 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ParentLayout } from "@/components/layouts/ParentLayout";
+import { DEMO_DATA } from "@/lib/demoData";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00"];
 
 export default function ParentSchedule() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
+
+  const isDemo = import.meta.env.DEV && roleOverride === "parent";
 
   useEffect(() => {
     if (!user) return;
+
+    if (isDemo) {
+      setStudents(DEMO_DATA.parent.students);
+      return;
+    }
+
     const fetch = async () => {
       const { data: parent } = await supabase.from("parents").select("id").eq("user_id", user.id).single();
       if (!parent) return;
@@ -19,7 +28,7 @@ export default function ParentSchedule() {
       setStudents(data ?? []);
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   // Generate a mock weekly schedule from student subjects
   const schedule: Record<string, Array<{ time: string; subject: string; student: string; tutor: string }>> = {};

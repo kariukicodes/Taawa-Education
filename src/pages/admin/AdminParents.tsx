@@ -4,17 +4,29 @@ import { AdminLayout } from "@/components/layouts/AdminLayout";
 import { UserCircle } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminParents() {
+  const { roleOverride } = useAuth();
   const [parents, setParents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   useEffect(() => {
+    if (isDemo) {
+      setLoading(true);
+      setParents(DEMO_DATA.admin.parents.parents);
+      setLoading(false);
+      return;
+    }
+
     supabase.from("parents").select("*, students(full_name, grade)").then(({ data }) => {
       setParents(data ?? []);
       setLoading(false);
     });
-  }, []);
+  }, [isDemo]);
 
   return (
     <AdminLayout>

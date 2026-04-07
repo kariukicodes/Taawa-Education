@@ -2,24 +2,33 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
+import { DEMO_DATA } from "@/lib/demoData";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00"];
 
 export default function TeacherSchedule() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
+
+  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
 
   useEffect(() => {
     if (!user) return;
+
+    if (isDemo) {
+      setStudents(DEMO_DATA.teacher.students);
+      return;
+    }
+
     const fetch = async () => {
-      const { data: tutor } = await supabase.from("tutors").select("id").eq("user_id", user.id).single();
+      const { data: tutor } = await supabase.from("tutors").select("id").eq("user_id", user.id).maybeSingle();
       if (!tutor) return;
       const { data } = await supabase.from("tutor_assignments").select("students(full_name, subjects)").eq("tutor_id", tutor.id);
       setStudents(data?.map((a) => a.students).filter(Boolean) ?? []);
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   const schedule: Record<string, Array<{ time: string; subject: string; student: string }>> = {};
   days.forEach((d) => (schedule[d] = []));

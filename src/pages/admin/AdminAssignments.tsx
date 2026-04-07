@@ -5,15 +5,28 @@ import { X, GitBranch } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminAssignments() {
+  const { roleOverride } = useAuth();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showReassign, setShowReassign] = useState<any>(null);
   const [newTutorId, setNewTutorId] = useState("");
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   const fetchData = async () => {
+    if (isDemo) {
+      setLoading(true);
+      setAssignments(DEMO_DATA.admin.assignments.assignments);
+      setTutors(DEMO_DATA.admin.students.tutors);
+      setLoading(false);
+      return;
+    }
+
     const [a, t] = await Promise.all([
       supabase.from("tutor_assignments").select("*, tutors(full_name), students(full_name, grade, subjects)"),
       supabase.from("tutors").select("id, full_name"),
@@ -23,10 +36,25 @@ export default function AdminAssignments() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [isDemo]);
 
   const handleReassign = async () => {
     if (!showReassign || !newTutorId) return;
+
+    if (isDemo) {
+      const tutorName = tutors.find((t) => t.id === newTutorId)?.full_name;
+      setAssignments((prev) =>
+        prev.map((a) =>
+          a.id === showReassign.id
+            ? { ...a, tutor_id: newTutorId, tutors: tutorName ? { full_name: tutorName } : a.tutors }
+            : a
+        )
+      );
+      setShowReassign(null);
+      setNewTutorId("");
+      return;
+    }
+
     await supabase.from("tutor_assignments").update({ tutor_id: newTutorId }).eq("id", showReassign.id);
     setShowReassign(null);
     setNewTutorId("");

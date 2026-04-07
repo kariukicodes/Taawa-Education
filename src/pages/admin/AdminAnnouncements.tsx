@@ -5,23 +5,49 @@ import { Plus, X, Megaphone } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminAnnouncements() {
+  const { roleOverride } = useAuth();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ message: "", target_role: "all" });
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   const fetchData = async () => {
+    if (isDemo) {
+      setLoading(true);
+      setAnnouncements(DEMO_DATA.admin.announcements.announcements);
+      setLoading(false);
+      return;
+    }
+
     const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
     setAnnouncements(data ?? []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [isDemo]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isDemo) {
+      const demoAnnouncement = {
+        id: `demo_announcement_${Date.now()}`,
+        message: form.message,
+        target_role: form.target_role,
+        created_at: new Date().toISOString(),
+      };
+      setAnnouncements((prev) => [demoAnnouncement, ...prev]);
+      setShowModal(false);
+      setForm({ message: "", target_role: "all" });
+      return;
+    }
+
     await supabase.from("announcements").insert({ message: form.message, target_role: form.target_role });
     setShowModal(false);
     setForm({ message: "", target_role: "all" });

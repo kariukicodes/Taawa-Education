@@ -1,23 +1,31 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 type UserRole = "admin" | "parent" | "teacher" | null;
 
+const ROLE_OVERRIDE_STORAGE_KEY = "edunest_role_override";
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole;
+  roleOverride: Exclude<UserRole, null> | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  setRoleOverride: (role: Exclude<UserRole, null> | null) => void;
+  clearRoleOverride: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   role: null,
+  roleOverride: null,
   loading: true,
   signOut: async () => {},
+  setRoleOverride: () => {},
+  clearRoleOverride: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -26,52 +34,155 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole>(null);
+  const [roleOverride, setRoleOverrideState] = useState<Exclude<UserRole, null> | null>(() => {
+    try {
+      const v = localStorage.getItem(ROLE_OVERRIDE_STORAGE_KEY);
+      return v === "admin" || v === "parent" || v === "teacher" ? v : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
-  const fetchRole = async (userId: string) => {
-    const { data } = await supabase
+  const roleFetchSeq = useRef(0);
+  const lastResolvedUserId = useRef<string | null>(null);
+  const roleOverrideRef = useRef<Exclude<UserRole, null> | null>(roleOverride);
+
+  useEffect(() => {
+    roleOverrideRef.current = roleOverride;
+  }, [roleOverride]);
+
+  const fetchRole = async (userId: string): Promise<UserRole> => {
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .single();
-    setRole(data?.role as UserRole ?? null);
+      .eq("user_id", userId);
+
+    if (error) throw error;
+
+    const roles = (data ?? []).map((r) => r.role) as Array<Exclude<UserRole, null>>;
+    const resolvedRole: UserRole = roles.includes("admin")
+      ? "admin"
+      : roles.includes("parent")
+        ? "parent"
+        : roles.includes("teacher")
+          ? "teacher"
+          : null;
+
+    return resolvedRole;
+  };
+
+  const fetchRoleWithTimeout = async (userId: string, timeoutMs = 10_000): Promise<UserRole> => {
+    return await Promise.race([
+      fetchRole(userId),
+      new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error("Role fetch timed out")), timeoutMs);
+      }),
+    ]) as UserRole;
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchRole(session.user.id);
-        } else {
+    let cancelled = false;
+
+    const resolveForSession = async (nextSession: Session | null) => {
+      const seq = ++roleFetchSeq.current;
+
+      setLoading(true);
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      const userId = nextSession?.user?.id ?? null;
+
+      try {
+        if (!userId) {
+          lastResolvedUserId.current = null;
           setRole(null);
+          return;
         }
+
+        const override = roleOverrideRef.current;
+        if (override) {
+          lastResolvedUserId.current = userId;
+          setRole(override);
+          return;
+        }
+
+        // Avoid re-fetching role on token refresh events for the same user.
+        if (lastResolvedUserId.current === userId) {
+          return;
+        }
+
+        const resolvedRole = await fetchRoleWithTimeout(userId);
+
+        if (cancelled || seq !== roleFetchSeq.current) return;
+        lastResolvedUserId.current = userId;
+        setRole(resolvedRole);
+      } catch (err) {
+        if (cancelled || seq !== roleFetchSeq.current) return;
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("Failed to resolve user role", {
+          message,
+          name: err instanceof Error ? err.name : undefined,
+          stack: err instanceof Error ? err.stack : undefined,
+          err,
+        });
+        lastResolvedUserId.current = null;
+        setRole(null);
+      } finally {
+        if (cancelled || seq !== roleFetchSeq.current) return;
         setLoading(false);
       }
-    );
+    };
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchRole(session.user.id);
-      }
-      setLoading(false);
+    // `onAuthStateChange` fires an initial event (INITIAL_SESSION) with the current session.
+    // Relying on that avoids a parallel `getSession()` call which can contend for the auth-token lock.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void resolveForSession(nextSession);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const setRoleOverride = (next: Exclude<UserRole, null> | null) => {
+    setRoleOverrideState(next);
+    try {
+      if (next) localStorage.setItem(ROLE_OVERRIDE_STORAGE_KEY, next);
+      else localStorage.removeItem(ROLE_OVERRIDE_STORAGE_KEY);
+    } catch {
+      // ignore storage failures (private mode / disabled storage)
+    }
+
+    if (next) setRole(next);
+  };
+
+  const clearRoleOverride = () => setRoleOverride(null);
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setRole(null);
+    clearRoleOverride();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, loading, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        role,
+        roleOverride,
+        loading,
+        signOut,
+        setRoleOverride,
+        clearRoleOverride,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

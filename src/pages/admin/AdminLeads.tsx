@@ -5,6 +5,8 @@ import { Search, X, Users } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 const statusColors: Record<string, string> = {
   New: "bg-primary/20 text-primary",
@@ -15,6 +17,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminLeads() {
+  const { roleOverride } = useAuth();
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -25,7 +28,18 @@ export default function AdminLeads() {
   const [panelFollowUp, setPanelFollowUp] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   const fetchLeads = async () => {
+    if (isDemo) {
+      setLoading(true);
+      const all = DEMO_DATA.admin.leads.leads as any[];
+      const filtered = statusFilter ? all.filter((l) => l.status === statusFilter) : all;
+      setLeads(filtered);
+      setLoading(false);
+      return;
+    }
+
     let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
     if (statusFilter) query = query.eq("status", statusFilter);
     const { data } = await query;
@@ -33,7 +47,7 @@ export default function AdminLeads() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchLeads(); }, [statusFilter]);
+  useEffect(() => { fetchLeads(); }, [statusFilter, isDemo]);
 
   const filtered = leads.filter((l) => {
     const term = search.toLowerCase();
@@ -50,6 +64,20 @@ export default function AdminLeads() {
   const saveChanges = async () => {
     if (!selectedLead) return;
     setSaving(true);
+
+    if (isDemo) {
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === selectedLead.id
+            ? { ...l, status: panelStatus, notes: panelNotes, follow_up_date: panelFollowUp || null }
+            : l
+        )
+      );
+      setSaving(false);
+      setSelectedLead(null);
+      return;
+    }
+
     await supabase.from("leads").update({ status: panelStatus, notes: panelNotes, follow_up_date: panelFollowUp || null }).eq("id", selectedLead.id);
     setSaving(false);
     setSelectedLead(null);

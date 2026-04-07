@@ -7,42 +7,99 @@ import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function TeacherEarnings() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [earnings, setEarnings] = useState<any[]>([]);
   const [thisMonth, setThisMonth] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
-      const { data: tutor } = await supabase.from("tutors").select("id").eq("user_id", user.id).single();
-      if (!tutor) { setLoading(false); return; }
-      const { data } = await supabase.from("earnings").select("*").eq("tutor_id", tutor.id).order("date", { ascending: false });
-      setEarnings(data ?? []);
-      const t = data?.reduce((s, e) => s + e.amount_kes, 0) ?? 0;
+
+    if (isDemo) {
+      setLoading(true);
+      setLoadError(null);
+      const demo = DEMO_DATA.teacher.earnings.earnings;
+      setEarnings(demo);
+      const t = demo.reduce((s: number, e: any) => s + e.amount_kes, 0);
       setTotal(t);
       const now = new Date();
       const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-      const m = data?.filter((e) => e.date >= monthStart).reduce((s, e) => s + e.amount_kes, 0) ?? 0;
+      const m = demo.filter((e: any) => e.date >= monthStart).reduce((s: number, e: any) => s + e.amount_kes, 0);
       setThisMonth(m);
       setLoading(false);
+      return;
+    }
+
+    const fetch = async () => {
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const { data: tutor, error: tutorError } = await supabase
+          .from("tutors")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (tutorError) throw tutorError;
+
+        if (!tutor) {
+          setLoadError("No tutor record was found for this account. Ask an admin to create a row in tutors for your user.");
+          setEarnings([]);
+          setThisMonth(0);
+          setTotal(0);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("earnings")
+          .select("*")
+          .eq("tutor_id", tutor.id)
+          .order("date", { ascending: false });
+
+        if (error) throw error;
+
+        setEarnings(data ?? []);
+        const t = data?.reduce((s, e) => s + e.amount_kes, 0) ?? 0;
+        setTotal(t);
+        const now = new Date();
+        const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+        const m = data?.filter((e) => e.date >= monthStart).reduce((s, e) => s + e.amount_kes, 0) ?? 0;
+        setThisMonth(m);
+      } catch (err) {
+        console.error("TeacherEarnings load failed", err);
+        setLoadError("We couldn't load your earnings.");
+        setEarnings([]);
+        setThisMonth(0);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   return (
     <TeacherLayout>
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-foreground">Earnings</h2>
 
+        {loadError && !loading && (
+          <EmptyState title="Account setup needed" description={loadError} icon={DollarSign} />
+        )}
+
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {[1, 2].map((i) => <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-2"><Skeleton className="h-3 w-32" /><Skeleton className="h-8 w-40" /></div>)}
           </div>
-        ) : (
+        ) : loadError ? null : (
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-border bg-card p-5">
               <p className="text-sm text-muted-foreground">Earned This Month</p>
@@ -55,7 +112,7 @@ export default function TeacherEarnings() {
           </div>
         )}
 
-        {loading ? <TableSkeleton columns={3} /> : earnings.length === 0 ? (
+        {loading ? <TableSkeleton columns={3} /> : loadError ? null : earnings.length === 0 ? (
           <EmptyState title="No earnings yet" description="Your earnings will be recorded here." icon={DollarSign} />
         ) : (
           <div className="rounded-xl border border-border bg-card overflow-x-auto">

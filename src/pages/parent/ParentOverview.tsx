@@ -6,45 +6,93 @@ import { BookOpen, ClipboardCheck, TrendingUp, CreditCard } from "lucide-react";
 import { formatKES, formatDate } from "@/lib/format";
 import { KpiSkeleton } from "@/components/ui/KpiSkeleton";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function ParentOverview() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [parentName, setParentName] = useState("");
   const [stats, setStats] = useState({ lessonsThisWeek: 0, attendanceRate: 0, latestRating: "—", pendingPayments: 0 });
   const [recentLessons, setRecentLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const isDemo = import.meta.env.DEV && roleOverride === "parent";
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
-      const { data: parent } = await supabase.from("parents").select("id, full_name").eq("user_id", user.id).single();
-      if (!parent) return;
-      setParentName(parent.full_name.split(" ")[0]);
-      const { data: students } = await supabase.from("students").select("id").eq("parent_id", parent.id);
-      const studentIds = students?.map((s) => s.id) ?? [];
-      if (studentIds.length === 0) { setLoading(false); return; }
-      const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
-      const [lessons, attendance, payments, recent] = await Promise.all([
-        supabase.from("lessons").select("id").in("student_id", studentIds).gte("date", weekAgo.toISOString().split("T")[0]),
-        supabase.from("attendance").select("status").in("student_id", studentIds),
-        supabase.from("payments").select("amount_kes").in("student_id", studentIds).in("status", ["Pending", "Overdue"]),
-        supabase.from("lessons").select("*, students(full_name), tutors(full_name)").in("student_id", studentIds).order("date", { ascending: false }).limit(3),
-      ]);
-      const totalAtt = attendance.data?.length ?? 0;
-      const presentAtt = attendance.data?.filter((a) => a.status === "present").length ?? 0;
-      const pendingTotal = payments.data?.reduce((s, p) => s + p.amount_kes, 0) ?? 0;
-      const latestLesson = recent.data?.[0];
-      setStats({
-        lessonsThisWeek: lessons.data?.length ?? 0,
-        attendanceRate: totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 0,
-        latestRating: latestLesson?.performance_rating ?? "—",
-        pendingPayments: pendingTotal,
-      });
-      setRecentLessons(recent.data ?? []);
+
+    if (isDemo) {
+      setLoading(true);
+      setLoadError(null);
+      setParentName(DEMO_DATA.parent.profile.firstName);
+      setStats(DEMO_DATA.parent.overview.stats);
+      setRecentLessons(DEMO_DATA.parent.overview.recentLessons);
       setLoading(false);
+      return;
+    }
+
+    const fetch = async () => {
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const { data: parent, error: parentError } = await supabase
+          .from("parents")
+          .select("id, full_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (parentError) throw parentError;
+
+        if (!parent) {
+          setLoadError("No parent record was found for this account. Ask an admin to create a row in parents for your user.");
+          return;
+        }
+
+        setParentName(parent.full_name.split(" ")[0]);
+
+        const { data: students, error: studentsError } = await supabase
+          .from("students")
+          .select("id")
+          .eq("parent_id", parent.id);
+
+        if (studentsError) throw studentsError;
+
+        const studentIds = students?.map((s) => s.id) ?? [];
+        if (studentIds.length === 0) return;
+
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+
+        const [lessons, attendance, payments, recent] = await Promise.all([
+          supabase.from("lessons").select("id").in("student_id", studentIds).gte("date", weekAgo.toISOString().split("T")[0]),
+          supabase.from("attendance").select("status").in("student_id", studentIds),
+          supabase.from("payments").select("amount_kes").in("student_id", studentIds).in("status", ["Pending", "Overdue"]),
+          supabase.from("lessons").select("*, students(full_name), tutors(full_name)").in("student_id", studentIds).order("date", { ascending: false }).limit(3),
+        ]);
+
+        const totalAtt = attendance.data?.length ?? 0;
+        const presentAtt = attendance.data?.filter((a) => a.status === "present").length ?? 0;
+        const pendingTotal = payments.data?.reduce((s, p) => s + p.amount_kes, 0) ?? 0;
+        const latestLesson = recent.data?.[0];
+
+        setStats({
+          lessonsThisWeek: lessons.data?.length ?? 0,
+          attendanceRate: totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 0,
+          latestRating: latestLesson?.performance_rating ?? "—",
+          pendingPayments: pendingTotal,
+        });
+        setRecentLessons(recent.data ?? []);
+      } catch (err) {
+        console.error("ParentOverview load failed", err);
+        setLoadError("We couldn't load your parent dashboard data.");
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   const ratingColors: Record<string, string> = {
     Excellent: "bg-secondary/20 text-secondary",
@@ -61,6 +109,9 @@ export default function ParentOverview() {
 
   return (
     <ParentLayout>
+      {loadError ? (
+        <EmptyState title="Account setup needed" description={loadError} />
+      ) : (
       <div className="space-y-8">
         <h2 className="text-2xl font-bold text-foreground">Welcome back, {parentName || "Parent"}</h2>
 
@@ -101,6 +152,7 @@ export default function ParentOverview() {
           )}
         </div>
       </div>
+      )}
     </ParentLayout>
   );
 }

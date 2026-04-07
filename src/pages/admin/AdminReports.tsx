@@ -5,15 +5,27 @@ import { FileText } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminReports() {
+  const { roleOverride } = useAuth();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   useEffect(() => {
+    if (isDemo) {
+      setLoading(true);
+      setLessons(DEMO_DATA.admin.reports.lessons);
+      setLoading(false);
+      return;
+    }
+
     supabase.from("lessons").select("*, students(full_name), tutors(full_name)")
       .order("date", { ascending: false }).then(({ data }) => { setLessons(data ?? []); setLoading(false); });
-  }, []);
+  }, [isDemo]);
 
   const ratingColors: Record<string, string> = {
     Excellent: "bg-secondary/20 text-secondary",

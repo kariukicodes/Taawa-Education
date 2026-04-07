@@ -5,15 +5,28 @@ import { Plus, X, ListTodo } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminTasks() {
+  const { roleOverride } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ tutor_id: "", title: "", description: "", due_date: "" });
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   const fetchData = async () => {
+    if (isDemo) {
+      setLoading(true);
+      setTasks(DEMO_DATA.admin.tasks.tasks);
+      setTutors(DEMO_DATA.admin.students.tutors);
+      setLoading(false);
+      return;
+    }
+
     const [t, tu] = await Promise.all([
       supabase.from("tasks").select("*, tutors(full_name)").order("due_date"),
       supabase.from("tutors").select("id, full_name"),
@@ -23,10 +36,28 @@ export default function AdminTasks() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [isDemo]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isDemo) {
+      const tutorName = tutors.find((t) => t.id === form.tutor_id)?.full_name;
+      const demoTask = {
+        id: `demo_admin_task_${Date.now()}`,
+        tutor_id: form.tutor_id,
+        title: form.title,
+        description: form.description,
+        due_date: form.due_date || null,
+        status: "pending",
+        tutors: tutorName ? { full_name: tutorName } : null,
+      };
+      setTasks((prev) => [...prev, demoTask]);
+      setShowModal(false);
+      setForm({ tutor_id: "", title: "", description: "", due_date: "" });
+      return;
+    }
+
     await supabase.from("tasks").insert({ tutor_id: form.tutor_id, title: form.title, description: form.description, due_date: form.due_date || null });
     setShowModal(false);
     setForm({ tutor_id: "", title: "", description: "", due_date: "" });

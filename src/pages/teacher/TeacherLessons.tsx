@@ -6,35 +6,109 @@ import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PenTool } from "lucide-react";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function TeacherLessons() {
-  const { user } = useAuth();
+  const { user, roleOverride } = useAuth();
   const [tutorId, setTutorId] = useState<string | null>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ student_id: "", subject: "", date: "", topics_covered: "", homework: "", performance_rating: "", comments: "" });
 
+  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
+
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
-      const { data: tutor } = await supabase.from("tutors").select("id").eq("user_id", user.id).single();
-      if (!tutor) { setLoading(false); return; }
-      setTutorId(tutor.id);
-      const { data: assignments } = await supabase.from("tutor_assignments").select("students(id, full_name, subjects)").eq("tutor_id", tutor.id);
-      setStudents(assignments?.map((a) => a.students).filter(Boolean) ?? []);
-      const { data: l } = await supabase.from("lessons").select("*, students(full_name)").eq("tutor_id", tutor.id).order("date", { ascending: false });
-      setLessons(l ?? []);
+
+    if (isDemo) {
+      setLoading(true);
+      setLoadError(null);
+      setTutorId("demo_tutor");
+      setStudents(DEMO_DATA.teacher.students);
+      setLessons(DEMO_DATA.teacher.lessons.lessons);
       setLoading(false);
+      return;
+    }
+
+    const fetch = async () => {
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const { data: tutor, error: tutorError } = await supabase
+          .from("tutors")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (tutorError) throw tutorError;
+
+        if (!tutor) {
+          setLoadError("No tutor record was found for this account. Ask an admin to create a row in tutors for your user.");
+          setTutorId(null);
+          setStudents([]);
+          setLessons([]);
+          return;
+        }
+
+        setTutorId(tutor.id);
+        const { data: assignments, error: assignmentsError } = await supabase
+          .from("tutor_assignments")
+          .select("students(id, full_name, subjects)")
+          .eq("tutor_id", tutor.id);
+
+        if (assignmentsError) throw assignmentsError;
+        setStudents(assignments?.map((a) => a.students).filter(Boolean) ?? []);
+
+        const { data: l, error: lessonsError } = await supabase
+          .from("lessons")
+          .select("*, students(full_name)")
+          .eq("tutor_id", tutor.id)
+          .order("date", { ascending: false });
+
+        if (lessonsError) throw lessonsError;
+        setLessons(l ?? []);
+      } catch (err) {
+        console.error("TeacherLessons load failed", err);
+        setLoadError("We couldn't load your lesson log.");
+        setTutorId(null);
+        setStudents([]);
+        setLessons([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
-  }, [user]);
+  }, [user, isDemo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorId) return;
     setSubmitting(true);
+
+    if (isDemo) {
+      const student = students.find((s: any) => s.id === form.student_id);
+      const demoLesson = {
+        id: `demo_lesson_${Date.now()}`,
+        tutor_id: tutorId,
+        student_id: form.student_id,
+        subject: form.subject,
+        date: form.date,
+        topics_covered: form.topics_covered,
+        homework: form.homework || null,
+        performance_rating: form.performance_rating || null,
+        comments: form.comments || null,
+        students: student ? { full_name: student.full_name } : null,
+      };
+      setLessons((prev) => [demoLesson, ...prev]);
+      setForm({ student_id: "", subject: "", date: "", topics_covered: "", homework: "", performance_rating: "", comments: "" });
+      setSubmitting(false);
+      return;
+    }
+
     await supabase.from("lessons").insert({
       tutor_id: tutorId, student_id: form.student_id, subject: form.subject, date: form.date,
       topics_covered: form.topics_covered, homework: form.homework,
@@ -56,6 +130,9 @@ export default function TeacherLessons() {
 
   return (
     <TeacherLayout>
+      {loadError ? (
+        <EmptyState title="Account setup needed" description={loadError} icon={PenTool} />
+      ) : (
       <div className="space-y-8">
         <h2 className="text-2xl font-bold text-foreground">Lesson Log</h2>
 
@@ -117,6 +194,7 @@ export default function TeacherLessons() {
           )}
         </div>
       </div>
+      )}
     </TeacherLayout>
   );
 }

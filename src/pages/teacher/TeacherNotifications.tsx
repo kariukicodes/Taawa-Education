@@ -5,15 +5,28 @@ import { Bell } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function TeacherNotifications() {
+  const { roleOverride } = useAuth();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
+
   useEffect(() => {
+    if (isDemo) {
+      setLoading(true);
+      const all = DEMO_DATA.admin.announcements.announcements as any[];
+      setAnnouncements(all.filter((a) => ["teacher", "all"].includes(a.target_role)));
+      setLoading(false);
+      return;
+    }
+
     supabase.from("announcements").select("*").in("target_role", ["teacher", "all"]).order("created_at", { ascending: false })
       .then(({ data }) => { setAnnouncements(data ?? []); setLoading(false); });
-  }, []);
+  }, [isDemo]);
 
   return (
     <TeacherLayout>

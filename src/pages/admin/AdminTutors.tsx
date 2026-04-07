@@ -5,24 +5,53 @@ import { Plus, X, UserCheck } from "lucide-react";
 import { formatKES } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
+import { DEMO_DATA } from "@/lib/demoData";
 
 export default function AdminTutors() {
+  const { roleOverride } = useAuth();
   const [tutors, setTutors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", subjects: "", rate_kes: "", status: "active" });
 
+  const isDemo = import.meta.env.DEV && roleOverride === "admin";
+
   const fetchTutors = async () => {
+    if (isDemo) {
+      setLoading(true);
+      setTutors(DEMO_DATA.admin.tutors.tutors);
+      setLoading(false);
+      return;
+    }
+
     const { data } = await supabase.from("tutors").select("*, tutor_assignments(student_id)");
     setTutors(data ?? []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchTutors(); }, []);
+  useEffect(() => { fetchTutors(); }, [isDemo]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const subjects = form.subjects.split(",").map((s) => s.trim()).filter(Boolean);
+
+    if (isDemo) {
+      const demoTutor = {
+        id: `demo_tutor_${Date.now()}`,
+        full_name: form.full_name,
+        phone: form.phone,
+        subjects,
+        rate_kes: parseInt(form.rate_kes) || 0,
+        status: form.status,
+        tutor_assignments: [],
+      };
+      setTutors((prev) => [demoTutor, ...prev]);
+      setShowModal(false);
+      setForm({ full_name: "", email: "", phone: "", subjects: "", rate_kes: "", status: "active" });
+      return;
+    }
+
     await supabase.from("tutors").insert({
       full_name: form.full_name, phone: form.phone, subjects,
       rate_kes: parseInt(form.rate_kes) || 0, status: form.status,

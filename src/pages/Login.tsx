@@ -9,24 +9,49 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [demoRole, setDemoRole] = useState<"admin" | "parent" | "teacher">("parent");
   const navigate = useNavigate();
-  const { user, role } = useAuth();
+  const { user, role, roleOverride, setRoleOverride, clearRoleOverride, loading: authLoading } = useAuth();
+
+  const isDev = import.meta.env.DEV;
+
+  const handleDemoRoleChange = (nextRole: "admin" | "parent" | "teacher") => {
+    setDemoRole(nextRole);
+    if (!isDev) return;
+    if (!user) return;
+    if (authLoading) return;
+
+    setRoleOverride(nextRole);
+    navigate(`/${nextRole}`, { replace: true });
+  };
 
   useEffect(() => {
-    if (user && role) {
+    if (!user) return;
+    if (authLoading) return;
+
+    if (role) {
       navigate(`/${role}`, { replace: true });
+      return;
     }
-  }, [user, role, navigate]);
+
+    if (isDev) {
+      setRoleOverride(demoRole);
+      navigate(`/${demoRole}`, { replace: true });
+      return;
+    }
+
+    setError("Your account has no role assigned yet. Ask an admin to add you to user_roles.");
+  }, [user, role, authLoading, navigate, isDev, demoRole, setRoleOverride]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-      setError(error.message);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setError(error.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -44,6 +69,37 @@ export default function Login() {
             {error && (
               <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
                 {error}
+              </div>
+            )}
+
+            {isDev && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  Demo role (dev only)
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={demoRole}
+                    onChange={(e) => handleDemoRoleChange(e.target.value as "admin" | "parent" | "teacher")}
+                    className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="parent">Parent</option>
+                    <option value="teacher">Teacher</option>
+                  </select>
+                  {roleOverride && (
+                    <button
+                      type="button"
+                      onClick={() => clearRoleOverride()}
+                      className="shrink-0 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
+                    >
+                      Use DB role
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This bypasses missing <span className="font-medium">user_roles</span> during local demo.
+                </p>
               </div>
             )}
 
