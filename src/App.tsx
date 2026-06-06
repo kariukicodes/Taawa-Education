@@ -29,9 +29,11 @@ import ParentAttendance from "./pages/parent/ParentAttendance";
 import ParentDocuments from "./pages/parent/ParentDocuments";
 import ParentBilling from "./pages/parent/ParentBilling";
 import ParentNotifications from "./pages/parent/ParentNotifications";
+import ParentMessages from "./pages/parent/ParentMessages";
 // Teacher
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherSchedule from "./pages/teacher/TeacherSchedule";
+import TeacherMessages from "./pages/teacher/TeacherMessages";
 import TeacherLessons from "./pages/teacher/TeacherLessons";
 import TeacherAttendance from "./pages/teacher/TeacherAttendance";
 import TeacherTasks from "./pages/teacher/TeacherTasks";
@@ -40,6 +42,7 @@ import TeacherNotifications from "./pages/teacher/TeacherNotifications";
 import TutorsPage from "@/pages/tutors";
 import AboutPage from "@/pages/AboutPage";
 import ProgramsPage from "@/pages/ProgramsPage";
+import PlaceholderPage from "@/pages/PlaceholderPage";
 import { ContactModalProvider } from "@/components/landing/ContactModalContext";
 
 const queryClient = new QueryClient();
@@ -73,6 +76,7 @@ const App = () => (
               <Route path="/parent" element={<ProtectedRoute requiredRole="parent"><ParentOverview /></ProtectedRoute>} />
               <Route path="/parent/children" element={<ProtectedRoute requiredRole="parent"><ParentChildren /></ProtectedRoute>} />
               <Route path="/parent/schedule" element={<ProtectedRoute requiredRole="parent"><ParentSchedule /></ProtectedRoute>} />
+              <Route path="/parent/messages" element={<ProtectedRoute requiredRole="parent"><ParentMessages /></ProtectedRoute>} />
               <Route path="/parent/reports" element={<ProtectedRoute requiredRole="parent"><ParentReports /></ProtectedRoute>} />
               <Route path="/parent/attendance" element={<ProtectedRoute requiredRole="parent"><ParentAttendance /></ProtectedRoute>} />
               <Route path="/parent/documents" element={<ProtectedRoute requiredRole="parent"><ParentDocuments /></ProtectedRoute>} />
@@ -82,6 +86,7 @@ const App = () => (
               {/* Teacher */}
               <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherStudents /></ProtectedRoute>} />
               <Route path="/teacher/schedule" element={<ProtectedRoute requiredRole="teacher"><TeacherSchedule /></ProtectedRoute>} />
+              <Route path="/teacher/messages" element={<ProtectedRoute requiredRole="teacher"><TeacherMessages /></ProtectedRoute>} />
               <Route path="/teacher/lessons" element={<ProtectedRoute requiredRole="teacher"><TeacherLessons /></ProtectedRoute>} />
               <Route path="/teacher/attendance" element={<ProtectedRoute requiredRole="teacher"><TeacherAttendance /></ProtectedRoute>} />
               <Route path="/teacher/tasks" element={<ProtectedRoute requiredRole="teacher"><TeacherTasks /></ProtectedRoute>} />
@@ -90,6 +95,16 @@ const App = () => (
               <Route path="/tutors" element={<TutorsPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/programs" element={<ProgramsPage />} />
+
+              {/* Placeholder Pages */}
+              <Route path="/fees" element={<PlaceholderPage title="Fees" />} />
+              <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
+              <Route path="/contact" element={<PlaceholderPage title="Contact Us" />} />
+              <Route path="/policy/fees" element={<PlaceholderPage title="Fees Policy" />} />
+              <Route path="/policy/admissions" element={<PlaceholderPage title="Admissions Policy" />} />
+              <Route path="/policy/child-protection" element={<PlaceholderPage title="Child Protection Policy" />} />
+              <Route path="/terms" element={<PlaceholderPage title="Terms and Conditions" />} />
+              <Route path="/privacy" element={<PlaceholderPage title="Privacy Policy" />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -188,7 +188,7 @@ function ProgramsHero() {
           className={`mb-12 max-w-lg text-[15px] font-light leading-[1.85] text-muted-foreground transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
         >
           From Kenya's national CBC to Cambridge IGCSE, from Montessori early
-          years to fully custom plans — every EduNest program is delivered
+          years to fully custom plans — every Taawa Education program is delivered
           one-on-one, at your child's pace.
         </p>
 

@@ -1,76 +1,114 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { ListTodo } from "lucide-react";
+
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ListTodo } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { DEMO_DATA } from "@/lib/demoData";
+import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
+import { reportClientError } from "@/lib/reportClientError";
+import { toast } from "@/hooks/use-toast";
+
+type TaskRecord = {
+  id: string;
+  tutor_id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  status: string;
+  created_at?: string;
+};
+
+type TeacherWorkspaceResponse = {
+  tasks: TaskRecord[];
+};
 
 export default function TeacherTasks() {
-  const { user, roleOverride } = useAuth();
-  const [tasks, setTasks] = useState<any[]>([]);
+  const { user, roleOverride, loading: authLoading } = useAuth();
+  const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
+  const isDemo =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE === "true" &&
+    roleOverride === "teacher";
 
-  useEffect(() => {
-    if (!user) return;
+  const fetchTasks = async () => {
+    setLoading(true);
+    setLoadError(null);
 
     if (isDemo) {
-      setLoading(true);
-      setLoadError(null);
       setTasks(DEMO_DATA.teacher.tasks.tasks);
       setLoading(false);
       return;
     }
 
-    const fetch = async () => {
-      setLoading(true);
-      setLoadError(null);
-
-      try {
-        const { data: tutor, error: tutorError } = await supabase
-          .from("tutors")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (tutorError) throw tutorError;
-
-        if (!tutor) {
-          setLoadError("No tutor record was found for this account. Ask an admin to create a row in tutors for your user.");
-          setTasks([]);
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from("tasks")
-          .select("*")
-          .eq("tutor_id", tutor.id)
-          .order("due_date");
-
-        if (error) throw error;
-        setTasks(data ?? []);
-      } catch (err) {
-        console.error("TeacherTasks load failed", err);
-        setLoadError("We couldn't load your tasks.");
-        setTasks([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, [user, isDemo]);
-
-  const toggleStatus = async (id: string, current: string) => {
-    const next = current === "pending" ? "done" : "pending";
-    if (!isDemo) {
-      await supabase.from("tasks").update({ status: next }).eq("id", id);
+    try {
+      const data = await invokeSupabaseFunction<TeacherWorkspaceResponse>(
+        "get-teacher-workspace",
+        undefined,
+      );
+      setTasks(data.tasks ?? []);
+    } catch (err) {
+      reportClientError("TeacherTasks.fetchTasks", err);
+      const message = err instanceof Error ? err.message : String(err);
+      setLoadError(message);
+      setTasks([]);
+      toast({
+        title: "Failed to load tasks",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: next } : t)));
+  };
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isDemo && !user) return;
+    void fetchTasks();
+  }, [authLoading, isDemo, user?.id]);
+
+  const toggleStatus = async (task: TaskRecord) => {
+    const action = task.status === "pending" ? "mark_done" : "mark_pending";
+
+    if (isDemo) {
+      setTasks((prev) =>
+        prev.map((item) =>
+          item.id === task.id
+            ? { ...item, status: action === "mark_done" ? "done" : "pending" }
+            : item,
+        ),
+      );
+      return;
+    }
+
+    try {
+      const { task: updatedTask } = await invokeSupabaseFunction<{ task: TaskRecord }>(
+        "manage-teacher-task",
+        {
+          action,
+          task_id: task.id,
+        },
+      );
+
+      setTasks((prev) => prev.map((item) => (item.id === task.id ? updatedTask : item)));
+    } catch (err) {
+      reportClientError("TeacherTasks.toggleStatus", err, {
+        taskId: task.id,
+        action,
+      });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({
+        title: "Failed to update task",
+        description: message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -82,23 +120,52 @@ export default function TeacherTasks() {
           <EmptyState title="Account setup needed" description={loadError} icon={ListTodo} />
         )}
 
-        {loading ? <CardSkeleton count={4} /> : loadError ? null : tasks.length === 0 ? (
-          <EmptyState title="No tasks assigned" description="Tasks from admin will appear here." icon={ListTodo} />
+        {loading ? (
+          <CardSkeleton count={4} />
+        ) : loadError ? null : tasks.length === 0 ? (
+          <EmptyState
+            title="No tasks assigned"
+            description="Tasks from admin will appear here."
+            icon={ListTodo}
+          />
         ) : (
           <div className="space-y-3">
-            {tasks.map((t) => (
-              <div key={t.id} className={`rounded-xl border border-border bg-card p-4 ${t.status === "done" ? "opacity-60" : ""}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            {tasks.map((task) => (
+              <div
+                key={task.id}
+                className={`rounded-xl border border-border bg-card p-4 ${
+                  task.status === "done" ? "opacity-60" : ""
+                }`}
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className={`font-medium text-foreground ${t.status === "done" ? "line-through" : ""}`}>{t.title}</p>
-                    <p className="text-xs text-muted-foreground">Due: {t.due_date ? formatDate(t.due_date) : "No date"}</p>
+                    <p
+                      className={`font-medium text-foreground ${
+                        task.status === "done" ? "line-through" : ""
+                      }`}
+                    >
+                      {task.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Due: {task.due_date ? formatDate(task.due_date) : "No date"}
+                    </p>
                   </div>
-                  <button onClick={() => toggleStatus(t.id, t.status)}
-                    className={`rounded-lg px-4 py-1.5 text-xs font-medium transition-colors ${t.status === "done" ? "bg-secondary/20 text-secondary" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}>
-                    {t.status === "done" ? "Done ✓" : "Mark Done"}
+
+                  <button
+                    onClick={() => void toggleStatus(task)}
+                    className={`rounded-lg px-4 py-1.5 text-xs font-medium transition-colors ${
+                      task.status === "done"
+                        ? "bg-secondary/20 text-secondary"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }`}
+                  >
+                    {task.status === "done" ? "Done" : "Mark Done"}
                   </button>
                 </div>
-                {t.description && <p className="mt-2 text-sm text-muted-foreground">{t.description}</p>}
+
+                {task.description && (
+                  <p className="mt-2 text-sm text-muted-foreground">{task.description}</p>
+                )}
               </div>
             ))}
           </div>

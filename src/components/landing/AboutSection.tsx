@@ -132,7 +132,7 @@ export function AboutSection() {
               {/* ── YOUR IMAGE — replace src ── */}
               <img
                 src="/heroimage.png"
-                alt="EduNest hero section image"
+                alt="Taawa Education hero section image"
                 className="absolute inset-0 h-full w-full object-cover object-center"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
@@ -261,7 +261,7 @@ export function AboutSection() {
               }}
             >
               <p className="text-[12.5px] font-light text-muted-foreground">
-                Want to know more about how EduNest works?
+                Want to know more about how Taawa Education works?
               </p>
               <a
                 href="/about"

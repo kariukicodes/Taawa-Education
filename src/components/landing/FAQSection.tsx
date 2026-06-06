@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 
 const faqs = [
   {
-    q: "How does EduNest's pricing model work?",
+    q: "How does Taawa Education's pricing model work?",
     a: "We offer tiered monthly packages based on the number of subjects, session frequency, and curriculum type. After your free consultation, we'll provide a personalised quote that matches your family's needs.",
   },
   {
@@ -52,7 +52,7 @@ export function FAQSection() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-8 text-[#F5F5F0]/55">
-            Everything parents usually want to know before getting started with EduNest.
+            Everything parents usually want to know before getting started with Taawa Education.
           </p>
         </div>
 

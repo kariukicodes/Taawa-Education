@@ -63,7 +63,7 @@ export function WhyChooseSection() {
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto mb-14 max-w-3xl text-center">
           <Badge className="border border-primary/20 bg-primary/10 px-4 py-1 text-[11px] tracking-[0.18em] text-primary uppercase hover:bg-primary/10">
-            Why Choose EduNest
+            Why Choose Taawa Education
           </Badge>
 
           <h2
@@ -74,7 +74,7 @@ export function WhyChooseSection() {
           </h2>
 
           <p className="mt-5 text-[15px] leading-8 text-muted-foreground md:text-base">
-            EduNest combines personalised academic support, carefully vetted tutors,
+            Taawa Education combines personalised academic support, carefully vetted tutors,
             and clear progress systems to give families a more confident
             homeschooling experience.
           </p>

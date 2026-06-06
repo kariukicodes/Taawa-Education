@@ -1,82 +1,73 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { Download, FileText } from "lucide-react";
+
 import { ParentLayout } from "@/components/layouts/ParentLayout";
-import { FileText, Download } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/contexts/AuthContext";
 import { DEMO_DATA } from "@/lib/demoData";
+import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
+import { reportClientError } from "@/lib/reportClientError";
+import { toast } from "@/hooks/use-toast";
+
+type DocumentRecord = {
+  id: string;
+  file_name: string;
+  file_url: string;
+  created_at: string;
+  students: { full_name: string };
+};
+
+type ParentWorkspaceResponse = {
+  documents: DocumentRecord[];
+};
 
 export default function ParentDocuments() {
-  const { user, roleOverride } = useAuth();
-  const [docs, setDocs] = useState<any[]>([]);
+  const { user, roleOverride, loading: authLoading } = useAuth();
+  const [docs, setDocs] = useState<DocumentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const isDemo = import.meta.env.DEV && roleOverride === "parent";
+  const isDemo =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE === "true" &&
+    roleOverride === "parent";
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!isDemo && !user) return;
 
-    if (isDemo) {
-      setLoading(true);
-      setLoadError(null);
-      setDocs(DEMO_DATA.parent.documents.docs);
-      setLoading(false);
-      return;
-    }
-
-    const fetch = async () => {
+    const fetchDocuments = async () => {
       setLoading(true);
       setLoadError(null);
 
       try {
-        const { data: parent, error: parentError } = await supabase
-          .from("parents")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const data = isDemo
+          ? { documents: DEMO_DATA.parent.documents.docs as DocumentRecord[] }
+          : await invokeSupabaseFunction<ParentWorkspaceResponse>(
+              "get-parent-workspace",
+              undefined,
+            );
 
-        if (parentError) throw parentError;
-
-        if (!parent) {
-          setLoadError("No parent record was found for this account. Ask an admin to create a row in parents for your user.");
-          setDocs([]);
-          return;
-        }
-
-        const { data: students, error: studentsError } = await supabase
-          .from("students")
-          .select("id")
-          .eq("parent_id", parent.id);
-
-        if (studentsError) throw studentsError;
-
-        const ids = students?.map((s) => s.id) ?? [];
-        if (ids.length === 0) {
-          setDocs([]);
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from("documents")
-          .select("*, students(full_name)")
-          .in("student_id", ids)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setDocs(data ?? []);
+        setDocs(data.documents ?? []);
       } catch (err) {
-        console.error("ParentDocuments load failed", err);
-        setLoadError("We couldn't load your documents.");
+        reportClientError("ParentDocuments.fetchDocuments", err);
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
         setDocs([]);
+        toast({
+          title: "Failed to load documents",
+          description: message,
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
-    fetch();
-  }, [user, isDemo]);
+
+    void fetchDocuments();
+  }, [authLoading, isDemo, user?.id]);
 
   return (
     <ParentLayout>
@@ -87,24 +78,41 @@ export default function ParentDocuments() {
           <EmptyState title="Account setup needed" description={loadError} icon={FileText} />
         )}
 
-        {loading ? <CardSkeleton count={4} /> : loadError ? null : docs.length === 0 ? (
-          <EmptyState title="No documents uploaded" description="Report cards and assessments will appear here." icon={FileText} />
+        {loading ? (
+          <CardSkeleton count={4} />
+        ) : loadError ? null : docs.length === 0 ? (
+          <EmptyState
+            title="No documents uploaded"
+            description="Report cards and assessments will appear here."
+            icon={FileText}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {docs.map((d) => (
-              <div key={d.id} className="card-hover-glow rounded-xl border border-border bg-card p-5">
+            {docs.map((doc) => (
+              <div
+                key={doc.id}
+                className="card-hover-glow rounded-xl border border-border bg-card p-5"
+              >
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate font-medium text-foreground">{d.file_name}</p>
-                    <p className="text-xs text-muted-foreground">{d.students?.full_name} • {formatDate(d.created_at)}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-foreground">{doc.file_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {doc.students?.full_name} | {formatDate(doc.created_at)}
+                    </p>
                   </div>
                 </div>
-                <a href={d.file_url} target="_blank" rel="noopener noreferrer"
-                  className="mt-4 flex items-center gap-2 text-sm text-primary hover:underline">
-                  <Download size={14} /> Download
+
+                <a
+                  href={doc.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Download size={14} />
+                  Download
                 </a>
               </div>
             ))}

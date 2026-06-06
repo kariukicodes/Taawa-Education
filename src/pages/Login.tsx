@@ -60,7 +60,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground">EduNest</h1>
+          <h1 className="text-3xl font-bold text-foreground">Taawa Education</h1>
           <p className="mt-2 text-muted-foreground">Sign in to your account</p>
         </div>
 

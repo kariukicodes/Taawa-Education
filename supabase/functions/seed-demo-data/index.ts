@@ -17,11 +17,11 @@ Deno.serve(async (req) => {
   try {
     // Create auth users
     const users = [
-      { email: "admin@edunest.co.ke", password: "Admin123!", role: "admin" as const },
+      { email: "admin@taawa.co.ke", password: "Admin123!", role: "admin" as const },
       { email: "grace.kamau@gmail.com", password: "Parent123!", role: "parent" as const },
       { email: "david.omondi@gmail.com", password: "Parent123!", role: "parent" as const },
-      { email: "tutor.amina@edunest.co.ke", password: "Tutor123!", role: "teacher" as const },
-      { email: "tutor.brian@edunest.co.ke", password: "Tutor123!", role: "teacher" as const },
+      { email: "tutor.amina@taawa.co.ke", password: "Tutor123!", role: "teacher" as const },
+      { email: "tutor.brian@taawa.co.ke", password: "Tutor123!", role: "teacher" as const },
     ];
 
     const createdUsers: Record<string, string> = {};
@@ -65,12 +65,12 @@ Deno.serve(async (req) => {
 
     // Create tutors
     const { data: tutor1 } = await supabase.from("tutors").upsert(
-      { user_id: createdUsers["tutor.amina@edunest.co.ke"], full_name: "Amina Hassan", phone: "+254 734 567 890", subjects: ["Math", "Science", "English", "History"], rate_kes: 45000, status: "active" },
+      { user_id: createdUsers["tutor.amina@taawa.co.ke"], full_name: "Amina Hassan", phone: "+254 734 567 890", subjects: ["Math", "Science", "English", "History"], rate_kes: 45000, status: "active" },
       { onConflict: "user_id" }
     ).select().single();
 
     const { data: tutor2 } = await supabase.from("tutors").upsert(
-      { user_id: createdUsers["tutor.brian@edunest.co.ke"], full_name: "Brian Kipchoge", phone: "+254 745 678 901", subjects: ["Math", "English"], rate_kes: 35000, status: "active" },
+      { user_id: createdUsers["tutor.brian@taawa.co.ke"], full_name: "Brian Kipchoge", phone: "+254 745 678 901", subjects: ["Math", "English"], rate_kes: 35000, status: "active" },
       { onConflict: "user_id" }
     ).select().single();
 
@@ -97,9 +97,9 @@ Deno.serve(async (req) => {
 
     // Tutor assignments
     await supabase.from("tutor_assignments").insert([
-      { tutor_id: tutor1!.id, student_id: zara!.id, assigned_by: createdUsers["admin@edunest.co.ke"] },
-      { tutor_id: tutor2!.id, student_id: leo!.id, assigned_by: createdUsers["admin@edunest.co.ke"] },
-      { tutor_id: tutor1!.id, student_id: ethan!.id, assigned_by: createdUsers["admin@edunest.co.ke"] },
+      { tutor_id: tutor1!.id, student_id: zara!.id, assigned_by: createdUsers["admin@taawa.co.ke"] },
+      { tutor_id: tutor2!.id, student_id: leo!.id, assigned_by: createdUsers["admin@taawa.co.ke"] },
+      { tutor_id: tutor1!.id, student_id: ethan!.id, assigned_by: createdUsers["admin@taawa.co.ke"] },
     ]);
 
     // Leads
@@ -183,18 +183,18 @@ Deno.serve(async (req) => {
     // Announcements
     await supabase.from("announcements").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabase.from("announcements").insert([
-      { message: "Dear Parents, we are pleased to announce that Term 2 begins on 14th April. Please ensure all outstanding payments are settled before the start of the new term. Timetables will be shared by 10th April. Thank you for your continued trust in EduNest.", target_role: "parent" },
+      { message: "Dear Parents, we are pleased to announce that Term 2 begins on 14th April. Please ensure all outstanding payments are settled before the start of the new term. Timetables will be shared by 10th April. Thank you for your continued trust in Taawa Education.", target_role: "parent" },
       { message: "Hi Team, please ensure all March progress reports are submitted by 5th April. The new assessment rubric templates have been uploaded to the shared folder. Reach out if you have any questions.", target_role: "teacher" },
     ]);
 
     // Documents
     await supabase.from("documents").insert([
-      { student_id: zara!.id, file_name: "Zara_Kamau_Term1_Report.pdf", file_url: "https://placeholder.edunest.co.ke/reports/zara-term1.pdf", uploaded_by: createdUsers["admin@edunest.co.ke"] },
-      { student_id: zara!.id, file_name: "Zara_Kamau_Math_Assessment.pdf", file_url: "https://placeholder.edunest.co.ke/assessments/zara-math.pdf", uploaded_by: createdUsers["tutor.amina@edunest.co.ke"] },
-      { student_id: leo!.id, file_name: "Leo_Kamau_Term1_Report.pdf", file_url: "https://placeholder.edunest.co.ke/reports/leo-term1.pdf", uploaded_by: createdUsers["admin@edunest.co.ke"] },
-      { student_id: leo!.id, file_name: "Leo_Kamau_English_Assessment.pdf", file_url: "https://placeholder.edunest.co.ke/assessments/leo-english.pdf", uploaded_by: createdUsers["tutor.brian@edunest.co.ke"] },
-      { student_id: ethan!.id, file_name: "Ethan_Omondi_Term1_Report.pdf", file_url: "https://placeholder.edunest.co.ke/reports/ethan-term1.pdf", uploaded_by: createdUsers["admin@edunest.co.ke"] },
-      { student_id: ethan!.id, file_name: "Ethan_Omondi_Science_Assessment.pdf", file_url: "https://placeholder.edunest.co.ke/assessments/ethan-science.pdf", uploaded_by: createdUsers["tutor.amina@edunest.co.ke"] },
+      { student_id: zara!.id, file_name: "Zara_Kamau_Term1_Report.pdf", file_url: "https://placeholder.taawa.co.ke/reports/zara-term1.pdf", uploaded_by: createdUsers["admin@taawa.co.ke"] },
+      { student_id: zara!.id, file_name: "Zara_Kamau_Math_Assessment.pdf", file_url: "https://placeholder.taawa.co.ke/assessments/zara-math.pdf", uploaded_by: createdUsers["tutor.amina@taawa.co.ke"] },
+      { student_id: leo!.id, file_name: "Leo_Kamau_Term1_Report.pdf", file_url: "https://placeholder.taawa.co.ke/reports/leo-term1.pdf", uploaded_by: createdUsers["admin@taawa.co.ke"] },
+      { student_id: leo!.id, file_name: "Leo_Kamau_English_Assessment.pdf", file_url: "https://placeholder.taawa.co.ke/assessments/leo-english.pdf", uploaded_by: createdUsers["tutor.brian@taawa.co.ke"] },
+      { student_id: ethan!.id, file_name: "Ethan_Omondi_Term1_Report.pdf", file_url: "https://placeholder.taawa.co.ke/reports/ethan-term1.pdf", uploaded_by: createdUsers["admin@taawa.co.ke"] },
+      { student_id: ethan!.id, file_name: "Ethan_Omondi_Science_Assessment.pdf", file_url: "https://placeholder.taawa.co.ke/assessments/ethan-science.pdf", uploaded_by: createdUsers["tutor.amina@taawa.co.ke"] },
     ]);
 
     return new Response(JSON.stringify({ success: true, users: Object.keys(createdUsers) }), {

@@ -1,84 +1,79 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { ClipboardCheck } from "lucide-react";
+
 import { ParentLayout } from "@/components/layouts/ParentLayout";
 import { formatDate } from "@/lib/format";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ClipboardCheck } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { DEMO_DATA } from "@/lib/demoData";
+import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
+import { reportClientError } from "@/lib/reportClientError";
+import { toast } from "@/hooks/use-toast";
+
+type AttendanceRecord = {
+  id: string;
+  lesson_date: string;
+  status: string;
+  students: { full_name: string };
+  tutors: { full_name: string };
+};
+
+type ParentWorkspaceResponse = {
+  attendance: AttendanceRecord[];
+};
 
 export default function ParentAttendance() {
-  const { user, roleOverride } = useAuth();
-  const [records, setRecords] = useState<any[]>([]);
+  const { user, roleOverride, loading: authLoading } = useAuth();
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const isDemo = import.meta.env.DEV && roleOverride === "parent";
+  const isDemo =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE === "true" &&
+    roleOverride === "parent";
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!isDemo && !user) return;
 
-    if (isDemo) {
-      setLoading(true);
-      setLoadError(null);
-      setRecords(DEMO_DATA.parent.attendance.records);
-      setLoading(false);
-      return;
-    }
-
-    const fetch = async () => {
+    const fetchAttendance = async () => {
       setLoading(true);
       setLoadError(null);
 
       try {
-        const { data: parent, error: parentError } = await supabase
-          .from("parents")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const data = isDemo
+          ? { attendance: DEMO_DATA.parent.attendance.records as AttendanceRecord[] }
+          : await invokeSupabaseFunction<ParentWorkspaceResponse>(
+              "get-parent-workspace",
+              undefined,
+            );
 
-        if (parentError) throw parentError;
-
-        if (!parent) {
-          setLoadError("No parent record was found for this account. Ask an admin to create a row in parents for your user.");
-          setRecords([]);
-          return;
-        }
-
-        const { data: students, error: studentsError } = await supabase
-          .from("students")
-          .select("id")
-          .eq("parent_id", parent.id);
-
-        if (studentsError) throw studentsError;
-
-        const ids = students?.map((s) => s.id) ?? [];
-        if (ids.length === 0) {
-          setRecords([]);
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from("attendance")
-          .select("*, students(full_name), tutors(full_name)")
-          .in("student_id", ids)
-          .order("lesson_date", { ascending: false });
-
-        if (error) throw error;
-        setRecords(data ?? []);
+        setRecords(data.attendance ?? []);
       } catch (err) {
-        console.error("ParentAttendance load failed", err);
-        setLoadError("We couldn't load your attendance records.");
+        reportClientError("ParentAttendance.fetchAttendance", err);
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
         setRecords([]);
+        toast({
+          title: "Failed to load attendance",
+          description: message,
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
-    fetch();
-  }, [user, isDemo]);
 
-  const statusDot: Record<string, string> = { present: "bg-secondary", absent: "bg-destructive", excused: "bg-muted-foreground" };
+    void fetchAttendance();
+  }, [authLoading, isDemo, user?.id]);
+
+  const statusDot: Record<string, string> = {
+    present: "bg-secondary",
+    absent: "bg-destructive",
+    excused: "bg-muted-foreground",
+  };
 
   return (
     <ParentLayout>
@@ -89,26 +84,39 @@ export default function ParentAttendance() {
           <EmptyState title="Account setup needed" description={loadError} icon={ClipboardCheck} />
         )}
 
-        {loading ? <TableSkeleton columns={4} /> : loadError ? null : records.length === 0 ? (
-          <EmptyState title="No attendance records" description="Attendance data will appear once sessions are logged." icon={ClipboardCheck} />
+        {loading ? (
+          <TableSkeleton columns={4} />
+        ) : loadError ? null : records.length === 0 ? (
+          <EmptyState
+            title="No attendance records"
+            description="Attendance data will appear once sessions are logged."
+            icon={ClipboardCheck}
+          />
         ) : (
-          <div className="rounded-xl border border-border bg-card overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-border bg-card">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">
-                {["Date", "Student", "Tutor", "Status"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">{h}</th>
-                ))}
-              </tr></thead>
+              <thead>
+                <tr className="border-b border-border">
+                  {["Date", "Student", "Tutor", "Status"].map((heading) => (
+                    <th
+                      key={heading}
+                      className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground"
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
               <tbody>
-                {records.map((r) => (
-                  <tr key={r.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 text-foreground">{formatDate(r.lesson_date)}</td>
-                    <td className="px-4 py-3 text-foreground">{r.students?.full_name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{r.tutors?.full_name}</td>
+                {records.map((record) => (
+                  <tr key={record.id} className="border-b border-border last:border-0">
+                    <td className="px-4 py-3 text-foreground">{formatDate(record.lesson_date)}</td>
+                    <td className="px-4 py-3 text-foreground">{record.students?.full_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{record.tutors?.full_name}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className={`h-2.5 w-2.5 rounded-full ${statusDot[r.status]}`} />
-                        <span className="capitalize text-muted-foreground">{r.status}</span>
+                        <div className={`h-2.5 w-2.5 rounded-full ${statusDot[record.status]}`} />
+                        <span className="capitalize text-muted-foreground">{record.status}</span>
                       </div>
                     </td>
                   </tr>

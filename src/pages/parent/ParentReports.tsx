@@ -1,82 +1,77 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { TrendingUp } from "lucide-react";
+
 import { ParentLayout } from "@/components/layouts/ParentLayout";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { TrendingUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { DEMO_DATA } from "@/lib/demoData";
+import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
+import { reportClientError } from "@/lib/reportClientError";
+import { toast } from "@/hooks/use-toast";
+
+type LessonRecord = {
+  id: string;
+  subject: string;
+  date: string;
+  topics_covered: string | null;
+  homework: string | null;
+  performance_rating: string | null;
+  comments: string | null;
+  students: { full_name: string };
+  tutors: { full_name: string };
+};
+
+type ParentWorkspaceResponse = {
+  lessons: LessonRecord[];
+};
 
 export default function ParentReports() {
-  const { user, roleOverride } = useAuth();
-  const [lessons, setLessons] = useState<any[]>([]);
+  const { user, roleOverride, loading: authLoading } = useAuth();
+  const [lessons, setLessons] = useState<LessonRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const isDemo = import.meta.env.DEV && roleOverride === "parent";
+  const isDemo =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE === "true" &&
+    roleOverride === "parent";
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!isDemo && !user) return;
 
-    if (isDemo) {
-      setLoading(true);
-      setLoadError(null);
-      setLessons(DEMO_DATA.parent.reports.lessons);
-      setLoading(false);
-      return;
-    }
-
-    const fetch = async () => {
+    const fetchReports = async () => {
       setLoading(true);
       setLoadError(null);
 
       try {
-        const { data: parent, error: parentError } = await supabase
-          .from("parents")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const data = isDemo
+          ? { lessons: DEMO_DATA.parent.reports.lessons as LessonRecord[] }
+          : await invokeSupabaseFunction<ParentWorkspaceResponse>(
+              "get-parent-workspace",
+              undefined,
+            );
 
-        if (parentError) throw parentError;
-
-        if (!parent) {
-          setLoadError("No parent record was found for this account. Ask an admin to create a row in parents for your user.");
-          setLessons([]);
-          return;
-        }
-
-        const { data: students, error: studentsError } = await supabase
-          .from("students")
-          .select("id")
-          .eq("parent_id", parent.id);
-
-        if (studentsError) throw studentsError;
-
-        const ids = students?.map((s) => s.id) ?? [];
-        if (ids.length === 0) {
-          setLessons([]);
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from("lessons")
-          .select("*, students(full_name), tutors(full_name)")
-          .in("student_id", ids)
-          .order("date", { ascending: false });
-
-        if (error) throw error;
-        setLessons(data ?? []);
+        setLessons(data.lessons ?? []);
       } catch (err) {
-        console.error("ParentReports load failed", err);
-        setLoadError("We couldn't load your progress reports.");
+        reportClientError("ParentReports.fetchReports", err);
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
         setLessons([]);
+        toast({
+          title: "Failed to load progress reports",
+          description: message,
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
-    fetch();
-  }, [user, isDemo]);
+
+    void fetchReports();
+  }, [authLoading, isDemo, user?.id]);
 
   const ratingColors: Record<string, string> = {
     Excellent: "bg-secondary/20 text-secondary",
@@ -93,25 +88,50 @@ export default function ParentReports() {
           <EmptyState title="Account setup needed" description={loadError} icon={TrendingUp} />
         )}
 
-        {loading ? <CardSkeleton count={4} /> : loadError ? null : lessons.length === 0 ? (
-          <EmptyState title="No reports yet" description="Lesson reports from tutors will appear here." icon={TrendingUp} />
+        {loading ? (
+          <CardSkeleton count={4} />
+        ) : loadError ? null : lessons.length === 0 ? (
+          <EmptyState
+            title="No reports yet"
+            description="Lesson reports from tutors will appear here."
+            icon={TrendingUp}
+          />
         ) : (
           <div className="space-y-4">
-            {lessons.map((l) => (
-              <div key={l.id} className="rounded-xl border border-border bg-card p-5">
+            {lessons.map((lesson) => (
+              <div key={lesson.id} className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-foreground">{l.students?.full_name} — {l.subject}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(l.date)} • Tutor: {l.tutors?.full_name}</p>
+                    <p className="font-semibold text-foreground">
+                      {lesson.students?.full_name} — {lesson.subject}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(lesson.date)} • Tutor: {lesson.tutors?.full_name}
+                    </p>
                   </div>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ratingColors[l.performance_rating] ?? "bg-muted text-muted-foreground"}`}>
-                    {l.performance_rating}
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      ratingColors[lesson.performance_rating ?? ""] ?? "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {lesson.performance_rating ?? "Unrated"}
                   </span>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
-                  <p><span className="text-muted-foreground">Topics:</span> <span className="text-foreground">{l.topics_covered}</span></p>
-                  <p><span className="text-muted-foreground">Homework:</span> <span className="text-foreground">{l.homework}</span></p>
-                  {l.comments && <p><span className="text-muted-foreground">Comments:</span> <span className="text-foreground">{l.comments}</span></p>}
+                  <p>
+                    <span className="text-muted-foreground">Topics:</span>{" "}
+                    <span className="text-foreground">{lesson.topics_covered || "-"}</span>
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Homework:</span>{" "}
+                    <span className="text-foreground">{lesson.homework || "-"}</span>
+                  </p>
+                  {lesson.comments && (
+                    <p>
+                      <span className="text-muted-foreground">Comments:</span>{" "}
+                      <span className="text-foreground">{lesson.comments}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

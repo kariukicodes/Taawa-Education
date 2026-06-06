@@ -1,0 +1,5 @@
+ALTER TABLE public.parents
+ALTER COLUMN user_id DROP NOT NULL;
+
+ALTER TABLE public.tutors
+ALTER COLUMN user_id DROP NOT NULL;

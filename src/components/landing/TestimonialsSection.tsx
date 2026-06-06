@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 
 const testimonials = [
   {
-    quote: "EduNest transformed our homeschooling journey. Zara is thriving in ways we never expected — she's two grades ahead in maths and actually enjoys learning.",
+    quote: "Taawa Education transformed our homeschooling journey. Zara is thriving in ways we never expected — she's two grades ahead in maths and actually enjoys learning.",
     parent: "Grace K.",
     child: "Daughter, Age 10, Grade 5",
     outcome: "Two grades ahead in Mathematics",
@@ -14,7 +14,7 @@ const testimonials = [
     outcome: "Top marks in Science assessments",
   },
   {
-    quote: "We moved from a top Nairobi school to EduNest and haven't looked back. The personalised attention is something no classroom of 30 students can offer.",
+    quote: "We moved from a top Nairobi school to Taawa Education and haven't looked back. The personalised attention is something no classroom of 30 students can offer.",
     parent: "Sarah M.",
     child: "Daughter, Age 11, Grade 6",
     outcome: "Personalised curriculum, remarkable confidence growth",

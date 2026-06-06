@@ -1,90 +1,90 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { DollarSign } from "lucide-react";
+
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
-import { formatKES, formatDate } from "@/lib/format";
+import { formatDate, formatKES } from "@/lib/format";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
 import { DEMO_DATA } from "@/lib/demoData";
+import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
+import { reportClientError } from "@/lib/reportClientError";
+import { toast } from "@/hooks/use-toast";
+
+type EarningRecord = {
+  id: string;
+  tutor_id: string;
+  description: string | null;
+  amount_kes: number;
+  date: string;
+  created_at?: string;
+};
+
+type TeacherWorkspaceResponse = {
+  earnings: EarningRecord[];
+};
 
 export default function TeacherEarnings() {
-  const { user, roleOverride } = useAuth();
-  const [earnings, setEarnings] = useState<any[]>([]);
+  const { user, roleOverride, loading: authLoading } = useAuth();
+  const [earnings, setEarnings] = useState<EarningRecord[]>([]);
   const [thisMonth, setThisMonth] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
+  const isDemo =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE === "true" &&
+    roleOverride === "teacher";
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!isDemo && !user) return;
 
-    if (isDemo) {
-      setLoading(true);
-      setLoadError(null);
-      const demo = DEMO_DATA.teacher.earnings.earnings;
-      setEarnings(demo);
-      const t = demo.reduce((s: number, e: any) => s + e.amount_kes, 0);
-      setTotal(t);
-      const now = new Date();
-      const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-      const m = demo.filter((e: any) => e.date >= monthStart).reduce((s: number, e: any) => s + e.amount_kes, 0);
-      setThisMonth(m);
-      setLoading(false);
-      return;
-    }
-
-    const fetch = async () => {
+    const fetchEarnings = async () => {
       setLoading(true);
       setLoadError(null);
 
       try {
-        const { data: tutor, error: tutorError } = await supabase
-          .from("tutors")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const data = isDemo
+          ? { earnings: DEMO_DATA.teacher.earnings.earnings as EarningRecord[] }
+          : await invokeSupabaseFunction<TeacherWorkspaceResponse>(
+              "get-teacher-workspace",
+              undefined,
+            );
 
-        if (tutorError) throw tutorError;
+        const nextEarnings = data.earnings ?? [];
+        setEarnings(nextEarnings);
 
-        if (!tutor) {
-          setLoadError("No tutor record was found for this account. Ask an admin to create a row in tutors for your user.");
-          setEarnings([]);
-          setThisMonth(0);
-          setTotal(0);
-          return;
-        }
+        const nextTotal = nextEarnings.reduce((sum, item) => sum + item.amount_kes, 0);
+        setTotal(nextTotal);
 
-        const { data, error } = await supabase
-          .from("earnings")
-          .select("*")
-          .eq("tutor_id", tutor.id)
-          .order("date", { ascending: false });
-
-        if (error) throw error;
-
-        setEarnings(data ?? []);
-        const t = data?.reduce((s, e) => s + e.amount_kes, 0) ?? 0;
-        setTotal(t);
         const now = new Date();
         const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-        const m = data?.filter((e) => e.date >= monthStart).reduce((s, e) => s + e.amount_kes, 0) ?? 0;
-        setThisMonth(m);
+        const nextThisMonth = nextEarnings
+          .filter((item) => item.date >= monthStart)
+          .reduce((sum, item) => sum + item.amount_kes, 0);
+        setThisMonth(nextThisMonth);
       } catch (err) {
-        console.error("TeacherEarnings load failed", err);
-        setLoadError("We couldn't load your earnings.");
+        reportClientError("TeacherEarnings.fetchEarnings", err);
+        const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
         setEarnings([]);
         setThisMonth(0);
         setTotal(0);
+        toast({
+          title: "Failed to load earnings",
+          description: message,
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
-    fetch();
-  }, [user, isDemo]);
+
+    void fetchEarnings();
+  }, [authLoading, isDemo, user?.id]);
 
   return (
     <TeacherLayout>
@@ -97,7 +97,15 @@ export default function TeacherEarnings() {
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            {[1, 2].map((i) => <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-2"><Skeleton className="h-3 w-32" /><Skeleton className="h-8 w-40" /></div>)}
+            {[1, 2].map((index) => (
+              <div
+                key={index}
+                className="space-y-2 rounded-xl border border-border bg-card p-5"
+              >
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-8 w-40" />
+              </div>
+            ))}
           </div>
         ) : loadError ? null : (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -112,22 +120,39 @@ export default function TeacherEarnings() {
           </div>
         )}
 
-        {loading ? <TableSkeleton columns={3} /> : loadError ? null : earnings.length === 0 ? (
-          <EmptyState title="No earnings yet" description="Your earnings will be recorded here." icon={DollarSign} />
+        {loading ? (
+          <TableSkeleton columns={3} />
+        ) : loadError ? null : earnings.length === 0 ? (
+          <EmptyState
+            title="No earnings yet"
+            description="Your earnings will be recorded here."
+            icon={DollarSign}
+          />
         ) : (
-          <div className="rounded-xl border border-border bg-card overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-border bg-card">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border">
-                {["Date", "Description", "Amount"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">{h}</th>
-                ))}
-              </tr></thead>
+              <thead>
+                <tr className="border-b border-border">
+                  {["Date", "Description", "Amount"].map((heading) => (
+                    <th
+                      key={heading}
+                      className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground"
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
               <tbody>
-                {earnings.map((e) => (
-                  <tr key={e.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 text-foreground">{formatDate(e.date)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{e.description}</td>
-                    <td className="px-4 py-3 text-foreground">{formatKES(e.amount_kes)}</td>
+                {earnings.map((earning) => (
+                  <tr key={earning.id} className="border-b border-border last:border-0">
+                    <td className="px-4 py-3 text-foreground">{formatDate(earning.date)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {earning.description || "Tuition payout"}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {formatKES(earning.amount_kes)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

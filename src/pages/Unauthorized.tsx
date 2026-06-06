@@ -1,21 +1,36 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
 export default function Unauthorized() {
-  const { user, roleOverride, setRoleOverride, clearRoleOverride, loading } = useAuth();
+  const { user, signOut, roleOverride, setRoleOverride, clearRoleOverride, loading } = useAuth();
   const [demoRole, setDemoRole] = useState<"admin" | "parent" | "teacher">("parent");
   const navigate = useNavigate();
+  const location = useLocation();
   const isDev = import.meta.env.DEV;
 
   const canSwitch = isDev && !!user && !loading;
+  const reason = (location.state as { reason?: string } | null)?.reason;
+  const isNoRole = reason === "no-role";
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <h1 className="text-6xl font-bold text-primary">403</h1>
       <p className="mt-4 text-lg text-muted-foreground">
-        You don't have permission to access this page.
+        {isNoRole
+          ? "Your account has no role assigned yet. Ask an admin to add you to user_roles."
+          : "You don't have permission to access this page."}
       </p>
+
+      {!!user && (
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="mt-6 rounded-lg border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+        >
+          Sign Out
+        </button>
+      )}
 
       {canSwitch && (
         <div className="mt-6 w-full max-w-sm rounded-xl border border-border bg-card p-4">

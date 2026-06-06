@@ -84,7 +84,7 @@ function AboutHero() {
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          EduNest was born in Nairobi from a simple belief — that every child
+          Taawa Education was born in Nairobi from a simple belief — that every child
           deserves an education as unique as they are. We built the platform we
           wished had existed.
         </p>
@@ -153,11 +153,11 @@ function StorySection() {
               },
               {
                 year: "2021",
-                text: "After two years of manually vetting tutors, building timetables in spreadsheets, and sending progress reports by WhatsApp, it was clear: there had to be a better way. EduNest was incorporated.",
+                text: "After two years of manually vetting tutors, building timetables in spreadsheets, and sending progress reports by WhatsApp, it was clear: there had to be a better way. Taawa Education was incorporated.",
               },
               {
                 year: "2024",
-                text: "Today EduNest serves 48+ families across Nairobi and the diaspora, with a network of 12+ vetted tutors delivering CBC, British, Montessori, and custom curricula through a single, elegant platform.",
+                text: "Today Taawa Education serves 48+ families across Nairobi and the diaspora, with a network of 12+ vetted tutors delivering CBC, British, Montessori, and custom curricula through a single, elegant platform.",
               },
             ].map((item, i) => (
               <div
@@ -201,13 +201,13 @@ function StorySection() {
             <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 40% 20%, rgba(201,168,76,0.16) 0%, transparent 55%)" }} />
             <img
               src="/about-story.jpg"
-              alt="EduNest founders"
+              alt="Taawa Education founders"
               className="absolute inset-0 h-full w-full object-cover object-center"
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
             {/* Placeholder */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-20">
-              <div className="font-display flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 text-[20px] text-primary">EN</div>
+              <div className="font-display flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 text-[20px] text-primary">TE</div>
               <p className="text-[11px] tracking-widest text-muted-foreground/70">FOUNDERS PHOTO</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(to top, #0A0A0A, transparent)" }} />
@@ -431,7 +431,7 @@ function TeamSection() {
           >
             The people behind
             <br />
-            <span className="text-primary">EduNest.</span>
+            <span className="text-primary">Taawa Education.</span>
           </h2>
         </div>
 

@@ -286,7 +286,7 @@ function TutorsHero() {
 
           {/* Sub */}
           <p className={`mb-10 max-w-[400px] text-[15px] font-light leading-[1.9] text-muted-foreground ${fadeUp("delay-200")}`}>
-            Every EduNest tutor is degree-qualified, background-checked, and
+            Every Taawa Education tutor is degree-qualified, background-checked, and
             trained in personalised homeschooling — not just teaching, but
             building a genuine relationship with your child.
           </p>

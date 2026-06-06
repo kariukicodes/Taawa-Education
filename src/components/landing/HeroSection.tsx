@@ -197,7 +197,7 @@ export function HeroSection() {
               {/* Hero image — swap src for your actual photo */}
               <img
                 src="/heroimage.png"
-                alt="Student learning with EduNest tutor"
+                alt="Student learning with Taawa Education tutor"
                 className="absolute inset-0 h-full w-full object-cover object-top"
                 style={{ opacity: 0.88 }}
               />
@@ -322,7 +322,7 @@ export function HeroSection() {
                 12{" "}
                 <span className="text-[15px] font-light text-primary">students</span>
               </div>
-              <p className="mt-1 text-[10px] text-muted-foreground/70">joined EduNest in April</p>
+              <p className="mt-1 text-[10px] text-muted-foreground/70">joined Taawa Education in April</p>
               <div className="mt-2 flex gap-1">
                 {[40, 65, 50, 80, 55, 90, 70].map((h, i) => (
                   <div

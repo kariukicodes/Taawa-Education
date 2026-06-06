@@ -3,13 +3,14 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard, Users, Calendar, TrendingUp, ClipboardCheck,
-  FileText, CreditCard, Bell, LogOut, Menu, X
+  FileText, CreditCard, Bell, LogOut, Menu, X, MessageSquare
 } from "lucide-react";
 
 const parentLinks = [
   { label: "Overview", path: "/parent", icon: LayoutDashboard },
   { label: "My Children", path: "/parent/children", icon: Users },
   { label: "Schedule", path: "/parent/schedule", icon: Calendar },
+  { label: "Messages", path: "/parent/messages", icon: MessageSquare },
   { label: "Progress & Reports", path: "/parent/reports", icon: TrendingUp },
   { label: "Attendance", path: "/parent/attendance", icon: ClipboardCheck },
   { label: "Documents", path: "/parent/documents", icon: FileText },

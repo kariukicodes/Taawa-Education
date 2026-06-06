@@ -1,45 +1,97 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { Bell } from "lucide-react";
+
+import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { formatDate } from "@/lib/format";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/contexts/AuthContext";
 import { DEMO_DATA } from "@/lib/demoData";
+import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
+import { reportClientError } from "@/lib/reportClientError";
+import { toast } from "@/hooks/use-toast";
+
+type AnnouncementRecord = {
+  id: string;
+  message: string;
+  target_role: string;
+  created_at: string;
+};
+
+type TeacherWorkspaceResponse = {
+  announcements: AnnouncementRecord[];
+};
 
 export default function TeacherNotifications() {
-  const { roleOverride } = useAuth();
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const { roleOverride, user, loading: authLoading } = useAuth();
+  const [announcements, setAnnouncements] = useState<AnnouncementRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isDemo = import.meta.env.DEV && roleOverride === "teacher";
+  const isDemo =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_DEMO_MODE === "true" &&
+    roleOverride === "teacher";
 
   useEffect(() => {
-    if (isDemo) {
-      setLoading(true);
-      const all = DEMO_DATA.admin.announcements.announcements as any[];
-      setAnnouncements(all.filter((a) => ["teacher", "all"].includes(a.target_role)));
-      setLoading(false);
-      return;
-    }
+    if (authLoading) return;
+    if (!isDemo && !user) return;
 
-    supabase.from("announcements").select("*").in("target_role", ["teacher", "all"]).order("created_at", { ascending: false })
-      .then(({ data }) => { setAnnouncements(data ?? []); setLoading(false); });
-  }, [isDemo]);
+    const fetchAnnouncements = async () => {
+      setLoading(true);
+
+      try {
+        const data = isDemo
+          ? {
+              announcements: (DEMO_DATA.admin.announcements.announcements as AnnouncementRecord[]).filter(
+                (announcement) => ["teacher", "all"].includes(announcement.target_role),
+              ),
+            }
+          : await invokeSupabaseFunction<TeacherWorkspaceResponse>(
+              "get-teacher-workspace",
+              undefined,
+            );
+
+        setAnnouncements(data.announcements ?? []);
+      } catch (err) {
+        reportClientError("TeacherNotifications.fetchAnnouncements", err);
+        const message = err instanceof Error ? err.message : String(err);
+        toast({
+          title: "Failed to load notifications",
+          description: message,
+          variant: "destructive",
+        });
+        setAnnouncements([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchAnnouncements();
+  }, [authLoading, isDemo, roleOverride, user?.id]);
 
   return (
     <TeacherLayout>
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
-        {loading ? <CardSkeleton count={3} /> : announcements.length === 0 ? (
-          <EmptyState title="No notifications" description="Announcements from admin will appear here." icon={Bell} />
+        {loading ? (
+          <CardSkeleton count={3} />
+        ) : announcements.length === 0 ? (
+          <EmptyState
+            title="No notifications"
+            description="Announcements from admin will appear here."
+            icon={Bell}
+          />
         ) : (
           <div className="space-y-3">
-            {announcements.map((a) => (
-              <div key={a.id} className="active-gold-border rounded-xl border border-border bg-card p-5">
-                <p className="text-xs text-muted-foreground mb-2">{formatDate(a.created_at)}</p>
-                <p className="text-sm text-foreground leading-relaxed">{a.message}</p>
+            {announcements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className="active-gold-border rounded-xl border border-border bg-card p-5"
+              >
+                <p className="mb-2 text-xs text-muted-foreground">
+                  {formatDate(announcement.created_at)}
+                </p>
+                <p className="text-sm leading-relaxed text-foreground">{announcement.message}</p>
               </div>
             ))}
           </div>

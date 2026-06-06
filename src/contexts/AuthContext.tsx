@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type UserRole = "admin" | "parent" | "teacher" | null;
 
-const ROLE_OVERRIDE_STORAGE_KEY = "edunest_role_override";
+const ROLE_OVERRIDE_STORAGE_KEY = "taawa_role_override";
 
 interface AuthContextType {
   user: User | null;
