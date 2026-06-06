@@ -26,6 +26,7 @@ export default function TeacherNotifications() {
   const { roleOverride, user, loading: authLoading } = useAuth();
   const [announcements, setAnnouncements] = useState<AnnouncementRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const isDemo =
     import.meta.env.DEV &&
@@ -38,6 +39,7 @@ export default function TeacherNotifications() {
 
     const fetchAnnouncements = async () => {
       setLoading(true);
+      setLoadError(null);
 
       try {
         const data = isDemo
@@ -55,6 +57,7 @@ export default function TeacherNotifications() {
       } catch (err) {
         reportClientError("TeacherNotifications.fetchAnnouncements", err);
         const message = err instanceof Error ? err.message : String(err);
+        setLoadError(message);
         toast({
           title: "Failed to load notifications",
           description: message,
@@ -75,6 +78,8 @@ export default function TeacherNotifications() {
         <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
         {loading ? (
           <CardSkeleton count={3} />
+        ) : loadError ? (
+          <EmptyState title="Notifications unavailable" description={loadError} icon={Bell} />
         ) : announcements.length === 0 ? (
           <EmptyState
             title="No notifications"

@@ -1,6 +1,12 @@
 import { requireAdmin } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  PARENT_BASIC_SELECT,
+  PARENT_FULL_SELECT,
+  isMissingColumnError,
+  normalizeParent,
+} from "../_shared/schemaCompat.ts";
 
 interface ManageParentBody {
   action?: "update" | "delete" | "archive" | "restore";
@@ -96,10 +102,15 @@ Deno.serve(async (req) => {
           archived_at: archivedAt,
         })
         .eq("id", body.parent_id)
-        .select("id, full_name, phone, user_id, status, archived_at, created_at")
+        .select(PARENT_FULL_SELECT)
         .single();
 
-      if (statusError) throw statusError;
+      if (statusError) {
+        if (isMissingColumnError(statusError)) {
+          throw new Error("Parent archive status is not available in the current database schema yet.");
+        }
+        throw statusError;
+      }
 
       const { data: students, error: studentsError } = await adminSupabase
         .from("students")
@@ -111,7 +122,7 @@ Deno.serve(async (req) => {
 
       return jsonResponse({
         parent: {
-          ...parent,
+          ...normalizeParent(parent),
           students: students ?? [],
         },
       });
@@ -124,7 +135,7 @@ Deno.serve(async (req) => {
         phone: body.phone?.trim() || null,
       })
       .eq("id", body.parent_id)
-      .select("id, full_name, phone, user_id, status, archived_at, created_at")
+      .select(PARENT_BASIC_SELECT)
       .single();
 
     if (updateError) throw updateError;
@@ -139,7 +150,7 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       parent: {
-        ...parent,
+        ...normalizeParent(parent),
         students: students ?? [],
       },
     });

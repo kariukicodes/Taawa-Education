@@ -37,6 +37,7 @@ type TeacherWorkspaceResponse = {
 };
 
 export default function TeacherLessons() {
+  const today = new Date().toISOString().slice(0, 10);
   const { user, roleOverride, loading: authLoading } = useAuth();
   const [students, setStudents] = useState<StudentOption[]>([]);
   const [lessons, setLessons] = useState<LessonRecord[]>([]);
@@ -46,7 +47,7 @@ export default function TeacherLessons() {
   const [form, setForm] = useState({
     student_id: "",
     subject: "",
-    date: "",
+    date: today,
     topics_covered: "",
     homework: "",
     performance_rating: "",
@@ -138,7 +139,7 @@ export default function TeacherLessons() {
       setForm({
         student_id: "",
         subject: "",
-        date: "",
+        date: today,
         topics_covered: "",
         homework: "",
         performance_rating: "",

@@ -1,6 +1,14 @@
 import { requireTeacher } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  STUDENT_BASIC_SELECT,
+  STUDENT_FULL_SELECT,
+  TUTOR_BASIC_SELECT,
+  normalizeStudent,
+  normalizeTutor,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,11 +25,24 @@ Deno.serve(async (req) => {
   const { adminSupabase, user } = auth;
 
   try {
-    const { data: tutor, error: tutorError } = await adminSupabase
-      .from("tutors")
-      .select("id, full_name, phone, status")
-      .eq("user_id", user.id)
-      .single();
+    const tutorResult = await selectWithFallback(
+      () =>
+        adminSupabase
+          .from("tutors")
+          .select("id, full_name, phone, status, user_id, created_at")
+          .eq("user_id", user.id)
+          .single(),
+      () =>
+        adminSupabase
+          .from("tutors")
+          .select(TUTOR_BASIC_SELECT)
+          .eq("user_id", user.id)
+          .single(),
+      normalizeTutor,
+    );
+
+    const tutor = tutorResult.data as Record<string, any> | null;
+    const tutorError = tutorResult.error;
 
     if (tutorError || !tutor) {
       throw tutorError ?? new Error("Tutor profile not found.");
@@ -79,11 +100,20 @@ Deno.serve(async (req) => {
     );
 
     const { data: students, error: studentsError } = studentIds.length
-      ? await adminSupabase
-          .from("students")
-          .select("id, full_name, age, grade, curriculum, subjects, start_date, status")
-          .in("id", studentIds)
-      : { data: [], error: null };
+      ? await selectWithFallback(
+          () =>
+            adminSupabase
+              .from("students")
+              .select(STUDENT_FULL_SELECT)
+              .in("id", studentIds),
+          () =>
+            adminSupabase
+              .from("students")
+              .select(STUDENT_BASIC_SELECT)
+              .in("id", studentIds),
+          normalizeStudent,
+        )
+      : { data: [], error: null, usedFallback: false };
 
     if (studentsError) throw studentsError;
 

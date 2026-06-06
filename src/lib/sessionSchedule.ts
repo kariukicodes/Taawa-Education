@@ -65,3 +65,12 @@ export function formatSessionReminder(schedule: SessionSchedule) {
 
   return `Reminder ${offset} minutes before`;
 }
+
+export function hasSessionSchedule(schedule: SessionSchedule) {
+  return (
+    schedule.session_day_of_week !== undefined &&
+    schedule.session_day_of_week !== null &&
+    Boolean(schedule.session_start_time) &&
+    Boolean(schedule.session_end_time)
+  );
+}

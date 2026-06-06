@@ -31,6 +31,7 @@ import ParentBilling from "./pages/parent/ParentBilling";
 import ParentNotifications from "./pages/parent/ParentNotifications";
 import ParentMessages from "./pages/parent/ParentMessages";
 // Teacher
+import TeacherOverview from "./pages/teacher/TeacherOverview";
 import TeacherStudents from "./pages/teacher/TeacherStudents";
 import TeacherSchedule from "./pages/teacher/TeacherSchedule";
 import TeacherMessages from "./pages/teacher/TeacherMessages";
@@ -84,7 +85,8 @@ const App = () => (
               <Route path="/parent/notifications" element={<ProtectedRoute requiredRole="parent"><ParentNotifications /></ProtectedRoute>} />
 
               {/* Teacher */}
-              <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherStudents /></ProtectedRoute>} />
+              <Route path="/teacher" element={<ProtectedRoute requiredRole="teacher"><TeacherOverview /></ProtectedRoute>} />
+              <Route path="/teacher/students" element={<ProtectedRoute requiredRole="teacher"><TeacherStudents /></ProtectedRoute>} />
               <Route path="/teacher/schedule" element={<ProtectedRoute requiredRole="teacher"><TeacherSchedule /></ProtectedRoute>} />
               <Route path="/teacher/messages" element={<ProtectedRoute requiredRole="teacher"><TeacherMessages /></ProtectedRoute>} />
               <Route path="/teacher/lessons" element={<ProtectedRoute requiredRole="teacher"><TeacherLessons /></ProtectedRoute>} />

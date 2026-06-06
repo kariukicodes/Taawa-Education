@@ -2,6 +2,7 @@ import { requireAdmin } from "../_shared/admin.ts";
 import { ensureEmailAvailable, normalizeEmail } from "../_shared/account.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import { normalizeStudent } from "../_shared/schemaCompat.ts";
 
 interface CreateStudentAdminBody {
   age?: number;
@@ -117,7 +118,7 @@ Deno.serve(async (req) => {
         grade: body.grade!.trim(),
         curriculum: body.curriculum ?? "CBC",
       })
-      .select("id, parent_id, full_name, age, grade, curriculum, status, archived_at, created_at")
+      .select("id, parent_id, full_name, age, grade, curriculum, subjects, start_date, created_at")
       .single();
 
     if (studentError) throw studentError;
@@ -147,7 +148,7 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       student: {
-        ...student,
+        ...normalizeStudent(student),
         parents: parentName ? { full_name: parentName } : null,
         tutor_assignments: tutorName
           ? [{ tutor_id: body.tutor_id, tutors: { full_name: tutorName } }]

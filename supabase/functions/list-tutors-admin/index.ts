@@ -2,6 +2,12 @@ import { requireAdmin } from "../_shared/admin.ts";
 import { getAuthUserDetails } from "../_shared/account.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  TUTOR_BASIC_SELECT,
+  TUTOR_FULL_SELECT,
+  normalizeTutor,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,14 +23,25 @@ Deno.serve(async (req) => {
 
   const { adminSupabase } = auth;
 
-  const { data: tutors, error: tutorsError } = await adminSupabase
-    .from("tutors")
-    .select("id, full_name, phone, rate_kes, status, user_id, created_at")
-    .order("created_at", { ascending: false });
+  const tutorsResult = await selectWithFallback(
+    () =>
+      adminSupabase
+        .from("tutors")
+        .select(TUTOR_FULL_SELECT)
+        .order("created_at", { ascending: false }),
+    () =>
+      adminSupabase
+        .from("tutors")
+        .select(TUTOR_BASIC_SELECT)
+        .order("created_at", { ascending: false }),
+    normalizeTutor,
+  );
 
-  if (tutorsError) {
-    return jsonResponse({ error: tutorsError.message }, { status: 400 });
+  if (tutorsResult.error) {
+    return jsonResponse({ error: tutorsResult.error.message }, { status: 400 });
   }
+
+  const tutors = Array.isArray(tutorsResult.data) ? tutorsResult.data : [];
 
   const tutorIds = (tutors ?? []).map((t) => t.id);
   let assignmentCounts = new Map<string, number>();

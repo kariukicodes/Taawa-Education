@@ -309,7 +309,7 @@ export default function TeacherMessages() {
                           </a>
                         )}
                         <Link
-                          to="/teacher"
+                          to="/teacher/students"
                           className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
                         >
                           View Student

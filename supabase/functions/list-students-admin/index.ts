@@ -1,5 +1,11 @@
 import { requireAdmin } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import {
+  STUDENT_BASIC_SELECT,
+  STUDENT_FULL_SELECT,
+  normalizeStudent,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -15,14 +21,25 @@ Deno.serve(async (req) => {
 
   const { adminSupabase } = auth;
 
-  const { data: students, error: studentsError } = await adminSupabase
-    .from("students")
-    .select("id, parent_id, full_name, age, grade, curriculum, status, archived_at, created_at")
-    .order("created_at", { ascending: false });
+  const studentsResult = await selectWithFallback(
+    () =>
+      adminSupabase
+        .from("students")
+        .select(STUDENT_FULL_SELECT)
+        .order("created_at", { ascending: false }),
+    () =>
+      adminSupabase
+        .from("students")
+        .select(STUDENT_BASIC_SELECT)
+        .order("created_at", { ascending: false }),
+    normalizeStudent,
+  );
 
-  if (studentsError) {
-    return jsonResponse({ error: studentsError.message }, { status: 400 });
+  if (studentsResult.error) {
+    return jsonResponse({ error: studentsResult.error.message }, { status: 400 });
   }
+
+  const students = Array.isArray(studentsResult.data) ? studentsResult.data : [];
 
   const parentIds = Array.from(
     new Set((students ?? []).map((student) => student.parent_id).filter(Boolean)),

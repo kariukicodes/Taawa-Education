@@ -10,7 +10,11 @@ import { buildWhatsAppLink } from "@/lib/contactLinks";
 import { formatDate } from "@/lib/format";
 import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
 import { reportClientError } from "@/lib/reportClientError";
-import { formatSessionReminder, formatSessionSchedule } from "@/lib/sessionSchedule";
+import {
+  formatSessionReminder,
+  formatSessionSchedule,
+  hasSessionSchedule,
+} from "@/lib/sessionSchedule";
 import { toast } from "@/hooks/use-toast";
 
 type TeacherDashboardResponse = {
@@ -85,7 +89,9 @@ export default function TeacherSchedule() {
     void fetchSchedule();
   }, [authLoading, isDemo, user?.id]);
 
-  const sessions = students.filter((student) => student.meeting_link);
+  const sessions = students.filter(
+    (student) => student.meeting_link || hasSessionSchedule(student),
+  );
 
   return (
     <TeacherLayout>
@@ -98,8 +104,8 @@ export default function TeacherSchedule() {
           <EmptyState title="Schedule unavailable" description={loadError} icon={Calendar} />
         ) : sessions.length === 0 ? (
           <EmptyState
-            title="No live meeting links yet"
-            description="Ask an admin to add Google Meet or Zoom links from Tutor Assignments."
+            title="No sessions scheduled yet"
+            description="Ask an admin to add the recurring class schedule from Tutor Assignments."
             icon={Video}
           />
         ) : (
@@ -127,15 +133,22 @@ export default function TeacherSchedule() {
                     <MessageCircle className="h-3.5 w-3.5" />
                     In-App Chat
                   </Link>
-                  <a
-                    href={session.meeting_link ?? "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Video className="h-3.5 w-3.5" />
-                    Join Session
-                  </a>
+                  {session.meeting_link ? (
+                    <a
+                      href={session.meeting_link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Video className="h-3.5 w-3.5" />
+                      Join Session
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted-foreground">
+                      <Video className="h-3.5 w-3.5" />
+                      Meeting Link Pending
+                    </span>
+                  )}
                   {session.parent?.phone && (
                     <a
                       href={buildWhatsAppLink(

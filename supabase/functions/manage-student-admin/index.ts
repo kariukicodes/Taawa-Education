@@ -1,6 +1,12 @@
 import { requireAdmin } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  STUDENT_BASIC_SELECT,
+  STUDENT_FULL_SELECT,
+  isMissingColumnError,
+  normalizeStudent,
+} from "../_shared/schemaCompat.ts";
 
 interface ManageStudentBody {
   action?: "update" | "delete" | "archive" | "restore";
@@ -74,10 +80,15 @@ Deno.serve(async (req) => {
           archived_at: archivedAt,
         })
         .eq("id", body.student_id)
-        .select("id, parent_id, full_name, age, grade, curriculum, status, archived_at, created_at")
+        .select(STUDENT_FULL_SELECT)
         .single();
 
-      if (statusError) throw statusError;
+      if (statusError) {
+        if (isMissingColumnError(statusError)) {
+          throw new Error("Student archive status is not available in the current database schema yet.");
+        }
+        throw statusError;
+      }
 
       const { data: parent, error: parentLookupError } = await adminSupabase
         .from("parents")
@@ -103,7 +114,7 @@ Deno.serve(async (req) => {
 
       return jsonResponse({
         student: {
-          ...student,
+          ...normalizeStudent(student),
           parents: { full_name: parent.full_name },
           tutor_assignments: tutorName && assignment?.tutor_id
             ? [{ tutor_id: assignment.tutor_id, tutors: { full_name: tutorName } }]
@@ -132,7 +143,7 @@ Deno.serve(async (req) => {
         curriculum: body.curriculum ?? "CBC",
       })
       .eq("id", body.student_id)
-      .select("id, parent_id, full_name, age, grade, curriculum, status, archived_at, created_at")
+      .select(STUDENT_BASIC_SELECT)
       .single();
 
     if (updateStudentError) throw updateStudentError;
@@ -206,7 +217,7 @@ Deno.serve(async (req) => {
 
     return jsonResponse({
       student: {
-        ...student,
+        ...normalizeStudent(student),
         parents: { full_name: parent.full_name },
         tutor_assignments: tutorName
           ? [{ tutor_id: nextTutorId, tutors: { full_name: tutorName } }]

@@ -1,6 +1,15 @@
 import { requireParent } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  PARENT_BASIC_SELECT,
+  PARENT_FULL_SELECT,
+  STUDENT_BASIC_SELECT,
+  STUDENT_FULL_SELECT,
+  normalizeParent,
+  normalizeStudent,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,28 +26,60 @@ Deno.serve(async (req) => {
   const { adminSupabase, user } = auth;
 
   try {
-    const { data: parent, error: parentError } = await adminSupabase
-      .from("parents")
-      .select("id, full_name, phone, status")
-      .eq("user_id", user.id)
-      .single();
+    const parentResult = await selectWithFallback(
+      () =>
+        adminSupabase
+          .from("parents")
+          .select("id, full_name, phone, status, user_id, created_at")
+          .eq("user_id", user.id)
+          .single(),
+      () =>
+        adminSupabase
+          .from("parents")
+          .select(PARENT_BASIC_SELECT)
+          .eq("user_id", user.id)
+          .single(),
+      normalizeParent,
+    );
+
+    const parent = parentResult.data as Record<string, any> | null;
+    const parentError = parentResult.error;
 
     if (parentError || !parent) {
       throw parentError ?? new Error("Parent profile not found.");
     }
 
-    const { data: students, error: studentsError } = await adminSupabase
-      .from("students")
-      .select("id, full_name, grade, age, curriculum, status, start_date")
-      .eq("parent_id", parent.id)
-      .order("full_name", { ascending: true });
+    const studentsResult = await selectWithFallback(
+      () =>
+        adminSupabase
+          .from("students")
+          .select(STUDENT_FULL_SELECT)
+          .eq("parent_id", parent.id)
+          .order("full_name", { ascending: true }),
+      () =>
+        adminSupabase
+          .from("students")
+          .select(STUDENT_BASIC_SELECT)
+          .eq("parent_id", parent.id)
+          .order("full_name", { ascending: true }),
+      normalizeStudent,
+    );
+
+    const students = Array.isArray(studentsResult.data) ? studentsResult.data : [];
+    const studentsError = studentsResult.error;
 
     if (studentsError) throw studentsError;
 
-    const studentIds = (students ?? []).map((student) => student.id);
+    const studentIds = students.map((student) => student.id);
 
-    const [attendanceResult, paymentsResult, documentsResult, lessonsResult, announcementsResult] =
+    const [assignmentsResult, attendanceResult, paymentsResult, documentsResult, lessonsResult, announcementsResult] =
       await Promise.all([
+        studentIds.length
+          ? adminSupabase
+              .from("tutor_assignments")
+              .select("student_id, tutor_id")
+              .in("student_id", studentIds)
+          : Promise.resolve({ data: [], error: null }),
         studentIds.length
           ? adminSupabase
               .from("attendance")
@@ -75,6 +116,7 @@ Deno.serve(async (req) => {
       ]);
 
     const firstError = [
+      assignmentsResult.error,
       attendanceResult.error,
       paymentsResult.error,
       documentsResult.error,
@@ -88,6 +130,7 @@ Deno.serve(async (req) => {
       new Set(
         (attendanceResult.data ?? [])
           .map((record) => record.tutor_id)
+          .concat((assignmentsResult.data ?? []).map((assignment) => assignment.tutor_id))
           .concat((lessonsResult.data ?? []).map((lesson) => lesson.tutor_id)),
       ),
     );
@@ -101,12 +144,12 @@ Deno.serve(async (req) => {
 
     if (tutorsError) throw tutorsError;
 
-    const studentsById = new Map((students ?? []).map((student) => [student.id, student] as const));
+    const studentsById = new Map(students.map((student) => [student.id, student] as const));
     const tutorsById = new Map((tutors ?? []).map((tutor) => [tutor.id, tutor.full_name] as const));
 
     return jsonResponse({
       parent,
-      students: students ?? [],
+      students,
       attendance: (attendanceResult.data ?? []).map((record) => ({
         ...record,
         students: { full_name: studentsById.get(record.student_id)?.full_name ?? "Student" },

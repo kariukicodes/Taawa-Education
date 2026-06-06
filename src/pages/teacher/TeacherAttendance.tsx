@@ -33,6 +33,7 @@ type TeacherWorkspaceResponse = {
 };
 
 export default function TeacherAttendance() {
+  const today = new Date().toISOString().slice(0, 10);
   const { user, roleOverride, loading: authLoading } = useAuth();
   const [students, setStudents] = useState<StudentOption[]>([]);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -41,7 +42,7 @@ export default function TeacherAttendance() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     student_id: "",
-    lesson_date: "",
+    lesson_date: today,
     status: "present",
   });
 
@@ -171,7 +172,7 @@ export default function TeacherAttendance() {
 
       setForm({
         student_id: "",
-        lesson_date: "",
+        lesson_date: today,
         status: "present",
       });
 

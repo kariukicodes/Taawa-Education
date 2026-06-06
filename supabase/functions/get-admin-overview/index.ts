@@ -1,6 +1,24 @@
 import { requireAdmin } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import { isMissingColumnError } from "../_shared/schemaCompat.ts";
+
+async function countWithOptionalStatus(adminSupabase: any, table: string) {
+  const activeResult = await adminSupabase
+    .from(table)
+    .select("id", { count: "exact", head: true })
+    .eq("status", "active");
+
+  if (!activeResult.error) {
+    return activeResult;
+  }
+
+  if (!isMissingColumnError(activeResult.error)) {
+    return activeResult;
+  }
+
+  return adminSupabase.from(table).select("id", { count: "exact", head: true });
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -33,9 +51,9 @@ Deno.serve(async (req) => {
       recentAssignmentsRes,
       recentPaymentsRes,
     ] = await Promise.all([
-      adminSupabase.from("students").select("id", { count: "exact", head: true }).eq("status", "active"),
-      adminSupabase.from("parents").select("id", { count: "exact", head: true }).eq("status", "active"),
-      adminSupabase.from("tutors").select("id", { count: "exact", head: true }).eq("status", "active"),
+      countWithOptionalStatus(adminSupabase, "students"),
+      countWithOptionalStatus(adminSupabase, "parents"),
+      countWithOptionalStatus(adminSupabase, "tutors"),
       adminSupabase.from("tutor_assignments").select("id", { count: "exact", head: true }),
       adminSupabase
         .from("leads")

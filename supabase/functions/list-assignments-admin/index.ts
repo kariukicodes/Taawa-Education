@@ -1,5 +1,13 @@
 import { requireAdmin } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import {
+  ASSIGNMENT_BASIC_SELECT,
+  ASSIGNMENT_FULL_SELECT,
+  TUTOR_BASIC_SELECT,
+  normalizeAssignment,
+  normalizeTutor,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -15,20 +23,33 @@ Deno.serve(async (req) => {
 
   const { adminSupabase } = auth;
 
-  const [
-    assignmentsResult,
-    tutorsResult,
-    studentsResult,
-    parentsResult,
-  ] = await Promise.all([
-    adminSupabase
-      .from("tutor_assignments")
-      .select("id, tutor_id, student_id, start_date, meeting_provider, meeting_link, created_at, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes, external_meeting_id")
-      .order("created_at", { ascending: false }),
-    adminSupabase
-      .from("tutors")
-      .select("id, full_name, status")
-      .order("full_name", { ascending: true }),
+  const [assignmentsCompat, tutorsCompat, studentsResult, parentsResult] = await Promise.all([
+    selectWithFallback(
+      () =>
+        adminSupabase
+          .from("tutor_assignments")
+          .select(ASSIGNMENT_FULL_SELECT)
+          .order("created_at", { ascending: false }),
+      () =>
+        adminSupabase
+          .from("tutor_assignments")
+          .select(ASSIGNMENT_BASIC_SELECT)
+          .order("created_at", { ascending: false }),
+      normalizeAssignment,
+    ),
+    selectWithFallback(
+      () =>
+        adminSupabase
+          .from("tutors")
+          .select("id, full_name, status")
+          .order("full_name", { ascending: true }),
+      () =>
+        adminSupabase
+          .from("tutors")
+          .select(TUTOR_BASIC_SELECT)
+          .order("full_name", { ascending: true }),
+      normalizeTutor,
+    ),
     adminSupabase
       .from("students")
       .select("id, parent_id, full_name, grade")
@@ -38,12 +59,12 @@ Deno.serve(async (req) => {
       .select("id, full_name"),
   ]);
 
-  if (assignmentsResult.error) {
-    return jsonResponse({ error: assignmentsResult.error.message }, { status: 400 });
+  if (assignmentsCompat.error) {
+    return jsonResponse({ error: assignmentsCompat.error.message }, { status: 400 });
   }
 
-  if (tutorsResult.error) {
-    return jsonResponse({ error: tutorsResult.error.message }, { status: 400 });
+  if (tutorsCompat.error) {
+    return jsonResponse({ error: tutorsCompat.error.message }, { status: 400 });
   }
 
   if (studentsResult.error) {
@@ -54,8 +75,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: parentsResult.error.message }, { status: 400 });
   }
 
+  const assignments = Array.isArray(assignmentsCompat.data) ? assignmentsCompat.data : [];
+  const tutors = Array.isArray(tutorsCompat.data) ? tutorsCompat.data : [];
+
   const tutorNames = new Map(
-    (tutorsResult.data ?? []).map((tutor) => [tutor.id, tutor.full_name] as const),
+    tutors.map((tutor) => [tutor.id, tutor.full_name] as const),
   );
   const studentsById = new Map(
     (studentsResult.data ?? []).map((student) => [student.id, student] as const),
@@ -65,7 +89,7 @@ Deno.serve(async (req) => {
   );
 
   return jsonResponse({
-    assignments: (assignmentsResult.data ?? []).map((assignment) => {
+    assignments: assignments.map((assignment) => {
       const student = studentsById.get(assignment.student_id);
 
       return {
@@ -82,7 +106,7 @@ Deno.serve(async (req) => {
           : null,
       };
     }),
-    tutors: tutorsResult.data ?? [],
+    tutors,
     students: (studentsResult.data ?? []).map((student) => ({
       id: student.id,
       full_name: student.full_name,

@@ -2,12 +2,13 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Users, Calendar, PenTool, ClipboardCheck,
+  LayoutDashboard, Users, Calendar, PenTool, ClipboardCheck,
   ListTodo, DollarSign, Bell, LogOut, Menu, X, MessageSquare
 } from "lucide-react";
 
 const teacherLinks = [
-  { label: "My Students", path: "/teacher", icon: Users },
+  { label: "Overview", path: "/teacher", icon: LayoutDashboard },
+  { label: "My Students", path: "/teacher/students", icon: Users },
   { label: "Schedule", path: "/teacher/schedule", icon: Calendar },
   { label: "Messages", path: "/teacher/messages", icon: MessageSquare },
   { label: "Lesson Log", path: "/teacher/lessons", icon: PenTool },

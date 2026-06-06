@@ -2,6 +2,12 @@ import { requireAdmin } from "../_shared/admin.ts";
 import { getAuthUserDetails } from "../_shared/account.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  PARENT_BASIC_SELECT,
+  PARENT_FULL_SELECT,
+  normalizeParent,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,14 +23,25 @@ Deno.serve(async (req) => {
 
   const { adminSupabase } = auth;
 
-  const { data: parents, error: parentsError } = await adminSupabase
-    .from("parents")
-    .select("id, full_name, phone, user_id, status, archived_at, created_at")
-    .order("created_at", { ascending: false });
+  const parentsResult = await selectWithFallback(
+    () =>
+      adminSupabase
+        .from("parents")
+        .select(PARENT_FULL_SELECT)
+        .order("created_at", { ascending: false }),
+    () =>
+      adminSupabase
+        .from("parents")
+        .select(PARENT_BASIC_SELECT)
+        .order("created_at", { ascending: false }),
+    normalizeParent,
+  );
 
-  if (parentsError) {
-    return jsonResponse({ error: parentsError.message }, { status: 400 });
+  if (parentsResult.error) {
+    return jsonResponse({ error: parentsResult.error.message }, { status: 400 });
   }
+
+  const parents = Array.isArray(parentsResult.data) ? parentsResult.data : [];
 
   const parentIds = (parents ?? []).map((parent) => parent.id);
   let studentsByParent = new Map<string, Array<{ full_name: string; grade: string | null }>>();

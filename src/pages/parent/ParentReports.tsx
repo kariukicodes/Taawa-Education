@@ -103,10 +103,10 @@ export default function ParentReports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold text-foreground">
-                      {lesson.students?.full_name} — {lesson.subject}
+                      {lesson.students?.full_name} - {lesson.subject}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDate(lesson.date)} • Tutor: {lesson.tutors?.full_name}
+                      {formatDate(lesson.date)} | Tutor: {lesson.tutors?.full_name}
                     </p>
                   </div>
                   <span

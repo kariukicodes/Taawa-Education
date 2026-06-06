@@ -2,6 +2,7 @@ import { requireAdmin } from "../_shared/admin.ts";
 import { ensureEmailAvailable, normalizeEmail } from "../_shared/account.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import { normalizeParent } from "../_shared/schemaCompat.ts";
 
 interface CreateParentUserBody {
   email?: string;
@@ -72,12 +73,12 @@ Deno.serve(async (req) => {
         full_name: body.full_name!.trim(),
         phone: body.phone?.trim() || null,
       })
-      .select("id, full_name, phone, user_id, status, archived_at")
+      .select("id, full_name, phone, user_id, created_at")
       .single();
 
     if (parentError) throw parentError;
 
-    return jsonResponse({ parent });
+    return jsonResponse({ parent: normalizeParent(parent) });
   } catch (error) {
     if (createdUserId) {
       await adminSupabase.auth.admin.deleteUser(createdUserId);

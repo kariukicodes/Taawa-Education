@@ -6,6 +6,13 @@ import {
   getNativeMeetingSetupHint,
   maybeCreateNativeMeeting,
 } from "../_shared/meetings.ts";
+import {
+  ASSIGNMENT_BASIC_SELECT,
+  ASSIGNMENT_FULL_SELECT,
+  isMissingColumnError,
+  normalizeAssignment,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 interface ManageAssignmentBody {
   action?: "create" | "update" | "delete";
@@ -47,6 +54,159 @@ function validateBody(body: ManageAssignmentBody) {
   return null;
 }
 
+async function loadAssignmentsForStudent(adminSupabase: any, studentId: string) {
+  return selectWithFallback(
+    () =>
+      adminSupabase
+        .from("tutor_assignments")
+        .select(ASSIGNMENT_FULL_SELECT)
+        .eq("student_id", studentId)
+        .order("created_at", { ascending: true }),
+    () =>
+      adminSupabase
+        .from("tutor_assignments")
+        .select(ASSIGNMENT_BASIC_SELECT)
+        .eq("student_id", studentId)
+        .order("created_at", { ascending: true }),
+    normalizeAssignment,
+  );
+}
+
+async function loadAssignmentById(adminSupabase: any, assignmentId: string) {
+  return selectWithFallback(
+    () =>
+      adminSupabase
+        .from("tutor_assignments")
+        .select(ASSIGNMENT_FULL_SELECT)
+        .eq("id", assignmentId)
+        .single(),
+    () =>
+      adminSupabase
+        .from("tutor_assignments")
+        .select(ASSIGNMENT_BASIC_SELECT)
+        .eq("id", assignmentId)
+        .single(),
+    normalizeAssignment,
+  );
+}
+
+async function createAssignment(adminSupabase: any, userId: string, body: ManageAssignmentBody) {
+  const richPayload = {
+    tutor_id: body.tutor_id!,
+    student_id: body.student_id!,
+    assigned_by: userId,
+    meeting_provider: body.meeting_provider?.trim() || null,
+    meeting_link: body.meeting_link?.trim() || null,
+    start_date: body.start_date ?? null,
+    session_day_of_week: body.session_day_of_week ?? null,
+    session_start_time: body.session_start_time ?? null,
+    session_end_time: body.session_end_time ?? null,
+    session_frequency: body.session_frequency ?? "weekly",
+    session_timezone: body.session_timezone ?? "Africa/Nairobi",
+    session_end_date: body.session_end_date ?? null,
+    reminder_enabled: body.reminder_enabled ?? true,
+    reminder_offset_minutes: body.reminder_offset_minutes ?? 60,
+  };
+
+  const richResult = await adminSupabase
+    .from("tutor_assignments")
+    .insert(richPayload)
+    .select(ASSIGNMENT_FULL_SELECT)
+    .single();
+
+  if (!richResult.error && richResult.data) {
+    return {
+      assignment: normalizeAssignment(richResult.data),
+      usedFallback: false,
+    };
+  }
+
+  if (!isMissingColumnError(richResult.error)) {
+    throw richResult.error ?? new Error("Unable to create assignment.");
+  }
+
+  const fallbackResult = await adminSupabase
+    .from("tutor_assignments")
+    .insert({
+      tutor_id: body.tutor_id!,
+      student_id: body.student_id!,
+      assigned_by: userId,
+    })
+    .select(ASSIGNMENT_BASIC_SELECT)
+    .single();
+
+  if (fallbackResult.error || !fallbackResult.data) {
+    throw fallbackResult.error ?? new Error("Unable to create assignment.");
+  }
+
+  return {
+    assignment: normalizeAssignment(fallbackResult.data),
+    usedFallback: true,
+  };
+}
+
+async function updateAssignment(
+  adminSupabase: any,
+  assignmentId: string,
+  userId: string,
+  body: ManageAssignmentBody,
+  existingAssignment: Record<string, unknown> | null,
+) {
+  const richPayload = {
+    tutor_id: body.tutor_id!,
+    assigned_by: userId,
+    meeting_provider: body.meeting_provider?.trim() || null,
+    meeting_link: body.meeting_link?.trim() || null,
+    start_date: body.start_date ?? existingAssignment?.start_date ?? null,
+    session_day_of_week: body.session_day_of_week ?? existingAssignment?.session_day_of_week ?? null,
+    session_start_time: body.session_start_time ?? existingAssignment?.session_start_time ?? null,
+    session_end_time: body.session_end_time ?? existingAssignment?.session_end_time ?? null,
+    session_frequency: body.session_frequency ?? existingAssignment?.session_frequency ?? "weekly",
+    session_timezone: body.session_timezone ?? existingAssignment?.session_timezone ?? "Africa/Nairobi",
+    session_end_date: body.session_end_date ?? existingAssignment?.session_end_date ?? null,
+    reminder_enabled: body.reminder_enabled ?? existingAssignment?.reminder_enabled ?? true,
+    reminder_offset_minutes:
+      body.reminder_offset_minutes ?? existingAssignment?.reminder_offset_minutes ?? 60,
+  };
+
+  const richResult = await adminSupabase
+    .from("tutor_assignments")
+    .update(richPayload)
+    .eq("id", assignmentId)
+    .select(ASSIGNMENT_FULL_SELECT)
+    .single();
+
+  if (!richResult.error && richResult.data) {
+    return {
+      assignment: normalizeAssignment(richResult.data),
+      usedFallback: false,
+    };
+  }
+
+  if (!isMissingColumnError(richResult.error)) {
+    throw richResult.error ?? new Error("Unable to update assignment.");
+  }
+
+  const fallbackResult = await adminSupabase
+    .from("tutor_assignments")
+    .update({
+      tutor_id: body.tutor_id!,
+      assigned_by: userId,
+    })
+    .eq("id", assignmentId)
+    .select(ASSIGNMENT_BASIC_SELECT)
+    .single();
+
+  if (fallbackResult.error || !fallbackResult.data) {
+    throw fallbackResult.error ?? new Error("Unable to update assignment.");
+  }
+
+  return {
+    assignment: normalizeAssignment(fallbackResult.data),
+    usedFallback: true,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -83,89 +243,36 @@ Deno.serve(async (req) => {
       return jsonResponse({ deletedId: body.assignment_id });
     }
 
-    let existingAssignment:
-      | {
-          id: string;
-          student_id: string;
-          tutor_id: string;
-          meeting_provider: string | null;
-          meeting_link: string | null;
-          start_date: string | null;
-          session_day_of_week: number | null;
-          session_start_time: string | null;
-          session_end_time: string | null;
-          session_frequency: "weekly" | "biweekly" | null;
-          session_timezone: string | null;
-          session_end_date: string | null;
-          reminder_enabled: boolean | null;
-          reminder_offset_minutes: number | null;
-          external_meeting_id: string | null;
-        }
-      | null = null;
+    let existingAssignment: Record<string, any> | null = null;
+    let usedFallbackSchema = false;
 
     if (body.action === "create") {
-      const { data: existingAssignments, error: lookupError } = await adminSupabase
-        .from("tutor_assignments")
-        .select("id, student_id, tutor_id, meeting_provider, meeting_link, start_date, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes, external_meeting_id")
-        .eq("student_id", body.student_id!)
-        .order("created_at", { ascending: true });
+      const lookupResult = await loadAssignmentsForStudent(adminSupabase, body.student_id!);
 
-      if (lookupError) throw lookupError;
+      if (lookupResult.error) throw lookupResult.error;
 
-      const existing = existingAssignments ?? [];
+      usedFallbackSchema = lookupResult.usedFallback;
+      const existing = Array.isArray(lookupResult.data) ? lookupResult.data : [];
 
       let assignmentId: string;
       existingAssignment = existing[0] ?? null;
-      const nextMeetingProvider = trimmedMeetingProvider;
 
       if (existing.length === 0) {
-        const { data: createdAssignment, error: createError } = await adminSupabase
-          .from("tutor_assignments")
-          .insert({
-            tutor_id: body.tutor_id!,
-            student_id: body.student_id!,
-            assigned_by: user.id,
-            meeting_provider: nextMeetingProvider,
-            meeting_link: trimmedMeetingLink,
-            start_date: body.start_date ?? null,
-            session_day_of_week: body.session_day_of_week ?? null,
-            session_start_time: body.session_start_time ?? null,
-            session_end_time: body.session_end_time ?? null,
-            session_frequency: body.session_frequency ?? "weekly",
-            session_timezone: body.session_timezone ?? "Africa/Nairobi",
-            session_end_date: body.session_end_date ?? null,
-            reminder_enabled: body.reminder_enabled ?? true,
-            reminder_offset_minutes: body.reminder_offset_minutes ?? 60,
-          })
-          .select("id, student_id, tutor_id, meeting_provider, meeting_link, start_date, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes, external_meeting_id")
-          .single();
-
-        if (createError || !createdAssignment) throw createError ?? new Error("Unable to create assignment.");
-        assignmentId = createdAssignment.id;
-        existingAssignment = createdAssignment;
+        const createdResult = await createAssignment(adminSupabase, user.id, body);
+        assignmentId = createdResult.assignment.id;
+        existingAssignment = createdResult.assignment;
+        usedFallbackSchema = usedFallbackSchema || createdResult.usedFallback;
       } else {
         assignmentId = existing[0].id;
-
-        const { error: updateExistingError } = await adminSupabase
-          .from("tutor_assignments")
-          .update({
-            tutor_id: body.tutor_id!,
-            assigned_by: user.id,
-            meeting_provider: nextMeetingProvider,
-            meeting_link: trimmedMeetingLink,
-            start_date: body.start_date ?? existingAssignment?.start_date ?? null,
-            session_day_of_week: body.session_day_of_week ?? existingAssignment?.session_day_of_week ?? null,
-            session_start_time: body.session_start_time ?? existingAssignment?.session_start_time ?? null,
-            session_end_time: body.session_end_time ?? existingAssignment?.session_end_time ?? null,
-            session_frequency: body.session_frequency ?? existingAssignment?.session_frequency ?? "weekly",
-            session_timezone: body.session_timezone ?? existingAssignment?.session_timezone ?? "Africa/Nairobi",
-            session_end_date: body.session_end_date ?? null,
-            reminder_enabled: body.reminder_enabled ?? existingAssignment?.reminder_enabled ?? true,
-            reminder_offset_minutes: body.reminder_offset_minutes ?? existingAssignment?.reminder_offset_minutes ?? 60,
-          })
-          .eq("id", assignmentId);
-
-        if (updateExistingError) throw updateExistingError;
+        const updatedResult = await updateAssignment(
+          adminSupabase,
+          assignmentId,
+          user.id,
+          body,
+          existingAssignment,
+        );
+        existingAssignment = updatedResult.assignment;
+        usedFallbackSchema = usedFallbackSchema || updatedResult.usedFallback;
 
         const extraIds = existing.slice(1).map((assignment) => assignment.id);
 
@@ -181,49 +288,34 @@ Deno.serve(async (req) => {
 
       body.assignment_id = assignmentId;
     } else {
-      const { data: currentAssignment, error: currentAssignmentError } = await adminSupabase
-        .from("tutor_assignments")
-        .select("id, student_id, tutor_id, meeting_provider, meeting_link, start_date, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes, external_meeting_id")
-        .eq("id", body.assignment_id)
-        .single();
+      const currentAssignmentResult = await loadAssignmentById(adminSupabase, body.assignment_id!);
 
-      if (currentAssignmentError || !currentAssignment) {
-        throw currentAssignmentError ?? new Error("Assignment not found.");
+      if (currentAssignmentResult.error || !currentAssignmentResult.data) {
+        throw currentAssignmentResult.error ?? new Error("Assignment not found.");
       }
 
-      existingAssignment = currentAssignment;
+      existingAssignment = currentAssignmentResult.data as Record<string, any>;
+      usedFallbackSchema = currentAssignmentResult.usedFallback;
 
-      const { error: updateError } = await adminSupabase
-        .from("tutor_assignments")
-        .update({
-          tutor_id: body.tutor_id!,
-          assigned_by: user.id,
-          meeting_provider: trimmedMeetingProvider,
-          meeting_link: trimmedMeetingLink,
-          start_date: body.start_date ?? existingAssignment.start_date ?? null,
-          session_day_of_week: body.session_day_of_week ?? existingAssignment.session_day_of_week ?? null,
-          session_start_time: body.session_start_time ?? existingAssignment.session_start_time ?? null,
-          session_end_time: body.session_end_time ?? existingAssignment.session_end_time ?? null,
-          session_frequency: body.session_frequency ?? existingAssignment.session_frequency ?? "weekly",
-          session_timezone: body.session_timezone ?? existingAssignment.session_timezone ?? "Africa/Nairobi",
-          session_end_date: body.session_end_date ?? null,
-          reminder_enabled: body.reminder_enabled ?? existingAssignment.reminder_enabled ?? true,
-          reminder_offset_minutes: body.reminder_offset_minutes ?? existingAssignment.reminder_offset_minutes ?? 60,
-        })
-        .eq("id", body.assignment_id);
-
-      if (updateError) throw updateError;
+      const updatedResult = await updateAssignment(
+        adminSupabase,
+        body.assignment_id!,
+        user.id,
+        body,
+        existingAssignment,
+      );
+      existingAssignment = updatedResult.assignment;
+      usedFallbackSchema = usedFallbackSchema || updatedResult.usedFallback;
     }
 
-    const { data: hydratedAssignment, error: hydratedAssignmentError } = await adminSupabase
-      .from("tutor_assignments")
-      .select("id, tutor_id, student_id, start_date, meeting_provider, meeting_link, created_at, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes, external_meeting_id")
-      .eq("id", body.assignment_id)
-      .single();
+    const hydratedAssignmentResult = await loadAssignmentById(adminSupabase, body.assignment_id!);
 
-    if (hydratedAssignmentError || !hydratedAssignment) {
-      throw hydratedAssignmentError ?? new Error("Assignment not found.");
+    if (hydratedAssignmentResult.error || !hydratedAssignmentResult.data) {
+      throw hydratedAssignmentResult.error ?? new Error("Assignment not found.");
     }
+
+    const hydratedAssignment = hydratedAssignmentResult.data as Record<string, any>;
+    usedFallbackSchema = usedFallbackSchema || hydratedAssignmentResult.usedFallback;
 
     const [
       { data: tutor, error: tutorError },
@@ -276,7 +368,12 @@ Deno.serve(async (req) => {
       trimmedMeetingProvider === "custom" ? null : hydratedAssignment.external_meeting_id ?? null;
     let providerMessage: string | null = null;
 
-    if (trimmedMeetingProvider && trimmedMeetingProvider !== "custom" && !trimmedMeetingLink) {
+    if (
+      !usedFallbackSchema &&
+      trimmedMeetingProvider &&
+      trimmedMeetingProvider !== "custom" &&
+      !trimmedMeetingLink
+    ) {
       if (!hydratedAssignment.meeting_link || !nextExternalMeetingId || meetingConfigChanged) {
         const tutorDetails = await getAuthUserDetails(adminSupabase, tutor.user_id ?? null);
         const parentDetails =
@@ -314,8 +411,9 @@ Deno.serve(async (req) => {
     }
 
     if (
-      hydratedAssignment.meeting_link !== nextMeetingLink ||
-      hydratedAssignment.external_meeting_id !== nextExternalMeetingId
+      (!usedFallbackSchema && hydratedAssignment.meeting_link !== nextMeetingLink) ||
+      (!usedFallbackSchema &&
+        hydratedAssignment.external_meeting_id !== nextExternalMeetingId)
     ) {
       const { error: persistMeetingError } = await adminSupabase
         .from("tutor_assignments")
@@ -331,14 +429,16 @@ Deno.serve(async (req) => {
     return jsonResponse({
       assignment: {
         ...hydratedAssignment,
-        meeting_link: nextMeetingLink,
+        meeting_link: usedFallbackSchema ? hydratedAssignment.meeting_link ?? null : nextMeetingLink,
         tutors: { full_name: tutor.full_name },
         students: {
           full_name: student.full_name,
           grade: student.grade,
         },
       },
-      providerMessage,
+      providerMessage: usedFallbackSchema
+        ? "Your database is missing the newer assignment scheduling columns, so this assignment was saved without advanced meeting scheduling."
+        : providerMessage,
     });
   } catch (error) {
     logFunctionError("manage-assignment-admin", error, {

@@ -2,6 +2,7 @@ import { requireAdmin } from "../_shared/admin.ts";
 import { ensureEmailAvailable, normalizeEmail } from "../_shared/account.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import { normalizeTutor } from "../_shared/schemaCompat.ts";
 
 interface CreateTutorUserBody {
   email?: string;
@@ -76,12 +77,12 @@ Deno.serve(async (req) => {
         rate_kes: body.rate_kes ?? 0,
         status: body.status ?? "active",
       })
-      .select("id, full_name, phone, rate_kes, status, user_id")
+      .select("id, full_name, phone, user_id, created_at")
       .single();
 
     if (tutorError) throw tutorError;
 
-    return jsonResponse({ tutor });
+    return jsonResponse({ tutor: normalizeTutor(tutor) });
   } catch (error) {
     if (createdUserId) {
       await adminSupabase.auth.admin.deleteUser(createdUserId);

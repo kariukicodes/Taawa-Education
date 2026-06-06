@@ -2,6 +2,20 @@ import { requireTeacher } from "../_shared/admin.ts";
 import { getAuthUserDetails } from "../_shared/account.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
+import {
+  ASSIGNMENT_BASIC_SELECT,
+  ASSIGNMENT_FULL_SELECT,
+  PARENT_BASIC_SELECT,
+  PARENT_FULL_SELECT,
+  STUDENT_BASIC_SELECT,
+  STUDENT_FULL_SELECT,
+  TUTOR_BASIC_SELECT,
+  normalizeAssignment,
+  normalizeParent,
+  normalizeStudent,
+  normalizeTutor,
+  selectWithFallback,
+} from "../_shared/schemaCompat.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,11 +32,24 @@ Deno.serve(async (req) => {
   const { adminSupabase, user } = auth;
 
   try {
-    const { data: tutor, error: tutorError } = await adminSupabase
-      .from("tutors")
-      .select("id, full_name, phone, status")
-      .eq("user_id", user.id)
-      .single();
+    const tutorResult = await selectWithFallback(
+      () =>
+        adminSupabase
+          .from("tutors")
+          .select("id, full_name, phone, status, user_id, created_at")
+          .eq("user_id", user.id)
+          .single(),
+      () =>
+        adminSupabase
+          .from("tutors")
+          .select(TUTOR_BASIC_SELECT)
+          .eq("user_id", user.id)
+          .single(),
+      normalizeTutor,
+    );
+
+    const tutor = tutorResult.data as Record<string, any> | null;
+    const tutorError = tutorResult.error;
 
     if (tutorError || !tutor) {
       throw tutorError ?? new Error("Tutor profile not found.");
@@ -33,11 +60,21 @@ Deno.serve(async (req) => {
     const weekAgoDate = weekAgo.toISOString().split("T")[0];
 
     const [assignmentsResult, tasksResult, lessonsResult] = await Promise.all([
-      adminSupabase
-        .from("tutor_assignments")
-        .select("id, student_id, tutor_id, start_date, meeting_provider, meeting_link, created_at, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes")
-        .eq("tutor_id", tutor.id)
-        .order("created_at", { ascending: false }),
+      selectWithFallback(
+        () =>
+          adminSupabase
+            .from("tutor_assignments")
+            .select(ASSIGNMENT_FULL_SELECT)
+            .eq("tutor_id", tutor.id)
+            .order("created_at", { ascending: false }),
+        () =>
+          adminSupabase
+            .from("tutor_assignments")
+            .select(ASSIGNMENT_BASIC_SELECT)
+            .eq("tutor_id", tutor.id)
+            .order("created_at", { ascending: false }),
+        normalizeAssignment,
+      ),
       adminSupabase
         .from("tasks")
         .select("id, title, description, due_date, status, created_at")
@@ -54,15 +91,24 @@ Deno.serve(async (req) => {
     if (tasksResult.error) throw tasksResult.error;
     if (lessonsResult.error) throw lessonsResult.error;
 
-    const assignments = assignmentsResult.data ?? [];
+    const assignments = Array.isArray(assignmentsResult.data) ? assignmentsResult.data : [];
     const studentIds = assignments.map((assignment) => assignment.student_id);
 
     const { data: students, error: studentsError } = studentIds.length
-      ? await adminSupabase
-          .from("students")
-          .select("id, parent_id, full_name, age, grade, curriculum, status, created_at")
-          .in("id", studentIds)
-      : { data: [], error: null };
+      ? await selectWithFallback(
+          () =>
+            adminSupabase
+              .from("students")
+              .select(STUDENT_FULL_SELECT)
+              .in("id", studentIds),
+          () =>
+            adminSupabase
+              .from("students")
+              .select(STUDENT_BASIC_SELECT)
+              .in("id", studentIds),
+          normalizeStudent,
+        )
+      : { data: [], error: null, usedFallback: false };
 
     if (studentsError) throw studentsError;
 
@@ -71,11 +117,20 @@ Deno.serve(async (req) => {
     ) as string[];
 
     const { data: parents, error: parentsError } = parentIds.length
-      ? await adminSupabase
-          .from("parents")
-          .select("id, full_name, phone, user_id")
-          .in("id", parentIds)
-      : { data: [], error: null };
+      ? await selectWithFallback(
+          () =>
+            adminSupabase
+              .from("parents")
+              .select(PARENT_FULL_SELECT)
+              .in("id", parentIds),
+          () =>
+            adminSupabase
+              .from("parents")
+              .select(PARENT_BASIC_SELECT)
+              .in("id", parentIds),
+          normalizeParent,
+        )
+      : { data: [], error: null, usedFallback: false };
 
     if (parentsError) throw parentsError;
 
