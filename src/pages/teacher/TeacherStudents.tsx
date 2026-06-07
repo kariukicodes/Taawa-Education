@@ -12,6 +12,7 @@ import { includesSearchTerm, sortByKey } from "@/lib/adminFilters";
 import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
 import { reportClientError } from "@/lib/reportClientError";
 import { formatSessionReminder, formatSessionSchedule } from "@/lib/sessionSchedule";
+import { describeClientError } from "@/lib/describeClientError";
 import { toast } from "@/hooks/use-toast";
 
 type TeacherDashboardResponse = {
@@ -76,7 +77,7 @@ export default function TeacherStudents() {
         setStudents(data.students ?? []);
       } catch (err) {
         reportClientError("TeacherStudents.fetchStudents", err);
-        const message = err instanceof Error ? err.message : String(err);
+        const message = describeClientError(err);
         setLoadError(message);
         toast({
           title: "Failed to load assigned students",

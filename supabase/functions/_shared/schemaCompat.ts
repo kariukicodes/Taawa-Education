@@ -4,9 +4,9 @@ export const PARENT_BASIC_SELECT =
   "id, full_name, phone, user_id, created_at";
 
 export const STUDENT_FULL_SELECT =
-  "id, parent_id, full_name, age, grade, curriculum, subjects, start_date, status, archived_at, created_at";
+  "id, parent_id, full_name, age, grade, curriculum, start_date, status, archived_at, created_at";
 export const STUDENT_BASIC_SELECT =
-  "id, parent_id, full_name, age, grade, curriculum, subjects, start_date, created_at";
+  "id, parent_id, full_name, age, grade, curriculum, created_at";
 
 export const TUTOR_FULL_SELECT =
   "id, full_name, phone, rate_kes, status, subjects, user_id, created_at";

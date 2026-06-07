@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { buildMailtoLink, buildWhatsAppLink } from "@/lib/contactLinks";
+import { getDemoParentChildren } from "@/lib/demoPortalData";
 import { formatDate } from "@/lib/format";
 import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
 import { reportClientError } from "@/lib/reportClientError";
@@ -62,7 +63,7 @@ export default function ParentChildren() {
       setLoadError(null);
 
       if (isDemo) {
-        setChildren([]);
+        setChildren(getDemoParentChildren());
         setSelected(0);
         setLoading(false);
         return;

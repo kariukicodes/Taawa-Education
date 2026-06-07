@@ -1,4 +1,10 @@
 import { getAuthUserDetails } from "./account.ts";
+import {
+  ASSIGNMENT_BASIC_SELECT,
+  ASSIGNMENT_FULL_SELECT,
+  normalizeAssignment,
+  selectWithFallback,
+} from "./schemaCompat.ts";
 
 type ViewerRole = "parent" | "teacher";
 
@@ -212,11 +218,20 @@ export async function hydrateThreads(
             .in("id", tutorIds)
         : Promise.resolve({ data: [], error: null }),
       studentIds.length
-        ? adminSupabase
-            .from("tutor_assignments")
-            .select("student_id, meeting_provider, meeting_link, start_date, session_day_of_week, session_start_time, session_end_time, session_frequency, session_timezone, session_end_date, reminder_enabled, reminder_offset_minutes")
-            .in("student_id", studentIds)
-        : Promise.resolve({ data: [], error: null }),
+        ? selectWithFallback(
+            () =>
+              adminSupabase
+                .from("tutor_assignments")
+                .select(ASSIGNMENT_FULL_SELECT)
+                .in("student_id", studentIds),
+            () =>
+              adminSupabase
+                .from("tutor_assignments")
+                .select(ASSIGNMENT_BASIC_SELECT)
+                .in("student_id", studentIds),
+            normalizeAssignment,
+          )
+        : Promise.resolve({ data: [], error: null, usedFallback: false }),
     ]);
 
   const firstError = [
@@ -235,7 +250,10 @@ export async function hydrateThreads(
   const parentMap = new Map((parentsResult.data ?? []).map((parent: any) => [parent.id, parent] as const));
   const tutorMap = new Map((tutorsResult.data ?? []).map((tutor: any) => [tutor.id, tutor] as const));
   const assignmentMap = new Map(
-    (assignmentsResult.data ?? []).map((assignment: any) => [assignment.student_id, assignment] as const),
+    (assignmentsResult.data ?? []).map((assignment: any) => [
+      assignment.student_id,
+      normalizeAssignment(assignment),
+    ] as const),
   );
 
   const authDetails = new Map<string, Awaited<ReturnType<typeof getAuthUserDetails>>>();

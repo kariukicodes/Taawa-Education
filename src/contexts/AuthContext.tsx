@@ -43,6 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
   const [loading, setLoading] = useState(true);
+  const demoModeEnabled =
+    import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
 
   const roleFetchSeq = useRef(0);
   const lastResolvedUserId = useRef<string | null>(null);
@@ -177,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         session,
         role,
-        roleOverride,
+        roleOverride: roleOverride ?? (demoModeEnabled ? role : null),
         loading,
         signOut,
         setRoleOverride,

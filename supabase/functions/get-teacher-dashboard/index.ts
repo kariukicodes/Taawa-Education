@@ -1,6 +1,6 @@
 import { requireTeacher } from "../_shared/admin.ts";
 import { getAuthUserDetails } from "../_shared/account.ts";
-import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import { corsHeaders, describeError, jsonResponse } from "../_shared/http.ts";
 import { logFunctionError } from "../_shared/log.ts";
 import {
   ASSIGNMENT_BASIC_SELECT,
@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
     });
 
     return jsonResponse(
-      { error: error instanceof Error ? error.message : String(error) },
+      { error: describeError(error) },
       { status: 400 },
     );
   }

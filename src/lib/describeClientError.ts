@@ -1,20 +1,4 @@
-export const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-export function jsonResponse(body: unknown, init: ResponseInit = {}) {
-  return new Response(JSON.stringify(body), {
-    ...init,
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "application/json",
-      ...(init.headers ?? {}),
-    },
-  });
-}
-
-export function describeError(error: unknown) {
+export function describeClientError(error: unknown) {
   if (error instanceof Error) {
     return error.message;
   }
@@ -30,6 +14,14 @@ export function describeError(error: unknown) {
 
     if ("error" in error && typeof error.error === "string" && error.error.trim()) {
       return error.error;
+    }
+
+    if ("name" in error && typeof error.name === "string" && error.name.trim()) {
+      try {
+        return JSON.stringify(error);
+      } catch {
+        return error.name;
+      }
     }
 
     try {

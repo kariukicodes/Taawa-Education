@@ -1,3 +1,5 @@
+import { describeError } from "./http.ts";
+
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
@@ -50,7 +52,18 @@ export async function getAuthUserDetails(adminSupabase: any, userId: string | nu
 
   const { data, error } = await adminSupabase.auth.admin.getUserById(userId);
 
-  if (error) throw error;
+  if (error) {
+    console.warn("[getAuthUserDetails]", {
+      user_id: userId,
+      error: describeError(error),
+    });
+
+    return {
+      account_email: null,
+      last_sign_in_at: null,
+      has_login: false,
+    };
+  }
 
   return {
     account_email: data.user?.email ?? null,

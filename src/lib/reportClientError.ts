@@ -1,3 +1,5 @@
+import { describeClientError } from "./describeClientError";
+
 export function reportClientError(scope: string, error: unknown, extra?: Record<string, unknown>) {
   const normalized =
     error instanceof Error
@@ -6,7 +8,7 @@ export function reportClientError(scope: string, error: unknown, extra?: Record<
           name: error.name,
           stack: error.stack,
         }
-      : { value: String(error) };
+      : { value: describeClientError(error) };
 
   console.error(`[${scope}]`, {
     ...extra,

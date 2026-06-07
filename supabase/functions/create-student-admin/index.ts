@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
         grade: body.grade!.trim(),
         curriculum: body.curriculum ?? "CBC",
       })
-      .select("id, parent_id, full_name, age, grade, curriculum, subjects, start_date, created_at")
+      .select("id, parent_id, full_name, age, grade, curriculum, created_at")
       .single();
 
     if (studentError) throw studentError;

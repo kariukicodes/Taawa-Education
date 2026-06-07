@@ -1,5 +1,11 @@
 import { requireAdmin } from "../_shared/admin.ts";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import {
+  TUTOR_BASIC_SELECT,
+  TUTOR_FULL_SELECT,
+  isMissingColumnError,
+  normalizeTutor,
+} from "../_shared/schemaCompat.ts";
 
 interface ManageTutorBody {
   action?: "update" | "delete";
@@ -78,7 +84,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ deletedId: body.tutor_id });
     }
 
-    const { data: tutor, error: updateError } = await adminSupabase
+    const richUpdateResult = await adminSupabase
       .from("tutors")
       .update({
         full_name: body.full_name!.trim(),
@@ -87,10 +93,30 @@ Deno.serve(async (req) => {
         status: body.status ?? "active",
       })
       .eq("id", body.tutor_id)
-      .select("id, full_name, phone, rate_kes, status, user_id")
+      .select(TUTOR_FULL_SELECT)
       .single();
 
-    if (updateError) throw updateError;
+    let tutor: Record<string, unknown> | null = null;
+    let updateError = richUpdateResult.error;
+
+    if (!richUpdateResult.error && richUpdateResult.data) {
+      tutor = normalizeTutor(richUpdateResult.data);
+    } else if (isMissingColumnError(richUpdateResult.error)) {
+      const fallbackUpdateResult = await adminSupabase
+        .from("tutors")
+        .update({
+          full_name: body.full_name!.trim(),
+          phone: body.phone?.trim() || null,
+        })
+        .eq("id", body.tutor_id)
+        .select(TUTOR_BASIC_SELECT)
+        .single();
+
+      updateError = fallbackUpdateResult.error;
+      tutor = fallbackUpdateResult.data ? normalizeTutor(fallbackUpdateResult.data) : null;
+    }
+
+    if (updateError || !tutor) throw updateError ?? new Error("Tutor update failed.");
 
     const { count, error: countError } = await adminSupabase
       .from("tutor_assignments")

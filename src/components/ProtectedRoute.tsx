@@ -7,8 +7,11 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, role, loading } = useAuth();
+  const { user, role, roleOverride, loading } = useAuth();
   const location = useLocation();
+  const isDemoMode =
+    import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
+  const effectiveRole = isDemoMode ? roleOverride ?? role : role;
 
   if (loading) {
     return (
@@ -22,13 +25,13 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (!role) {
+  if (!effectiveRole) {
     return <Navigate to="/unauthorized" replace state={{ reason: "no-role" }} />;
   }
 
-  if (role !== requiredRole) {
+  if (effectiveRole !== requiredRole) {
     // If an authenticated user lands on the wrong dashboard, route them to their own.
-    return <Navigate to={`/${role}`} replace />;
+    return <Navigate to={`/${effectiveRole}`} replace />;
   }
 
   return <>{children}</>;

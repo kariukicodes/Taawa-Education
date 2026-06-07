@@ -6,6 +6,7 @@ import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDemoTeacherAssignedStudents } from "@/lib/demoPortalData";
 import { buildWhatsAppLink } from "@/lib/contactLinks";
 import { formatDate } from "@/lib/format";
 import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
@@ -61,7 +62,7 @@ export default function TeacherSchedule() {
       setLoadError(null);
 
       if (isDemo) {
-        setStudents([]);
+        setStudents(getDemoTeacherAssignedStudents());
         setLoading(false);
         return;
       }

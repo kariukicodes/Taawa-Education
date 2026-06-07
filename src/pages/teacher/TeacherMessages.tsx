@@ -6,6 +6,7 @@ import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { CardSkeleton } from "@/components/ui/CardSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDemoTeacherThreads } from "@/lib/demoPortalData";
 import { formatDate } from "@/lib/format";
 import { includesSearchTerm, sortByKey } from "@/lib/adminFilters";
 import { invokeSupabaseFunction } from "@/lib/invokeSupabaseFunction";
@@ -72,7 +73,14 @@ export default function TeacherMessages() {
 
   const loadThreads = async (markReadThreadId?: string | null) => {
     if (isDemo) {
-      setThreads([]);
+      const nextThreads = getDemoTeacherThreads();
+      setThreads(nextThreads);
+      if (requestedStudentId) {
+        const matchingThread = nextThreads.find((thread) => thread.student?.id === requestedStudentId);
+        setSelectedId(matchingThread?.id ?? nextThreads[0]?.id ?? null);
+      } else {
+        setSelectedId((current) => current ?? nextThreads[0]?.id ?? null);
+      }
       setLoading(false);
       return;
     }
@@ -160,6 +168,41 @@ export default function TeacherMessages() {
   const handleSend = async () => {
     const messageBody = draft.trim();
     if (!messageBody) return;
+
+    if (isDemo) {
+      const targetThreadId =
+        selectedThread?.id ??
+        threads.find((thread) => thread.student?.id === requestedStudentId)?.id ??
+        threads[0]?.id;
+
+      if (!targetThreadId) return;
+
+      const createdAt = new Date().toISOString();
+      setThreads((current) =>
+        current.map((thread) =>
+          thread.id === targetThreadId
+            ? {
+                ...thread,
+                unread_count: 0,
+                last_message_at: createdAt,
+                last_message_preview: messageBody,
+                messages: [
+                  ...thread.messages,
+                  {
+                    id: `demo-outbound-${createdAt}`,
+                    body: messageBody,
+                    created_at: createdAt,
+                    sender_role: "teacher",
+                  },
+                ],
+              }
+            : thread,
+        ),
+      );
+      setSelectedId(targetThreadId);
+      setDraft("");
+      return;
+    }
 
     try {
       setSending(true);
