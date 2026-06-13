@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 const programs = [
@@ -70,12 +71,12 @@ export function ProgramsSection() {
               <p className="mt-3 flex-1 text-sm text-muted-foreground leading-relaxed">
                 {p.structure}
               </p>
-              <a
-                href="#contact"
+              <Link
+                to="/programs"
                 className="mt-6 block rounded-lg border border-primary bg-transparent py-2 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
               >
                 Learn More
-              </a>
+              </Link>
             </div>
           ))}
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Footer } from "@/components/landing/Footer";
 import { useContactModal } from "@/components/landing/ContactModalContext";
 
 // ── Scroll visibility hook ─────────────────────────────────────
@@ -565,13 +566,16 @@ function AboutCTA() {
 // ══════════════════════════════════════════════════════════════
 export default function AboutPage() {
   return (
-    <main className="bg-[#0F0F0F]">
-      <AboutHero />
-      <StorySection />
-      <ValuesSection />
-      <StatsSection />
-      <TeamSection />
-      <AboutCTA />
-    </main>
+    <>
+      <main className="bg-[#0F0F0F]">
+        <AboutHero />
+        <StorySection />
+        <ValuesSection />
+        <StatsSection />
+        <TeamSection />
+        <AboutCTA />
+      </main>
+      <Footer />
+    </>
   );
 }

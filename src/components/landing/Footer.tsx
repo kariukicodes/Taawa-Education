@@ -1,102 +1,122 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Linkedin, Youtube, Music2 } from "lucide-react";
 
+const socials = [
+  { icon: Facebook,   href: "/#contact", label: "Facebook"  },
+  { icon: Instagram,  href: "/#contact", label: "Instagram" },
+  { icon: Linkedin,   href: "/#contact", label: "LinkedIn"  },
+  { icon: Youtube,    href: "/#contact", label: "YouTube"   },
+  { icon: Music2,     href: "/#contact", label: "TikTok"    },
+];
+
+const columns = [
+  {
+    heading: "Company",
+    links: [
+      { label: "About Us",       to: "/about"    },
+      { label: "Careers",        to: "/careers"  },
+      { label: "FAQ",            to: "/#faq"      },
+      { label: "Contact Us",     to: "/#contact"  },
+      { label: "Fees",           to: "/policy/fees"     },
+    ],
+  },
+  {
+    heading: "For Parents",
+    links: [
+      { label: "Find a Tutor",        to: "/tutors"   },
+      { label: "Explore Programs",    to: "/programs" },
+      { label: "Subject Selection",   to: "/programs" },
+      { label: "How It Works",        to: "/#how-it-works"     },
+      { label: "Book a Consultation", to: "/#contact"  },
+    ],
+  },
+  {
+    heading: "For Tutors",
+    links: [
+      { label: "Join as a Tutor",    to: "/tutors#join-as-tutor"    },
+      { label: "Tutor Guidelines",   to: "/tutors/guide"    },
+      { label: "Tutor Dashboard",    to: "/login"       },
+      { label: "Resources",          to: "/resources"       },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [
+      { label: "Privacy Policy",          to: "/privacy"                 },
+      { label: "Terms & Conditions",      to: "/terms"                   },
+      { label: "Fees Policy",             to: "/policy/fees"             },
+      { label: "Admissions Policy",       to: "/policy/admissions"       },
+      { label: "Child Protection Policy", to: "/policy/child-protection" },
+    ],
+  },
+];
+
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background py-16 px-6 lg:px-8">
+    <footer className="bg-[#0A0A08] px-6 pt-16 lg:px-16">
+
+      {/* ── Main grid ── */}
       <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-4 lg:grid-cols-5">
-          
-          {/* Brand & Addresses */}
-          <div className="col-span-1 md:col-span-2 space-y-8">
-            <div>
-              <p className="text-3xl font-bold text-foreground">
-                Taawa<span className="text-primary"> Education</span>
-              </p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-8">
-              {/* Kenya Office */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-foreground text-lg">Kenya Office</h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>Malik Heights, 6th Floor</p>
-                  <p>Ngong Road</p>
-                  <p>Nairobi, Kenya</p>
-                  <p>+254 704 007 008,</p>
-                  <p>+254 706 007 008,</p>
-                  <p>+254 718 007 008</p>
-                  <p>info@taawa.co.ke</p>
-                </div>
-              </div>
+        <div className="grid grid-cols-2 gap-10 pb-16 md:grid-cols-3 lg:grid-cols-[220px_1fr_1fr_1fr_1fr] lg:gap-12">
 
-              {/* UK Office */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-foreground text-lg">UK Office</h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>128 City Road,</p>
-                  <p>London,</p>
-                  <p>EC1V 2NX,</p>
-                  <p>United Kingdom</p>
-                  <p>+44 (0) 203 907 7700</p>
-                  <p>info@taawa.co.uk</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Links */}
-            <div className="flex items-center gap-4 pt-4">
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                <Youtube className="h-5 w-5" />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                <Music2 className="h-5 w-5" />
-              </a>
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-3 lg:col-span-1">
+            <div className="flex items-center gap-2.5">
+              <span className="h-[9px] w-[9px] flex-shrink-0 rounded-full bg-primary" />
+              <span className="text-[20px] font-bold tracking-[-0.03em] text-white">
+                Taawa Education
+              </span>
             </div>
           </div>
 
-          <div className="hidden lg:block col-span-1"></div>
-
-          {/* Information Links */}
-          <div className="space-y-6">
-            <h4 className="font-semibold text-foreground text-lg">Information</h4>
-            <ul className="space-y-4 text-sm text-primary">
-              <li><Link to="/about" className="hover:underline">About Us</Link></li>
-              <li><Link to="/fees" className="hover:underline">Fees</Link></li>
-              <li><Link to="/careers" className="hover:underline">Careers</Link></li>
-              <li><Link to="#faq" className="hover:underline">FAQ</Link></li>
-              <li><Link to="/programs" className="hover:underline">Subject Selection</Link></li>
-              <li><Link to="/contact" className="hover:underline">Contact Us</Link></li>
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div className="space-y-6">
-            <h4 className="font-semibold text-foreground text-lg">Legal</h4>
-            <ul className="space-y-4 text-sm text-primary">
-              <li><Link to="/policy/fees" className="hover:underline">Fees Policy</Link></li>
-              <li><Link to="/policy/admissions" className="hover:underline">Admissions Policy</Link></li>
-              <li><Link to="/policy/child-protection" className="hover:underline">Child Protection Policy</Link></li>
-              <li><Link to="/terms" className="hover:underline">Terms and Conditions</Link></li>
-              <li><Link to="/privacy" className="hover:underline">Privacy Policy</Link></li>
-            </ul>
-          </div>
-
+          {/* Link columns */}
+          {columns.map((col) => (
+            <div key={col.heading}>
+              <h4 className="mb-6 text-[15px] font-semibold text-white">
+                {col.heading}
+              </h4>
+              <ul className="space-y-3.5">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      to={link.to}
+                      className="text-[13px] text-white/50 transition-colors duration-150 hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-16 border-t border-border pt-8 text-center sm:flex sm:justify-between sm:text-left">
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Taawa Education. All rights reserved.
-          </p>
+        {/* ── Bottom bar ── */}
+        <div className="flex flex-col gap-4 border-t border-white/[0.08] py-6 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[12px] text-white/35">
+              © {new Date().getFullYear()} Taawa Education Ltd. All Rights Reserved.
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-white/22">
+              Malik Heights, 6th Floor, Ngong Road, Nairobi, Kenya
+              &nbsp;·&nbsp;
+              128 City Road, London, EC1V 2NX, United Kingdom
+            </p>
+          </div>
+
+          {/* Socials */}
+          <div className="flex items-center gap-5">
+            {socials.map(({ icon: Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                className="text-white/40 transition-colors duration-150 hover:text-white"
+              >
+                <Icon className="h-[18px] w-[18px]" />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, CheckCheck } from "lucide-react";
+import { Footer } from "@/components/landing/Footer";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { useContactModal } from "@/components/landing/ContactModalContext";
 import { ProgramsHero } from "@/components/ProgramsHero";
@@ -141,6 +142,7 @@ const programs = [
 // 1. PROGRAM DEEP-DIVE CARDS — alternating layout
 // ══════════════════════════════════════════════════════════════
 function ProgramCard({ program, index }: { program: typeof programs[0]; index: number }) {
+  const { openModal } = useContactModal();
   const { ref, visible } = useVisible();
   const isEven = index % 2 === 0;
 
@@ -239,13 +241,14 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
                 <p className="mt-0.5 text-[11px] text-muted-foreground/70">{program.period}</p>
               </div>
               <div className="ml-auto flex flex-col gap-2">
-                <a
-                  href="#contact"
+                <button
+                  type="button"
+                  onClick={openModal}
                   className="rounded-lg px-6 py-3 text-[13px] font-semibold text-background transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
                   style={{ background: program.accent, boxShadow: `0 0 0 0 ${program.accent}` }}
                 >
                   Enquire Now
-                </a>
+                </button>
                 <p className="text-center text-[10px] text-muted-foreground/60">Free consultation</p>
               </div>
             </div>
@@ -316,6 +319,7 @@ const compRows = [
 ];
 
 function ComparisonTable() {
+  const { openModal } = useContactModal();
   const { ref, visible } = useVisible();
 
   return (
@@ -379,13 +383,14 @@ function ComparisonTable() {
             </div>
             {programs.map((p) => (
               <div key={p.id} className="flex items-center justify-center px-5 py-4">
-                <a
-                  href="#contact"
+                <button
+                  type="button"
+                  onClick={openModal}
                   className="rounded-lg px-4 py-2 text-[11px] font-semibold transition-all duration-200 hover:scale-[1.03]"
                   style={{ background: `${p.accent}18`, border: `1px solid ${p.accent}25`, color: p.accent }}
                 >
                   Choose
-                </a>
+                </button>
               </div>
             ))}
           </div>
@@ -531,6 +536,7 @@ export default function ProgramsPage() {
         <HowItWorks />
         <ProgramsCTA />
       </main>
+      <Footer />
     </div>
   );
 }

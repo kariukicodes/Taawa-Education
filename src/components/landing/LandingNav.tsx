@@ -6,9 +6,9 @@ import { useContactModal } from "./ContactModalContext";
 const navLinks = [
   { label: "About", href: "/about" },
   { label: "Programs", href: "/programs" },
-  { label: "How It Works", href: "#how-it-works" },
+  { label: "How It Works", href: "/#how-it-works" },
   { label: "Tutors", href: "/tutors" },
-  { label: "Contact", href: "#contact" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 type LandingNavProps = {

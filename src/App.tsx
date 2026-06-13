@@ -44,6 +44,13 @@ import TutorsPage from "@/pages/tutors";
 import AboutPage from "@/pages/AboutPage";
 import ProgramsPage from "@/pages/ProgramsPage";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import {
+  AdmissionsPolicyPage,
+  ChildProtectionPolicyPage,
+  FeesPolicyPage,
+  PrivacyPolicyPage,
+  TermsPage,
+} from "@/pages/LegalPages";
 import { ContactModalProvider } from "@/components/landing/ContactModalContext";
 
 const queryClient = new QueryClient();
@@ -102,11 +109,13 @@ const App = () => (
               <Route path="/fees" element={<PlaceholderPage title="Fees" />} />
               <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
               <Route path="/contact" element={<PlaceholderPage title="Contact Us" />} />
-              <Route path="/policy/fees" element={<PlaceholderPage title="Fees Policy" />} />
-              <Route path="/policy/admissions" element={<PlaceholderPage title="Admissions Policy" />} />
-              <Route path="/policy/child-protection" element={<PlaceholderPage title="Child Protection Policy" />} />
-              <Route path="/terms" element={<PlaceholderPage title="Terms and Conditions" />} />
-              <Route path="/privacy" element={<PlaceholderPage title="Privacy Policy" />} />
+              <Route path="/resources" element={<PlaceholderPage title="Resources" />} />
+              <Route path="/tutors/guide" element={<PlaceholderPage title="Tutor Guidelines" />} />
+              <Route path="/policy/fees" element={<FeesPolicyPage />} />
+              <Route path="/policy/admissions" element={<AdmissionsPolicyPage />} />
+              <Route path="/policy/child-protection" element={<ChildProtectionPolicyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
