@@ -45,8 +45,7 @@ export function FAQSection() {
           </Badge>
 
           <h2
-            className="mt-4 text-3xl font-bold tracking-[-0.02em] text-[#F5F5F0] md:text-4xl"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display mt-4 text-3xl font-bold tracking-[-0.02em] text-[#F5F5F0] md:text-4xl"
           >
             Frequently asked questions
           </h2>

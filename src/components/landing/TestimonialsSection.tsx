@@ -40,8 +40,7 @@ export function TestimonialsSection() {
           </Badge>
 
           <h2
-            className="mt-4 text-3xl font-bold text-[#F5F5F0] md:text-4xl tracking-[-0.02em]"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-display mt-4 text-3xl font-bold tracking-[-0.02em] text-[#F5F5F0] md:text-4xl"
           >
             What families are experiencing
           </h2>

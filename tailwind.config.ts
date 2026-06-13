@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['"Poppins"', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', '"Poppins"', 'system-ui', 'sans-serif'],
+        ui: ['"Inter"', '"Poppins"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

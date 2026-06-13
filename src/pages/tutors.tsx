@@ -1,7 +1,27 @@
-import { useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { LandingNav } from "@/components/landing/LandingNav";
+import { useContactModal } from "@/components/landing/ContactModalContext";
 
-const tutors = [
+// Types
+
+type Tutor = {
+  name: string;
+  role: string;
+  subjects: string[];
+  rating: number;
+  students: number;
+  experience: string;
+  image: string;
+  initials: string;
+  bgColor: string;
+  darkBgColor: string;
+  textColor: string;
+};
+
+// Data
+
+const tutors: Tutor[] = [
   {
     name: "Amina Odhiambo",
     role: "Mathematics & Sciences",
@@ -11,8 +31,9 @@ const tutors = [
     experience: "8 yrs",
     image: "/amina.jpg",
     initials: "AO",
-    accent: "#C9A84C",
-    bgAccent: "#1C1609",
+    bgColor: "#D6E8D4",
+    darkBgColor: "#1A2E19",
+    textColor: "#2D5A29",
   },
   {
     name: "Brian Mutua",
@@ -23,20 +44,22 @@ const tutors = [
     experience: "6 yrs",
     image: "/mutua.jpg",
     initials: "BM",
-    accent: "#7A9E7E",
-    bgAccent: "#0D150E",
+    bgColor: "#D8E8F5",
+    darkBgColor: "#111E2E",
+    textColor: "#1A4A6E",
   },
   {
     name: "Cynthia Waweru",
-    role: "Early Childhood · CBC",
-    subjects: ["Grade 1–3", "Literacy", "Numeracy"],
+    role: "Early Childhood & CBC",
+    subjects: ["Grade 1â€“3", "Literacy", "Numeracy"],
     rating: 5.0,
     students: 18,
     experience: "5 yrs",
     image: "/cynthia.jpg",
     initials: "CW",
-    accent: "#C9A84C",
-    bgAccent: "#1C1609",
+    bgColor: "#F5E6D8",
+    darkBgColor: "#2A1A0E",
+    textColor: "#6E3A1A",
   },
   {
     name: "David Kariuki",
@@ -47,8 +70,9 @@ const tutors = [
     experience: "10 yrs",
     image: "/kariuki.png",
     initials: "DK",
-    accent: "#7A9E7E",
-    bgAccent: "#0D150E",
+    bgColor: "#E8D8F5",
+    darkBgColor: "#1E1030",
+    textColor: "#4A1A6E",
   },
   {
     name: "Esther Njoki",
@@ -57,20 +81,31 @@ const tutors = [
     rating: 4.7,
     students: 22,
     experience: "7 yrs",
-    image: "/easther.jpg",
+    image: "/esther.jpg",
     initials: "EN",
-    accent: "#C9A84C",
-    bgAccent: "#1C1609",
+    bgColor: "#F5F0D8",
+    darkBgColor: "#252010",
+    textColor: "#6E5A1A",
   },
 ];
 
+const heroTutors = [tutors[0], tutors[1], tutors[4]];
+
+// Sub-components
+
 function Stars({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <svg key={s} width="11" height="11" viewBox="0 0 24 24"
-          fill={s <= Math.round(rating) ? "#C9A84C" : "none"}
-          stroke="#C9A84C" strokeWidth="2">
+    <div className="flex items-center gap-[2px]">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <svg
+          key={star}
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill={star <= Math.round(rating) ? "#C9A84C" : "none"}
+          stroke="#C9A84C"
+          strokeWidth="2"
+        >
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       ))}
@@ -78,349 +113,318 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-// ── Stacked card stack with hover-to-cycle interaction ──────────
-function TutorStack({ tutors: stackTutors }: { tutors: typeof tutors }) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
-
-  // Cycle to next card
-  const cycleNext = () => setActiveIdx((i) => (i + 1) % stackTutors.length);
-
-  // Build display order: active card is front, rest fan behind
-  const order = stackTutors.map((_, i) => {
-    const pos = (i - activeIdx + stackTutors.length) % stackTutors.length;
-    return pos; // 0 = front, 1 = second, 2 = third...
-  });
-
-  const visibleCount = 3;
-
+function TutorAvatar({
+  tutor,
+  imgErrors,
+  setImgErrors,
+  className,
+  dark = false,
+}: {
+  tutor: Tutor;
+  imgErrors: Record<string, boolean>;
+  setImgErrors: Dispatch<SetStateAction<Record<string, boolean>>>;
+  className?: string;
+  dark?: boolean;
+}) {
+  const bg = dark ? tutor.darkBgColor : tutor.bgColor;
   return (
-    <div
-      className="relative cursor-pointer select-none"
-      style={{ width: "280px", height: "400px" }}
-      onClick={cycleNext}
-      onMouseEnter={cycleNext}
-    >
-      {stackTutors.map((tutor, i) => {
-        const pos = order[i];
-        if (pos >= visibleCount) return null;
-
-        const isFront = pos === 0;
-        const scale = 1 - pos * 0.06;
-        const translateX = pos * 28;
-        const translateY = pos * 12;
-        const zIndex = visibleCount - pos;
-        const opacity = 1 - pos * 0.25;
-
-        return (
-          <div
-            key={tutor.name}
-            className="absolute inset-0 overflow-hidden rounded-[28px]"
-            style={{
-              background: tutor.bgAccent,
-              border: `1px solid rgba(255,255,255,${isFront ? 0.1 : 0.04})`,
-              boxShadow: isFront
-                ? "0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.1)"
-                : "0 12px 32px rgba(0,0,0,0.5)",
-              transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale})`,
-              transformOrigin: "top left",
-              zIndex,
-              opacity,
-              transition: "all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            }}
-          >
-            {/* Warm ambient */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `radial-gradient(ellipse at 50% 15%, ${tutor.accent}28 0%, transparent 60%)`,
-                zIndex: 0,
-              }}
-            />
-
-            {/* Initials fallback */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
-              <div
-                className="font-display flex h-20 w-20 items-center justify-center rounded-full text-[22px] font-black"
-                style={{
-                  background: `${tutor.accent}18`,
-                  border: `1px solid ${tutor.accent}30`,
-                  color: tutor.accent,
-                }}
-              >
-                {tutor.initials}
-              </div>
-            </div>
-
-            {/* Photo */}
-            {!imgErrors[tutor.name] && (
-              <img
-                src={tutor.image}
-                alt={tutor.name}
-                className="absolute inset-0 h-full w-full object-cover object-top"
-                style={{ zIndex: 2 }}
-                onError={() => setImgErrors((p) => ({ ...p, [tutor.name]: true }))}
-              />
-            )}
-
-            {/* Bottom scrim */}
-            <div
-              className="absolute bottom-0 left-0 right-0"
-              style={{
-                height: isFront ? "180px" : "60px",
-                background: `linear-gradient(to top, ${tutor.bgAccent} 0%, transparent 100%)`,
-                zIndex: 3,
-                transition: "height 0.55s ease",
-              }}
-            />
-
-            {/* Info — front card only */}
-            {isFront && (
-              <div className="absolute bottom-0 left-0 right-0 z-10 p-5" style={{ zIndex: 4 }}>
-                <p
-                  className="font-display mb-0.5 text-[15px] font-bold text-foreground"
-                >
-                  {tutor.name}
-                </p>
-                <p className="mb-2.5 text-[11px] text-muted-foreground">{tutor.role}</p>
-                <div className="mb-1.5 flex items-center gap-2">
-                  <Stars rating={tutor.rating} />
-                  <span className="text-[10px] text-muted-foreground/80">{tutor.rating}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-primary">✦</span>
-                  <span className="text-[10px] text-muted-foreground/80">{tutor.students}+ students</span>
-                </div>
-              </div>
-            )}
-
-            {/* Experience badge */}
-            {isFront && (
-              <div
-                className="absolute right-4 top-4 rounded-full px-3 py-1 text-[10px] font-semibold backdrop-blur-md"
-                style={{
-                  zIndex: 5,
-                  background: `${tutor.accent}20`,
-                  border: `1px solid ${tutor.accent}30`,
-                  color: tutor.accent,
-                }}
-              >
-                {tutor.experience} exp
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Hover hint */}
+    <>
       <div
-        className="absolute -bottom-8 left-0 right-0 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/50"
+        className="absolute inset-0 flex items-end justify-center pb-6"
+        style={{ background: bg }}
       >
-        <span>hover to browse</span>
-        <span className="text-primary/60">→</span>
+        <span
+          className="select-none text-[64px] font-black leading-none opacity-10"
+          style={{ color: tutor.textColor }}
+        >
+          {tutor.initials}
+        </span>
       </div>
+      {!imgErrors[tutor.name] && (
+        <img
+          src={tutor.image}
+          alt={tutor.name}
+          className={className}
+          onError={() =>
+            setImgErrors((prev) => ({ ...prev, [tutor.name]: true }))
+          }
+        />
+      )}
+    </>
+  );
+}
 
-      {/* Dot indicators */}
-      <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-2">
-        {stackTutors.map((_, i) => (
-          <div
-            key={i}
-            className="h-[3px] rounded-full transition-all duration-300"
-            style={{
-              width: i === activeIdx ? "20px" : "5px",
-              background: i === activeIdx ? "#C9A84C" : "rgba(255,255,255,0.15)",
-            }}
-          />
-        ))}
-      </div>
+// Mode Toggle
+
+function ModeToggle({
+  isTutors,
+  onToggle,
+}: {
+  isTutors: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="inline-flex items-center gap-4">
+      {/* Programs label */}
+      <span
+        className={`text-[13px] font-semibold uppercase tracking-widest transition-colors duration-200 ${
+          !isTutors
+            ? "text-primary"
+            : "text-gray-400 dark:text-gray-500"
+        }`}
+      >
+        Programs
+      </span>
+
+      {/* Toggle pill */}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isTutors}
+        aria-label="Switch between Programs and Tutors"
+        onClick={onToggle}
+        className={`relative inline-flex h-[32px] w-[58px] flex-shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+          isTutors
+            ? "border-primary/40 bg-primary/10 dark:bg-primary/20"
+            : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800"
+        }`}
+      >
+        <span
+          className={`inline-block h-[22px] w-[22px] transform rounded-full shadow transition-all duration-300 ${
+            isTutors
+              ? "translate-x-[28px] bg-primary"
+              : "translate-x-[3px] bg-gray-300 dark:bg-gray-500"
+          }`}
+        />
+      </button>
+
+      {/* Tutors label */}
+      <span
+        className={`text-[13px] font-semibold uppercase tracking-widest transition-colors duration-200 ${
+          isTutors
+            ? "text-primary"
+            : "text-gray-400 dark:text-gray-500"
+        }`}
+      >
+        Tutors
+      </span>
     </div>
   );
 }
 
-// ── Hero ────────────────────────────────────────────────────────
-function TutorsHero() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+// Hero Section
 
-  const fadeUp = (delay: string) =>
-    `transition-all duration-700 ${delay} ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"}`;
+function TutorsHero() {
+  const { openModal } = useContactModal();
+  const navigate = useNavigate();
+  const [mounted, setMounted] = useState(false);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isTutors, setIsTutors] = useState(true);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  const fade = (delay: string) =>
+    `transition-all duration-700 ${delay} ${
+      mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+    }`;
+
+  const handleToggle = () => {
+    if (isTutors) {
+      // switching to Programs â€” navigate to programs page
+      navigate("/programs");
+    } else {
+      setIsTutors(true);
+    }
+  };
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#0A0A08]">
-      <div className="absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/50 to-transparent" />
+    <section className="overflow-hidden bg-[#0F0F0F] pb-0 pt-24">
+      <div className="mx-auto max-w-[1400px] px-6 md:px-10 lg:px-16">
+        <div className="grid min-h-[580px] items-center gap-12 lg:grid-cols-[1fr_auto] lg:gap-20">
 
-      {/* Grain */}
-      <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundSize: "256px 256px",
-        }}
-      />
+          {/* Left: Copy */}
+          <div className="flex flex-col justify-center py-10">
 
-      {/* Ambient glow */}
-      <div
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          background: "radial-gradient(ellipse 60% 50% at 75% 50%, rgba(201,168,76,0.05) 0%, transparent 70%)",
-        }}
-      />
+            {/* Toggle */}
+            <div className={`mb-10 ${fade("delay-0")}`}>
+              <ModeToggle isTutors={isTutors} onToggle={handleToggle} />
+            </div>
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1280px] items-center gap-16 px-8 lg:grid-cols-2 lg:px-12">
-
-        {/* ── LEFT ── */}
-        <div className="flex flex-col justify-center py-28 lg:py-0">
-
-
-          {/* Headline */}
-          <h1
-            className={`font-display mb-6 text-[52px] font-black leading-[1.0] tracking-[-0.03em] text-foreground md:text-[62px] lg:text-[70px] ${fadeUp("delay-100")}`}
-          >
-            Meet Nairobi's
-            <br />
-            finest{" "}
-            <span className="text-primary">tutors</span>
-            <br />
-            for your child.
-          </h1>
-
-          {/* Sub */}
-          <p className={`mb-10 max-w-[400px] text-[15px] font-light leading-[1.9] text-muted-foreground ${fadeUp("delay-200")}`}>
-            Every Taawa Education tutor is degree-qualified, background-checked, and
-            trained in personalised homeschooling — not just teaching, but
-            building a genuine relationship with your child.
-          </p>
-
-          {/* CTAs */}
-          <div className={`mb-12 flex flex-wrap gap-4 ${fadeUp("delay-300")}`}>
-            <a
-              href="#tutors-grid"
-              className="group inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-[13px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-[#C9A84C]/20 active:scale-[0.98]"
+            {/* Headline */}
+            <h1
+              className={`mb-6 max-w-[560px] text-[58px] font-normal leading-[1.07] tracking-[-0.04em] text-gray-50 ${fade("delay-100")}`}
             >
-              Explore Our Tutors
-            </a>
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] px-8 py-3.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/40 hover:text-foreground"
+              Hire top private{" "}
+              <span className="font-bold text-primary">tutors</span> and
+              bring your child&apos;s goals to life.
+            </h1>
+
+            {/* Subheading */}
+            <p
+              className={`mb-8 max-w-[480px] text-[17px] leading-[1.6] text-gray-400 ${fade("delay-200")}`}
             >
-              Request a Tutor
-              <span className="text-primary">→</span>
-            </a>
+              Discover Nairobi&apos;s finest tutors and transform your
+              child&apos;s learning journey with exceptional care, subject
+              depth, and one-on-one support.
+            </p>
+
+            {/* CTAs */}
+            <div className={`flex flex-wrap gap-3 ${fade("delay-300")}`}>
+              <a
+                href="#tutors-grid"
+                className="inline-flex items-center justify-center rounded-[10px] bg-primary px-7 py-[14px] text-[14px] font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-primary/90"
+              >
+                Explore Tutors
+              </a>
+              <button
+                type="button"
+                onClick={openModal}
+                className="inline-flex items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.05] px-7 py-[14px] text-[14px] font-medium text-white/70 transition-all hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                Post a Job
+              </button>
+            </div>
           </div>
 
-          {/* Stats */}
-          <div className={`flex flex-wrap items-center gap-8 border-t border-white/[0.06] pt-8 ${fadeUp("delay-500")}`}>
-            {[
-              { value: "12+", label: "Expert tutors" },
-              { value: "48+", label: "Families served" },
-              { value: "4.9+", label: "Average rating" },
-            ].map((s) => (
-              <div key={s.label}>
-                <p
-                  className="font-display text-[28px] font-black leading-none text-primary"
+          {/* Right: Accordion cards */}
+          <div
+            className={`flex items-end gap-3 pb-0 ${fade("delay-300")}`}
+            onMouseLeave={() => setActiveIndex(0)}
+          >
+            {heroTutors.map((tutor, i) => {
+              const isActive = i === activeIndex;
+              return (
+                <article
+                  key={tutor.name}
+                  className={`relative cursor-pointer overflow-hidden rounded-[22px] border border-white/6 transition-all duration-500 ease-out ${
+                    isActive ? "h-[440px] w-[280px]" : "h-[440px] w-[110px]"
+                  }`}
+                  onMouseEnter={() => setActiveIndex(i)}
+                  onClick={() => setActiveIndex(i)}
                 >
-                  {s.value}
-                </p>
-                <p className="mt-1 text-[11px] text-muted-foreground/70">{s.label}</p>
-              </div>
+                  {/* bg set via JS since it's dynamic */}
+                  <TutorAvatar
+                    tutor={tutor}
+                    imgErrors={imgErrors}
+                    setImgErrors={setImgErrors}
+                    className="absolute inset-0 h-full w-full object-cover object-top transition-all duration-500"
+                  />
+
+                  {/* Active footer */}
+                  <div
+                    className={`absolute inset-x-0 bottom-0 rounded-b-[22px] bg-[#111]/90 backdrop-blur-sm transition-all duration-500 ${
+                      isActive
+                        ? "px-5 pb-5 pt-4 opacity-100"
+                        : "pointer-events-none px-5 pb-0 pt-0 opacity-0"
+                    }`}
+                  >
+                    <p className="text-[15px] font-semibold leading-none text-gray-100">
+                      {tutor.name}
+                    </p>
+                    <p className="mt-1 text-[12px] text-gray-400">
+                      {tutor.role}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Stars rating={tutor.rating} />
+                      <span className="text-[11px] text-gray-400">{tutor.rating}</span>
+                    </div>
+                    <p className="mt-2 text-[12px] text-gray-400">
+                      {tutor.students * 10}+ sessions
+                    </p>
+                  </div>
+
+                  {/* Collapsed name label */}
+                  {!isActive && (
+                    <div className="absolute bottom-5 left-0 right-0 flex justify-center">
+                      <span
+                        className="-rotate-90 whitespace-nowrap text-[11px] font-semibold tracking-wide opacity-60"
+                        style={{ color: tutor.textColor }}
+                      >
+                        {tutor.name.split(" ")[0]}
+                      </span>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Partners strip */}
+        <div className="border-t border-white/8 py-10">
+          <p className="mb-6 text-center text-[12px] font-medium uppercase tracking-widest text-gray-500">
+            Trusted by
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-4">
+            {["Brighter Minds", "Elimu Hub", "Safari Scholars", "Twiga Learn"].map((p) => (
+              <span
+                key={p}
+                className="text-[20px] font-semibold tracking-tight text-white/25"
+              >
+                {p}
+              </span>
             ))}
           </div>
         </div>
-
-        {/* ── RIGHT: Hover-to-cycle stack ── */}
-        <div className="relative hidden lg:flex lg:items-center lg:justify-center lg:py-20">
-          <div className="relative flex flex-col items-center">
-
-            {/* Floating badge — subjects */}
-            <div
-              className="absolute -top-6 right-0 z-30 rounded-2xl border border-white/[0.08] bg-[#131310]/90 px-4 py-3 backdrop-blur-xl transition-all duration-700"
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "translateY(0)" : "translateY(-12px)",
-                transitionDelay: "1200ms",
-              }}
-            >
-              <p className="text-[9px] font-semibold tracking-[0.12em] text-muted-foreground/70 uppercase">
-                Subjects Covered
-              </p>
-              <p
-                className="font-display text-[26px] font-black leading-none text-foreground"
-              >
-                15<span className="text-primary">+</span>
-              </p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground/70">across all curricula</p>
-            </div>
-
-            {/* The stack */}
-            <TutorStack tutors={tutors} />
-
-            {/* Floating badge — vetted */}
-            <div
-              className="absolute -bottom-4 left-0 z-30 rounded-2xl border border-white/[0.08] bg-[#131310]/90 px-4 py-3 backdrop-blur-xl transition-all duration-700"
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "translateY(0)" : "translateY(12px)",
-                transitionDelay: "1400ms",
-              }}
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C9A84C]/15 ring-1 ring-[#C9A84C]/20">
-                  <span className="text-[11px] text-primary">✓</span>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-foreground">Vetted &amp; Verified</p>
-                  <p className="text-[10px] text-muted-foreground/70">All tutors background-checked</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-10 z-20 hidden flex-col items-center gap-2 lg:flex">
-        <div className="h-10 w-px animate-pulse bg-gradient-to-b from-[#C9A84C]/50 to-transparent" />
-        <span
-          className="text-[9px] font-medium tracking-[0.25em] text-muted-foreground/50 uppercase"
-          style={{ writingMode: "vertical-rl" }}
-        >
-          Scroll
-        </span>
       </div>
     </section>
   );
 }
 
-// ── Tutors grid ─────────────────────────────────────────────────
+// Tutors Grid Section
+
 function TutorsGrid() {
+  const { openModal } = useContactModal();
   const [filter, setFilter] = useState("All");
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
   const filters = ["All", "CBC", "British", "Sciences", "Languages"];
 
-  const filtered =
+  const filteredTutors =
     filter === "All"
       ? tutors
       : tutors.filter(
           (t) =>
-            t.subjects.some((s) => s.toLowerCase().includes(filter.toLowerCase())) ||
-            t.role.toLowerCase().includes(filter.toLowerCase())
+            t.subjects.some((s) =>
+              s.toLowerCase().includes(filter.toLowerCase())
+            ) || t.role.toLowerCase().includes(filter.toLowerCase())
         );
 
   return (
-    <section id="tutors-grid" className="bg-[#0A0A08] py-24">
-      <div className="mx-auto max-w-7xl px-8 md:px-12">
+    <section
+      id="tutors-grid"
+      className="bg-[#10100F] py-24"
+    >
+      <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-16">
 
-        {/* Filter tabs */}
-        <div className="mb-12 flex flex-wrap gap-2">
+        {/* Section header */}
+        <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-primary">
+              Explore profiles
+            </p>
+            <h2 className="max-w-[480px] text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-gray-50">
+              Browse tutors by curriculum and teaching style.
+            </h2>
+          </div>
+          <p className="max-w-sm text-[14px] leading-relaxed text-gray-400">
+            Each profile highlights subject fit, experience, and the kind of
+            learning relationship parents can expect.
+          </p>
+        </div>
+
+        {/* Filter pills */}
+        <div className="mb-10 flex flex-wrap gap-2">
           {filters.map((f) => (
             <button
               key={f}
+              type="button"
               onClick={() => setFilter(f)}
-              className={`rounded-full px-5 py-2 text-[12px] font-medium transition-all duration-200 ${
+              className={`rounded-full px-5 py-2 text-[13px] font-medium transition-all duration-200 ${
                 filter === f
                   ? "bg-primary text-primary-foreground"
-                  : "border border-white/[0.08] bg-white/[0.04] text-muted-foreground"
+                  : "border border-white/10 bg-white/[0.04] text-gray-400 hover:border-white/20"
               }`}
             >
               {f}
@@ -430,119 +434,93 @@ function TutorsGrid() {
 
         {/* Grid */}
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((tutor) => (
+          {filteredTutors.map((tutor) => (
             <div
               key={tutor.name}
-              className="group relative overflow-hidden rounded-[20px] border border-white/[0.06] bg-[#111110] transition-all duration-500 hover:-translate-y-1 hover:border-primary/25"
+              className="group overflow-hidden rounded-[20px] border border-white/6 bg-[#181817] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/10 hover:shadow-md"
             >
-              <div className="relative overflow-hidden" style={{ height: "260px", background: tutor.bgAccent }}>
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    zIndex: 0,
-                    background: `radial-gradient(ellipse at 50% 20%, ${tutor.accent}22 0%, transparent 60%)`,
-                  }}
+              {/* Photo area */}
+              <div className="relative h-[240px] overflow-hidden">
+                <TutorAvatar
+                  tutor={tutor}
+                  imgErrors={imgErrors}
+                  setImgErrors={setImgErrors}
+                  className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
                 />
-                {/* Initials */}
-                <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
-                  <div
-                    className="font-display flex h-20 w-20 items-center justify-center rounded-full text-[20px] font-black"
-                    style={{
-                      background: `${tutor.accent}18`,
-                      border: `1px solid ${tutor.accent}30`,
-                      color: tutor.accent,
-                    }}
-                  >
-                    {tutor.initials}
-                  </div>
-                </div>
-                {/* Photo */}
-                {!imgErrors[tutor.name] && (
-                  <img
-                    src={tutor.image}
-                    alt={tutor.name}
-                    className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
-                    style={{ zIndex: 2 }}
-                    onError={() => setImgErrors((p) => ({ ...p, [tutor.name]: true }))}
-                  />
-                )}
-                <div
-                  className="absolute bottom-0 left-0 right-0"
-                  style={{
-                    height: "80px",
-                    background: "linear-gradient(to top, #111110, transparent)",
-                    zIndex: 3,
-                  }}
-                />
-                <div
-                  className="absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-semibold backdrop-blur-md"
-                  style={{
-                    zIndex: 4,
-                    background: `${tutor.accent}18`,
-                    border: `1px solid ${tutor.accent}28`,
-                    color: tutor.accent,
-                  }}
-                >
+
+                {/* Experience badge */}
+                <span className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-[11px] font-semibold text-gray-200 backdrop-blur-sm">
                   {tutor.experience}
-                </div>
+                </span>
+
+                {/* Fade to card bg */}
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#181817] to-transparent" />
               </div>
 
+              {/* Info */}
               <div className="p-5">
-                <h3
-                  className="font-display text-[15px] font-semibold text-foreground"
-                >
+                <h3 className="text-[15px] font-semibold text-gray-100">
                   {tutor.name}
                 </h3>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{tutor.role}</p>
-                <div className="mb-3 mt-2 flex items-center gap-2">
+                <p className="mt-0.5 text-[12px] text-gray-400">
+                  {tutor.role}
+                </p>
+
+                <div className="mt-2 flex items-center gap-2">
                   <Stars rating={tutor.rating} />
-                  <span className="text-[10px] text-muted-foreground/70">
-                    {tutor.rating} · {tutor.students}+ students
+                  <span className="text-[11px] text-gray-400">
+                    {tutor.rating} Â· {tutor.students}+ students
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {tutor.subjects.map((s) => (
+
+                {/* Subject tags */}
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {tutor.subjects.map((subject) => (
                     <span
-                      key={s}
-                      className="rounded-full px-2.5 py-[4px] text-[10px] font-medium text-muted-foreground"
-                      style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                      }}
+                      key={subject}
+                      className="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-gray-400"
                     >
-                      {s}
+                      {subject}
                     </span>
                   ))}
                 </div>
-              </div>
 
-              <div
-                className="absolute bottom-0 left-0 right-0 h-[1.5px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                style={{ background: `linear-gradient(to right, transparent, ${tutor.accent}, transparent)` }}
-              />
+                {/* CTA */}
+                <button
+                  type="button"
+                  onClick={openModal}
+                  className="mt-4 w-full rounded-[10px] border border-white/10 py-2.5 text-[13px] font-medium text-gray-300 transition-all hover:border-primary/35 hover:bg-primary hover:text-primary-foreground"
+                >
+                  Book a Session
+                </button>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center gap-4 text-center">
-          <p className="text-[14px] text-muted-foreground/70">
-            Don't see the right fit? We'll match you personally.
+        {/* Bottom CTA */}
+        <div className="mt-20 flex flex-col items-center gap-4 text-center">
+          <p className="text-[14px] text-gray-400">
+            Not sure who&apos;s the right fit? We&apos;ll shortlist options for you.
           </p>
-          <a
-            href="#contact"
-            className="rounded-xl bg-primary px-8 py-3.5 text-[13px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 hover:shadow-lg hover:shadow-[#C9A84C]/20"
+          <button
+            type="button"
+            onClick={openModal}
+            className="rounded-[10px] bg-primary px-8 py-3.5 text-[14px] font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg"
           >
             Request a Custom Tutor Match
-          </a>
+          </button>
         </div>
       </div>
     </section>
   );
 }
 
+// Page
+
 export default function TutorsPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A08]">
+    <div className="min-h-screen bg-[#0F0F0F]">
       <LandingNav />
       <main>
         <TutorsHero />

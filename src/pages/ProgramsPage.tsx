@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { CalendarDays, CheckCheck } from "lucide-react";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { useContactModal } from "@/components/landing/ContactModalContext";
+import { ProgramsHero } from "@/components/ProgramsHero";
 
 // ── Scroll visibility hook ─────────────────────────────────────
 function useVisible(threshold = 0.1) {
@@ -21,9 +23,8 @@ function useVisible(threshold = 0.1) {
 function Label({ text, center = false }: { text: string; center?: boolean }) {
   return (
     <div className={`mb-5 flex items-center gap-3 ${center ? "justify-center" : ""}`}>
-      <span className="h-px w-8 bg-[#C9A84C]/40" />
-      <span className="text-[11px] font-medium tracking-[0.18em] text-primary">{text}</span>
-      <span className="h-px w-8 bg-[#C9A84C]/40" />
+      <span className="h-1.5 w-1.5 rounded-full bg-primary/80" />
+      <span className="text-[11px] font-medium tracking-[0.16em] text-primary/90">{text}</span>
     </div>
   );
 }
@@ -53,7 +54,7 @@ const programs = [
       "Flexible scheduling",
     ],
     ideal: "Families who want official curriculum coverage with a personalised delivery and the flexibility homeschooling provides.",
-      image: "/competency.jpg",
+    image: "/competency.jpg",
     popular: true,
   },
   {
@@ -79,7 +80,7 @@ const programs = [
       "Parent progress meetings",
     ],
     ideal: "Families with international ambitions, expat families, or those targeting UK, US, or global university admissions.",
-      image: "/igcse.jpg",
+    image: "/igcse.jpg",
     popular: false,
   },
   {
@@ -105,7 +106,7 @@ const programs = [
       "Flexible pacing",
     ],
     ideal: "Parents of younger children who want to nurture independence, creativity, and a genuine love of learning from an early age.",
-      image: "/montessori.png",
+    image: "/montessori.png",
     popular: false,
   },
   {
@@ -131,99 +132,13 @@ const programs = [
       "Direct founder involvement",
     ],
     ideal: "Children with unique learning needs, twice-exceptional students, or families who want something that goes beyond any standard curriculum.",
-      image: "/special.png",
+    image: "/special.png",
     popular: false,
   },
 ];
 
 // ══════════════════════════════════════════════════════════════
-// 1. HERO
-// ══════════════════════════════════════════════════════════════
-function ProgramsHero() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  return (
-    <section className="relative min-h-[65vh] overflow-hidden bg-[#0F0F0F]">
-      <div className="absolute left-0 top-0 z-10 h-[2px] w-full bg-gradient-to-r from-transparent via-[#C9A84C]/50 to-transparent" />
-
-      {/* Dot grid */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-
-      {/* Faint watermark */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
-        <span
-          className="font-display select-none text-[18vw] font-black leading-none text-foreground/[0.018]"
-        >
-          PROGRAMS
-        </span>
-      </div>
-
-      <div className="relative z-10 mx-auto flex min-h-[65vh] max-w-7xl flex-col items-center justify-center px-3 py-28 text-center lg:px-3">
-        <div
-          className={`mb-6 flex items-center gap-3 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
-        >
-          <span className="h-px w-8 bg-primary/40" />
-          <span className="text-[11px] font-medium tracking-[0.18em] text-primary">
-            OUR PROGRAMS
-          </span>
-          <span className="h-px w-8 bg-primary/40" />
-        </div>
-
-        <h1
-          className={`font-display mb-6 max-w-3xl text-[52px] font-black leading-[1.0] tracking-[-2.5px] text-foreground transition-all duration-700 delay-100 md:text-[66px] lg:text-[76px] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-        >
-          Four paths.
-          <br />
-          <span className="text-primary">One perfect fit.</span>
-        </h1>
-
-        <p
-          className={`mb-12 max-w-lg text-[15px] font-light leading-[1.85] text-muted-foreground transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-        >
-          From Kenya's national CBC to Cambridge IGCSE, from Montessori early
-          years to fully custom plans — every Taawa Education program is delivered
-          one-on-one, at your child's pace.
-        </p>
-
-        {/* Program quick-nav pills */}
-        <div
-          className={`flex flex-wrap justify-center gap-3 transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-        >
-          {programs.map((p) => (
-            <a
-              key={p.id}
-              href={`#${p.id}`}
-              className="flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-[12px] font-medium text-muted-foreground transition-all duration-300 hover:border-primary/35 hover:text-foreground"
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.accent }} />
-              {p.tag}
-              {p.popular && (
-                <span
-                  className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
-                  style={{ background: "rgba(201,168,76,0.15)" }}
-                >
-                  <span className="text-primary">Popular</span>
-                </span>
-              )}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0F0F0F] to-transparent" />
-    </section>
-  );
-}
-
-// ══════════════════════════════════════════════════════════════
-// 2. PROGRAM DEEP-DIVE CARDS — alternating layout
+// 1. PROGRAM DEEP-DIVE CARDS — alternating layout
 // ══════════════════════════════════════════════════════════════
 function ProgramCard({ program, index }: { program: typeof programs[0]; index: number }) {
   const { ref, visible } = useVisible();
@@ -234,7 +149,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
       ref={ref}
       id={program.id}
       className="relative py-24"
-      style={{ background: index % 2 === 0 ? "#0F0F0F" : "#0A0A0A" }}
+      style={{ background: index % 2 === 0 ? "#10100F" : "#0D0D0C" }}
     >
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
@@ -267,9 +182,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
               )}
             </div>
 
-            <h2
-              className="font-display mb-2 text-[36px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[42px]"
-            >
+            <h2 className="font-display mb-2 text-[36px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[42px]">
               {program.name}
             </h2>
             <p className="mb-5 text-[14px] font-light" style={{ color: program.accent }}>
@@ -287,7 +200,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex-1 rounded-xl border border-white/7 bg-[#141412] px-4 py-3"
+                  className="flex-1 rounded-xl border border-white/7 bg-[#131311] px-4 py-3"
                 >
                   <p className="mb-0.5 text-[10px] font-medium tracking-[0.08em] text-muted-foreground/70">
                     {item.label.toUpperCase()}
@@ -306,11 +219,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
                 {program.subjects.map((s) => (
                   <span
                     key={s}
-                    className="rounded-full px-3 py-1.5 text-[11px] font-medium text-muted-foreground"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
+                    className="rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-muted-foreground"
                   >
                     {s}
                   </span>
@@ -319,14 +228,12 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
             </div>
 
             {/* Pricing + CTA */}
-            <div className="flex items-center gap-5 rounded-2xl border border-white/8 bg-[#141412] p-5">
+            <div className="flex items-center gap-5 rounded-2xl border border-white/8 bg-[#131311] p-5">
               <div>
                 <p className="text-[10px] font-medium tracking-[0.1em] text-muted-foreground/70">
                   STARTING FROM
                 </p>
-                <p
-                  className="font-display text-[28px] font-black leading-none text-foreground"
-                >
+                <p className="font-display text-[28px] font-black leading-none text-foreground">
                   {program.price}
                 </p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground/70">{program.period}</p>
@@ -352,26 +259,14 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
               transform: visible ? "translateX(0)" : `translateX(${isEven ? "28px" : "-28px"})`,
             }}
           >
-            {/* Outer glow ring */}
-            <div
-              className="absolute -inset-[1px] rounded-[32px]"
-              style={{ background: `linear-gradient(135deg, ${program.accent}28 0%, transparent 50%)` }}
-            />
-
             <div
               className="relative overflow-hidden rounded-[32px]"
               style={{
                 height: "480px",
                 background: program.darkAccent,
-                boxShadow: `0 40px 80px rgba(0,0,0,0.55), 0 0 0 1px ${program.accent}12`,
+                boxShadow: `0 24px 60px rgba(0,0,0,0.35)`,
               }}
             >
-              {/* Ambient wash */}
-              <div
-                className="absolute inset-0"
-                style={{ background: `radial-gradient(ellipse at 40% 20%, ${program.accent}20 0%, transparent 55%)` }}
-              />
-
               {/* Image */}
               <img
                 src={program.image}
@@ -380,7 +275,7 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
 
-              {/* Placeholder */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-25">
                 <div
                   className="font-display flex h-20 w-20 items-center justify-center rounded-full border text-[20px] font-black"
@@ -393,38 +288,9 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
                 </p>
               </div>
 
-              {/* Bottom fade */}
-              <div
-                className="absolute bottom-0 left-0 right-0 z-10"
-                style={{ height: "200px", background: `linear-gradient(to top, ${program.darkAccent} 0%, transparent 100%)` }}
-              />
-
-              {/* What's included overlay card */}
-              <div className="absolute bottom-5 left-5 right-5 z-20 rounded-2xl border border-white/10 bg-[#0D0D0B]/88 p-4 backdrop-blur-md">
-                <p className="mb-3 text-[10px] font-medium tracking-[0.1em] text-muted-foreground/70">
-                  WHAT'S INCLUDED
-                </p>
-                <div className="grid grid-cols-2 gap-y-1.5 gap-x-3">
-                  {program.includes.map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <div
-                        className="h-1 w-1 flex-shrink-0 rounded-full"
-                        style={{ background: program.accent }}
-                      />
-                      <span className="text-[11px] text-foreground/80">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Ideal for badge — top left */}
-              <div
-                className="absolute left-5 top-5 z-20 max-w-[200px] rounded-xl border border-white/10 bg-[#0D0D0B]/85 p-3 backdrop-blur-md"
-              >
-                <p className="mb-1 text-[9px] font-medium tracking-[0.1em] text-muted-foreground/70">
-                  IDEAL FOR
-                </p>
-                <p className="text-[11px] leading-[1.5] text-foreground/80">{program.ideal}</p>
+              <div className="absolute inset-x-5 bottom-5 z-20 rounded-2xl border border-white/10 bg-[#0D0D0B]/88 p-4 backdrop-blur-md">
+                <p className="mb-1 text-[11px] font-medium text-muted-foreground">Ideal for</p>
+                <p className="text-[13px] leading-[1.6] text-foreground/82">{program.ideal}</p>
               </div>
             </div>
           </div>
@@ -436,24 +302,24 @@ function ProgramCard({ program, index }: { program: typeof programs[0]; index: n
 }
 
 // ══════════════════════════════════════════════════════════════
-// 3. COMPARISON TABLE
+// 2. COMPARISON TABLE
 // ══════════════════════════════════════════════════════════════
 const compRows = [
-  { label: "Age range",          cbc: "4 – 17",        british: "5 – 18",         montessori: "2 – 12",      custom: "All ages"    },
-  { label: "Curriculum body",    cbc: "KICD Kenya",     british: "Cambridge/Edexcel", montessori: "AMI/AMS",  custom: "Bespoke"     },
-  { label: "Starting price",     cbc: "KES 40,000",    british: "KES 50,000",     montessori: "KES 30,000",  custom: "KES 45,000"  },
-  { label: "Exam prep",          cbc: "KCPE / KCSE",   british: "IGCSE / A-Level", montessori: "None",       custom: "As required" },
-  { label: "Session format",     cbc: "1-on-1",        british: "1-on-1",         montessori: "1-on-1",      custom: "1-on-1"      },
-  { label: "Progress reports",   cbc: "Weekly",        british: "Weekly",         montessori: "Observational", custom: "Weekly"   },
-  { label: "Flexible pacing",    cbc: "✓",             british: "✓",              montessori: "✓✓",          custom: "✓✓✓"        },
-  { label: "International rec.", cbc: "Kenya only",    british: "Global",         montessori: "Global",      custom: "Varies"      },
+  { label: "Age range",          cbc: "4 – 17",        british: "5 – 18",            montessori: "2 – 12",      custom: "All ages"    },
+  { label: "Curriculum body",    cbc: "KICD Kenya",     british: "Cambridge/Edexcel", montessori: "AMI/AMS",     custom: "Bespoke"     },
+  { label: "Starting price",     cbc: "KES 40,000",    british: "KES 50,000",        montessori: "KES 30,000",  custom: "KES 45,000"  },
+  { label: "Exam prep",          cbc: "KCPE / KCSE",   british: "IGCSE / A-Level",   montessori: "None",        custom: "As required" },
+  { label: "Session format",     cbc: "1-on-1",        british: "1-on-1",            montessori: "1-on-1",      custom: "1-on-1"      },
+  { label: "Progress reports",   cbc: "Weekly",        british: "Weekly",            montessori: "Observational", custom: "Weekly"    },
+  { label: "Flexible pacing",    cbc: "✓",             british: "✓",                 montessori: "✓✓",          custom: "✓✓✓"        },
+  { label: "International rec.", cbc: "Kenya only",    british: "Global",            montessori: "Global",      custom: "Varies"      },
 ];
 
 function ComparisonTable() {
   const { ref, visible } = useVisible();
 
   return (
-    <section ref={ref} className="bg-[#0F0F0F] py-24">
+    <section ref={ref} className="bg-[#10100F] py-24">
       <div className="absolute left-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
 
       <div className="mx-auto max-w-7xl px-3 lg:px-3">
@@ -462,9 +328,7 @@ function ComparisonTable() {
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)" }}
         >
           <Label text="COMPARE PROGRAMS" center />
-          <h2
-            className="font-display mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]"
-          >
+          <h2 className="font-display mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]">
             Not sure which to choose?
             <br />
             <span className="text-primary">Compare side by side.</span>
@@ -472,11 +336,11 @@ function ComparisonTable() {
         </div>
 
         <div
-          className="overflow-hidden rounded-2xl border border-white/8 transition-all duration-700"
+          className="overflow-hidden rounded-2xl border border-white/8 bg-[#131311] transition-all duration-700"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(24px)", transitionDelay: "200ms" }}
         >
           {/* Table header */}
-          <div className="grid grid-cols-5 border-b border-white/8 bg-[#141412]">
+          <div className="grid grid-cols-5 border-b border-white/8 bg-[#151513]">
             <div className="px-5 py-4" />
             {programs.map((p) => (
               <div key={p.id} className="px-5 py-4 text-center">
@@ -532,7 +396,7 @@ function ComparisonTable() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// 4. HOW IT WORKS — 4-step process
+// 3. HOW IT WORKS — 4-step process
 // ══════════════════════════════════════════════════════════════
 const steps = [
   { num: "01", title: "Book a consultation", body: "A free 30-minute call with our team. No obligation, no pressure — just an honest conversation about your child's needs.", accent: "#C9A84C" },
@@ -545,14 +409,8 @@ function HowItWorks() {
   const { ref, visible } = useVisible();
 
   return (
-    <section ref={ref} className="relative bg-[#0A0A0A] py-24">
+    <section ref={ref} className="relative bg-[#0D0D0C] py-24">
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
-
-      {/* Diagonal texture */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.022]"
-        style={{ backgroundImage: "repeating-linear-gradient(45deg, #C9A84C 0px, #C9A84C 1px, transparent 1px, transparent 60px)" }}
-      />
 
       <div className="relative mx-auto max-w-7xl px-3 lg:px-3">
         <div
@@ -560,9 +418,7 @@ function HowItWorks() {
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(20px)" }}
         >
           <Label text="THE PROCESS" center />
-          <h2
-            className="font-display mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]"
-          >
+          <h2 className="font-display mx-auto max-w-xl text-[38px] font-black leading-[1.05] tracking-[-1.5px] text-foreground md:text-[46px]">
             From enquiry to first lesson
             <br />
             <span className="text-primary">in four simple steps.</span>
@@ -581,21 +437,13 @@ function HowItWorks() {
               }}
             >
               <div
-                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                style={{ background: `radial-gradient(ellipse at 10% 10%, ${step.accent}10 0%, transparent 65%)` }}
-              />
-
-              {/* Big faint number */}
-              <div
-                className="font-display mb-4 text-[52px] font-black leading-none"
+                className="font-display mb-4 text-[40px] font-black leading-none"
                 style={{ color: `${step.accent}20` }}
               >
                 {step.num}
               </div>
 
-              <h3
-                className="font-display mb-2.5 text-[15px] font-semibold text-foreground"
-              >
+              <h3 className="font-display mb-2.5 text-[15px] font-semibold text-foreground">
                 {step.title}
               </h3>
               <p className="text-[12.5px] font-light leading-[1.8] text-muted-foreground">{step.body}</p>
@@ -606,11 +454,6 @@ function HowItWorks() {
                   →
                 </div>
               )}
-
-              <div
-                className="absolute bottom-0 left-5 right-5 h-[1.5px] origin-left scale-x-0 rounded-full transition-transform duration-500 group-hover:scale-x-100"
-                style={{ background: `linear-gradient(to right, ${step.accent}70, transparent)` }}
-              />
             </div>
           ))}
         </div>
@@ -620,19 +463,15 @@ function HowItWorks() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// 5. CTA
+// 4. CTA
 // ══════════════════════════════════════════════════════════════
 function ProgramsCTA() {
   const { ref, visible } = useVisible();
   const { openModal } = useContactModal();
 
   return (
-    <section ref={ref} className="relative overflow-hidden bg-[#0F0F0F] py-28">
+    <section ref={ref} className="relative overflow-hidden bg-[#10100F] py-28">
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/6 to-transparent" />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 65%)" }}
-      />
 
       <div
         className="relative mx-auto max-w-3xl px-3 text-center transition-all duration-1000 lg:px-3"
@@ -640,9 +479,7 @@ function ProgramsCTA() {
       >
         <Label text="GET STARTED" center />
 
-        <h2
-          className="font-display mb-6 text-[42px] font-black leading-[1.02] tracking-[-1.5px] text-foreground md:text-[52px]"
-        >
+        <h2 className="font-display mb-6 text-[42px] font-black leading-[1.02] tracking-[-1.5px] text-foreground md:text-[52px]">
           Not sure which program
           <br />
           <span className="text-primary">is right for your child?</span>
@@ -673,7 +510,6 @@ function ProgramsCTA() {
             <span className="text-primary">→</span>
           </a>
         </div>
-
       </div>
     </section>
   );
