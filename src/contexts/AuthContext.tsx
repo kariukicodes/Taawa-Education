@@ -132,8 +132,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         lastResolvedUserId.current = null;
         setRole(null);
       } finally {
-        if (cancelled || seq !== roleFetchSeq.current) return;
-        setLoading(false);
+        if (!cancelled && seq === roleFetchSeq.current) {
+          setLoading(false);
+        }
       }
     };
 

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { Footer } from "@/components/landing/Footer";
 
 function LegalLayout({
   title,
@@ -79,8 +78,6 @@ function LegalLayout({
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

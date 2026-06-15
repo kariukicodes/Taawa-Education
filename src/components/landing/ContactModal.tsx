@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, X } from "lucide-react";
+
+import { submitPublicLead } from "@/lib/publicLeadSubmission";
 
 interface ContactModalProps {
   open: boolean;
@@ -59,30 +60,33 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setServerError("");
 
     if (!validate()) return;
 
     setLoading(true);
-    const { error } = await supabase.from("leads").insert({
-      parent_name: form.parent_name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      grade: form.grade.trim(),
-      curriculum_interest: form.curriculum_interest,
-      message: form.message.trim(),
-      status: "New",
-    });
-    setLoading(false);
 
-    if (error) {
-      setServerError("Something went wrong. Please try again.");
-      return;
+    try {
+      await submitPublicLead({
+        parent_name: form.parent_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        grade: form.grade.trim(),
+        curriculum_interest: form.curriculum_interest,
+        message: form.message.trim(),
+        status: "New",
+      });
+
+      setSubmitted(true);
+    } catch (error) {
+      setServerError(
+        error instanceof Error ? error.message : "Something went wrong. Please try again.",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setSubmitted(true);
   };
 
   const inputClass = (field: keyof FormErrors) =>
@@ -109,9 +113,11 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
         {submitted ? (
           <div className="py-10 text-center">
             <CheckCircle className="mx-auto h-14 w-14 text-primary" />
-            <h3 className="font-display mt-6 text-2xl font-bold text-foreground">Thank you for reaching out</h3>
+            <h3 className="font-display mt-6 text-2xl font-bold text-foreground">
+              Thank you for reaching out
+            </h3>
             <p className="mx-auto mt-3 max-w-md text-[15px] leading-7 text-muted-foreground">
-              We’ve received your inquiry and our team will be in touch shortly.
+              We've received your inquiry and our team will be in touch shortly.
             </p>
 
             <button
@@ -125,28 +131,34 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
         ) : (
           <>
             <div className="text-center">
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Private consultation</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">
+                Private consultation
+              </p>
               <h2 className="font-display mt-3 text-[30px] font-bold tracking-[-0.03em] text-foreground sm:text-[34px]">
-                Tell us about your child’s needs
+                Tell us about your child's needs
               </h2>
               <p className="mx-auto mt-3 max-w-md text-[15px] leading-7 text-muted-foreground">
-                Share what you’re aiming for and we’ll guide you on the best next step.
+                Share what you're aiming for and we'll guide you on the best next step.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               {serverError && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{serverError}</div>
+                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                  {serverError}
+                </div>
               )}
 
               <div>
                 <input
                   className={inputClass("parent_name")}
                   value={form.parent_name}
-                  onChange={(e) => update("parent_name", e.target.value)}
+                  onChange={(event) => update("parent_name", event.target.value)}
                   placeholder="Parent full name"
                 />
-                {errors.parent_name && <p className="mt-1 text-xs text-destructive">{errors.parent_name}</p>}
+                {errors.parent_name && (
+                  <p className="mt-1 text-xs text-destructive">{errors.parent_name}</p>
+                )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -155,7 +167,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                     type="email"
                     className={inputClass("email")}
                     value={form.email}
-                    onChange={(e) => update("email", e.target.value)}
+                    onChange={(event) => update("email", event.target.value)}
                     placeholder="Email address"
                   />
                   {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
@@ -165,7 +177,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   <input
                     className={inputClass("phone")}
                     value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
+                    onChange={(event) => update("phone", event.target.value)}
                     placeholder="Phone number"
                   />
                   {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
@@ -177,7 +189,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   <input
                     className={inputClass("grade")}
                     value={form.grade}
-                    onChange={(e) => update("grade", e.target.value)}
+                    onChange={(event) => update("grade", event.target.value)}
                     placeholder="Child's grade / age"
                   />
                   {errors.grade && <p className="mt-1 text-xs text-destructive">{errors.grade}</p>}
@@ -187,7 +199,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   <select
                     className={inputClass("curriculum_interest")}
                     value={form.curriculum_interest}
-                    onChange={(e) => update("curriculum_interest", e.target.value)}
+                    onChange={(event) => update("curriculum_interest", event.target.value)}
                   >
                     <option value="">Select curriculum</option>
                     <option value="CBC">CBC</option>
@@ -206,10 +218,12 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   rows={4}
                   className={inputClass("message")}
                   value={form.message}
-                  onChange={(e) => update("message", e.target.value)}
-                  placeholder="Tell us about your child’s needs and goals"
+                  onChange={(event) => update("message", event.target.value)}
+                  placeholder="Tell us about your child's needs and goals"
                 />
-                {errors.message && <p className="mt-1 text-xs text-destructive">{errors.message}</p>}
+                {errors.message && (
+                  <p className="mt-1 text-xs text-destructive">{errors.message}</p>
+                )}
               </div>
 
               <button
@@ -222,7 +236,9 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
             </form>
 
             <div className="mt-6 rounded-2xl border border-white/[0.08] bg-black/20 p-5">
-              <h3 className="font-display text-[20px] font-bold tracking-[-0.02em] text-foreground">What you’ll get</h3>
+              <h3 className="font-display text-[20px] font-bold tracking-[-0.02em] text-foreground">
+                What you'll get
+              </h3>
               <ul className="mt-3 space-y-2 text-[14px] leading-7 text-muted-foreground">
                 <li>Clear next-step recommendations based on your goals</li>
                 <li>Program and tutor-fit guidance for your child</li>

@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/landing/Footer";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { useContactModal } from "@/components/landing/ContactModalContext";
+import { submitTutorApplicationLead } from "@/lib/publicLeadSubmission";
 
 // Types
 
@@ -596,6 +597,8 @@ function JoinAsTutor() {
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [isPerksModalOpen, setIsPerksModalOpen] = useState(false);
   const [isShowcaseExpanded, setIsShowcaseExpanded] = useState(false);
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
+  const [applicationError, setApplicationError] = useState("");
   const isAnyModalOpen = isApplicationModalOpen || isPerksModalOpen;
 
   useEffect(() => {
@@ -624,6 +627,7 @@ function JoinAsTutor() {
       setFormData(emptyFormData);
       setSubmitted(false);
     }
+    setApplicationError("");
     setIsPerksModalOpen(false);
     setIsApplicationModalOpen(true);
   };
@@ -643,7 +647,27 @@ function JoinAsTutor() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setApplicationError("");
+    setIsSubmittingApplication(true);
+
+    void submitTutorApplicationLead({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      experience: formData.experience,
+      subject: formData.subject,
+      curriculum: formData.curriculum,
+      message: formData.message,
+    })
+      .then(() => setSubmitted(true))
+      .catch((error) => {
+        setApplicationError(
+          error instanceof Error
+            ? error.message
+            : "We couldn't submit your application right now.",
+        );
+      })
+      .finally(() => setIsSubmittingApplication(false));
   };
 
   return (
@@ -790,6 +814,11 @@ function JoinAsTutor() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+                {applicationError && (
+                  <div className="rounded-[12px] border border-destructive/30 bg-destructive/10 px-4 py-3 text-[13px] text-destructive">
+                    {applicationError}
+                  </div>
+                )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1.5 block text-[12px] font-medium text-white/45">Full name *</label>
@@ -871,9 +900,10 @@ function JoinAsTutor() {
 
                 <button
                   type="submit"
+                  disabled={isSubmittingApplication}
                   className="w-full rounded-[12px] bg-primary py-4 text-[14px] font-bold text-[#0F0F0F] transition-all hover:scale-[1.01] hover:bg-primary/90 hover:shadow-[0_8px_24px_rgba(201,168,76,0.25)] active:scale-[0.99]"
                 >
-                  Submit Application
+                  {isSubmittingApplication ? "Submitting..." : "Submit Application"}
                 </button>
 
                 <p className="text-center text-[11px] text-white/20">

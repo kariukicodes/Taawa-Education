@@ -57,7 +57,7 @@ export async function invokeSupabaseFunction<T>(name: string, body: unknown) {
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error("You must be signed in as an admin to create login accounts.");
+    throw new Error("You must be signed in to continue.");
   }
 
   const { data, error } = await supabase.functions.invoke(name, {

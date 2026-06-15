@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -11,23 +11,27 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [demoRole, setDemoRole] = useState<"admin" | "parent" | "teacher">("parent");
   const navigate = useNavigate();
-  const { user, role, roleOverride, setRoleOverride, clearRoleOverride, loading: authLoading } = useAuth();
+  const {
+    user,
+    role,
+    roleOverride,
+    setRoleOverride,
+    clearRoleOverride,
+    loading: authLoading,
+  } = useAuth();
 
   const isDev = import.meta.env.DEV;
 
   const handleDemoRoleChange = (nextRole: "admin" | "parent" | "teacher") => {
     setDemoRole(nextRole);
-    if (!isDev) return;
-    if (!user) return;
-    if (authLoading) return;
+    if (!isDev || !user || authLoading) return;
 
     setRoleOverride(nextRole);
     navigate(`/${nextRole}`, { replace: true });
   };
 
   useEffect(() => {
-    if (!user) return;
-    if (authLoading) return;
+    if (!user || authLoading) return;
 
     if (role) {
       navigate(`/${role}`, { replace: true });
@@ -43,14 +47,20 @@ export default function Login() {
     setError("Your account has no role assigned yet. Ask an admin to add you to user_roles.");
   }, [user, role, authLoading, navigate, isDev, demoRole, setRoleOverride]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(error.message);
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -60,7 +70,7 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground">Taawa Education</h1>
+          <h1 className="text-3xl font-bold text-foreground">EduNest Portal</h1>
           <p className="mt-2 text-muted-foreground">Sign in to your account</p>
         </div>
 
@@ -80,7 +90,9 @@ export default function Login() {
                 <div className="flex gap-2">
                   <select
                     value={demoRole}
-                    onChange={(e) => handleDemoRoleChange(e.target.value as "admin" | "parent" | "teacher")}
+                    onChange={(event) =>
+                      handleDemoRoleChange(event.target.value as "admin" | "parent" | "teacher")
+                    }
                     className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="admin">Admin</option>
@@ -110,7 +122,7 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="you@example.com"
                 required
@@ -124,9 +136,9 @@ export default function Login() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 className="w-full rounded-lg border border-border bg-muted px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="••••••••"
+                placeholder="********"
                 required
               />
             </div>
@@ -142,7 +154,9 @@ export default function Login() {
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          <a href="/" className="text-primary hover:underline">← Back to home</a>
+          <a href="/" className="text-primary hover:underline">
+            Back to home
+          </a>
         </p>
       </div>
     </div>

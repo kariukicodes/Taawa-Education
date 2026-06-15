@@ -106,7 +106,7 @@ const App = () => (
               <Route path="/programs" element={<ProgramsPage />} />
 
               {/* Placeholder Pages */}
-              <Route path="/fees" element={<PlaceholderPage title="Fees" />} />
+              <Route path="/fees" element={<FeesPolicyPage />} />
               <Route path="/careers" element={<PlaceholderPage title="Careers" />} />
               <Route path="/contact" element={<PlaceholderPage title="Contact Us" />} />
               <Route path="/resources" element={<PlaceholderPage title="Resources" />} />
